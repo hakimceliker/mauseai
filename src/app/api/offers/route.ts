@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     const offers = await OfferRepository.getTenantOffers(
       auth.tenantId,
-      (status as any) || undefined
+      (status as 'draft' | 'active' | 'archived' | null) || undefined
     );
 
     return NextResponse.json(

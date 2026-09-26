@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { PolicyEngine } from '@/src/lib/policy/policy-engine';
 import { Offer } from '@/src/lib/db/offer-repository';
+import * as Domain from '@/src/types/domain';
 
 describe('PolicyEngine', () => {
-  const baseTenantId = 'tenant-1' as any;
+  const baseTenantId = 'tenant-1' as Domain.TenantId;
 
   describe('evaluate', () => {
     it('should validate a valid offer', () => {

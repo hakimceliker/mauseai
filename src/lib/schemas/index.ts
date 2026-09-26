@@ -2,11 +2,11 @@ import { z } from 'zod';
 import * as Domain from '@/src/types/domain';
 
 // ID creation helpers - validate but pass through as branded types
-const createIdValidator = (brand: string) => z.string().min(1).max(255).transform((val) => {
+const createIdValidator = (brand: string) => z.string().min(1).max(255).transform((val: string) => {
   if (val.trim().length === 0) {
     throw new Error(`${brand} cannot be empty`);
   }
-  return val as any;
+  return val as string;
 });
 
 export const TenantIdSchema = createIdValidator('TenantId');
