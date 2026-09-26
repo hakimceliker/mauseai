@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1400" viewBox="0 0 2200 1400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b1020"/><stop offset="1" stop-color="#151b35"/></linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7c5cff"/><stop offset="1" stop-color="#35d0ba"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".3"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8592c7"/></marker>
+    <style>
+      .title{font:700 34px Arial;fill:#fff}.sub{font:400 17px Arial;fill:#aeb9df}.section{font:700 18px Arial;fill:#fff}.cardtitle{font:700 16px Arial;fill:#fff}.body{font:400 14px Arial;fill:#c4cce7}.small{font:400 13px Arial;fill:#98a5cf}.line{stroke:#7886bb;stroke-width:2;fill:none;marker-end:url(#arrow);opacity:.85}.dash{stroke:#566395;stroke-width:2;stroke-dasharray:7 7;fill:none;marker-end:url(#arrow);opacity:.7}
+    </style>
+  </defs>
+  <rect width="2200" height="1400" fill="url(#bg)"/>
+  <text x="90" y="82" class="title">MasuAI — A’dan Z’ye Ürün ve Operasyon Mimarisi</text>
+  <text x="90" y="115" class="sub">Problemin keşfinden ölçülebilir büyümeye: güvenli, otomasyon-öncelikli yapay zekâ platformu</text>
+
+  <!-- lanes -->
+  <rect x="70" y="155" width="2060" height="210" rx="24" fill="#111a35" stroke="#2d3a68"/>
+  <rect x="70" y="395" width="2060" height="250" rx="24" fill="#111a35" stroke="#2d3a68"/>
+  <rect x="70" y="675" width="2060" height="280" rx="24" fill="#111a35" stroke="#2d3a68"/>
+  <rect x="70" y="985" width="2060" height="315" rx="24" fill="#111a35" stroke="#2d3a68"/>
+  <text x="95" y="188" class="section">1 · STRATEJİ &amp; GİRDİLER</text>
+  <text x="95" y="428" class="section">2 · VERİ, BİLGİ &amp; AI ÇEKİRDEĞİ</text>
+  <text x="95" y="708" class="section">3 · ÜRÜN YÜZÜ &amp; İŞ AKIŞLARI</text>
+  <text x="95" y="1018" class="section">4 · GÜVEN, OPERASYON &amp; BÜYÜME</text>
+
+  <!-- top cards -->
+  <g filter="url(#shadow)">
+    <rect x="105" y="220" width="270" height="105" rx="15" fill="#263256"/><text x="125" y="248" class="cardtitle">A — Amaç &amp; Konumlandırma</text><text x="125" y="273" class="body">Hedef kullanıcı, ana problem,</text><text x="125" y="293" class="body">değer önerisi, başarı tanımı</text>
+    <rect x="410" y="220" width="270" height="105" rx="15" fill="#263256"/><text x="430" y="248" class="cardtitle">B — Brief &amp; Gereksinim</text><text x="430" y="273" class="body">Kullanım senaryoları, roller,</text><text x="430" y="293" class="body">öncelikler, kabul kriterleri</text>
+    <rect x="715" y="220" width="270" height="105" rx="15" fill="#263256"/><text x="735" y="248" class="cardtitle">C — Channels</text><text x="735" y="273" class="body">Web, mobil, API, e-posta,</text><text x="735" y="293" class="body">Slack/Teams, CRM yüzeyleri</text>
+    <rect x="1020" y="220" width="270" height="105" rx="15" fill="#263256"/><text x="1040" y="248" class="cardtitle">D — Domain Bilgisi</text><text x="1040" y="273" class="body">Sözlük, süreçler, politika,</text><text x="1040" y="293" class="body">kaynak sahipleri ve güncellik</text>
+    <rect x="1325" y="220" width="270" height="105" rx="15" fill="#263256"/><text x="1345" y="248" class="cardtitle">E — Etki &amp; KPI</text><text x="1345" y="273" class="body">Zaman tasarrufu, doğruluk,</text><text x="1345" y="293" class="body">dönüşüm, memnuniyet, maliyet</text>
+    <rect x="1630" y="220" width="440" height="105" rx="15" fill="#263256"/><text x="1650" y="248" class="cardtitle">F — Feedback Döngüsü</text><text x="1650" y="273" class="body">Kullanıcı geri bildirimi → etiketleme → iyileştirme kuyruğu</text><text x="1650" y="293" class="body">İnsan onayı gereken noktalar baştan tanımlanır.</text>
+  </g>
+  <path d="M375 272 H410 M680 272 H715 M985 272 H1020 M1290 272 H1325 M1595 272 H1630" class="line"/>
+
+  <!-- core -->
+  <g filter="url(#shadow)">
+    <rect x="110" y="465" width="280" height="145" rx="16" fill="#202b52"/><text x="132" y="497" class="cardtitle">G — Veri Alımı</text><text x="132" y="524" class="body">Dosya, API, webhook,</text><text x="132" y="546" class="body">doküman, olay akışı</text><text x="132" y="578" class="small">Şema + versiyon + sahiplik</text>
+    <rect x="440" y="465" width="280" height="145" rx="16" fill="#202b52"/><text x="462" y="497" class="cardtitle">H — Hazırlama</text><text x="462" y="524" class="body">Temizleme, parçalama,</text><text x="462" y="546" class="body">PII maskeleme, metadata</text><text x="462" y="578" class="small">Kalite kapıları ve izlenebilirlik</text>
+    <rect x="770" y="445" width="470" height="185" rx="22" fill="url(#core)"/><text x="815" y="488" class="title" font-size="28">MASUAI CORE</text><text x="815" y="520" class="body">Model yönlendirme · RAG · araç çağrısı</text><text x="815" y="545" class="body">Prompt politikası · hafıza · orkestrasyon</text><text x="815" y="582" class="small">Girdi → bağlam → karar → eylem → kanıt</text>
+    <rect x="1290" y="465" width="280" height="145" rx="16" fill="#202b52"/><text x="1312" y="497" class="cardtitle">I — İzolasyon</text><text x="1312" y="524" class="body">Tenant sınırları, RBAC,</text><text x="1312" y="546" class="body">oran limitleri, bütçe kontrolü</text><text x="1312" y="578" class="small">Güvenli varsayılanlar</text>
+    <rect x="1620" y="465" width="450" height="145" rx="16" fill="#202b52"/><text x="1642" y="497" class="cardtitle">J — Jeneratif Çıktı Kalitesi</text><text x="1642" y="524" class="body">Kaynak gösterme, yapılandırılmış çıktı,</text><text x="1642" y="546" class="body">guardrail, düşük güven durumunda eskalasyon</text>
+  </g>
+  <path d="M390 537 H440 M720 537 H770 M1240 537 H1290 M1570 537 H1620" class="line"/>
+
+  <!-- product -->
+  <g filter="url(#shadow)">
+    <rect x="110" y="750" width="255" height="160" rx="16" fill="#25335d"/><text x="132" y="782" class="cardtitle">K — Kullanıcı Deneyimi</text><text x="132" y="810" class="body">Hızlı başlangıç, arama,</text><text x="132" y="832" class="body">sohbet, açıklanabilir sonuç</text><text x="132" y="865" class="small">Kişisel alan + ekip alanı</text>
+    <rect x="400" y="750" width="255" height="160" rx="16" fill="#25335d"/><text x="422" y="782" class="cardtitle">L — Logic &amp; Tools</text><text x="422" y="810" class="body">İş kuralları, fonksiyonlar,</text><text x="422" y="832" class="body">araç izinleri, hata yönetimi</text><text x="422" y="865" class="small">Her eylem için audit izi</text>
+    <rect x="690" y="750" width="255" height="160" rx="16" fill="#25335d"/><text x="712" y="782" class="cardtitle">M — Modüler Akışlar</text><text x="712" y="810" class="body">Araştır, özetle, üret,</text><text x="712" y="832" class="body">onaylat, yayınla, takip et</text><text x="712" y="865" class="small">Tekrar kullanılabilir şablonlar</text>
+    <rect x="980" y="750" width="255" height="160" rx="16" fill="#25335d"/><text x="1002" y="782" class="cardtitle">N — Notifications</text><text x="1002" y="810" class="body">Görev, uyarı, özet,</text><text x="1002" y="832" class="body">insan onayı ve SLA takibi</text><text x="1002" y="865" class="small">Doğru kişiye, doğru zamanda</text>
+    <rect x="1270" y="750" width="255" height="160" rx="16" fill="#25335d"/><text x="1292" y="782" class="cardtitle">O — Omnichannel</text><text x="1292" y="810" class="body">Web + API + ekip araçları</text><text x="1292" y="832" class="body">tek kimlik ve tek bağlam</text><text x="1292" y="865" class="small">Kesintisiz kullanıcı yolculuğu</text>
+    <rect x="1560" y="750" width="510" height="160" rx="16" fill="#25335d"/><text x="1582" y="782" class="cardtitle">P — Pilot → Production</text><text x="1582" y="810" class="body">Küçük kullanıcı grubunda dene → güvenlik/kalite kapıları → kademeli yaygınlaştır.</text><text x="1582" y="842" class="body">Her akış için sahip, geri dönüş planı ve operasyon runbook’u.</text>
+  </g>
+  <path d="M945 630 V700 H237 V750 M945 630 V700 H527 V750 M945 630 V700 H817 V750 M945 630 V700 H1107 V750 M945 630 V700 H1397 V750 M945 630 V700 H1815 V750" class="line"/>
+
+  <!-- bottom -->
+  <g filter="url(#shadow)">
+    <rect x="110" y="1055" width="270" height="185" rx="16" fill="#202b52"/><text x="132" y="1087" class="cardtitle">Q — Quality &amp; Eval</text><text x="132" y="1115" class="body">Altın veri seti, regresyon,</text><text x="132" y="1137" class="body">insan değerlendirmesi, A/B</text><text x="132" y="1170" class="small">Doğruluk · fayda · gecikme</text>
+    <rect x="410" y="1055" width="270" height="185" rx="16" fill="#202b52"/><text x="432" y="1087" class="cardtitle">R — Risk &amp; Güvenlik</text><text x="432" y="1115" class="body">Prompt injection, veri sızıntısı,</text><text x="432" y="1137" class="body">model kötüye kullanımı testleri</text><text x="432" y="1170" class="small">Politika + olay müdahalesi</text>
+    <rect x="710" y="1055" width="270" height="185" rx="16" fill="#202b52"/><text x="732" y="1087" class="cardtitle">S — SRE &amp; Maliyet</text><text x="732" y="1115" class="body">Gözlemlenebilirlik, SLA,</text><text x="732" y="1137" class="body">token/altyapı bütçesi, fallback</text><text x="732" y="1170" class="small">Alarmlar ve kapasite planı</text>
+    <rect x="1010" y="1055" width="270" height="185" rx="16" fill="#202b52"/><text x="1032" y="1087" class="cardtitle">T — Takım &amp; Sahiplik</text><text x="1032" y="1115" class="body">Ürün, mühendislik, veri,</text><text x="1032" y="1137" class="body">hukuk, destek sorumlulukları</text><text x="1032" y="1170" class="small">RACI + karar kayıtları</text>
+    <rect x="1310" y="1055" width="270" height="185" rx="16" fill="#202b52"/><text x="1332" y="1087" class="cardtitle">U — Uyum &amp; Gizlilik</text><text x="1332" y="1115" class="body">Veri sınıfları, saklama,</text><text x="1332" y="1137" class="body">silme, erişim ve denetim</text><text x="1332" y="1170" class="small">Privacy by design</text>
+    <rect x="1610" y="1055" width="460" height="185" rx="16" fill="#263a5d"/><text x="1632" y="1087" class="cardtitle">V–Z — Yaygınlaştırma ve Büyüme</text><text x="1632" y="1115" class="body">V: versiyonla · W: workflow’ları çoğalt</text><text x="1632" y="1137" class="body">X: deneyleri ölç · Y: kullanıcıyı elde tut</text><text x="1632" y="1159" class="body">Z: sürekli öğren, yeni kullanım alanları aç</text>
+  </g>
+  <path d="M237 910 V1015 H245 V1055 M527 910 V1015 H545 V1055 M817 910 V1015 H845 V1055 M1107 910 V1015 H1145 V1055 M1397 910 V1015 H1445 V1055 M1815 910 V1015 H1840 V1055" class="dash"/>
+  <text x="90" y="1350" class="small">Akış prensibi: keşfet → bağla → güvenceye al → otomatikleştir → ölç → öğren → ölçekle</text>
+</svg>

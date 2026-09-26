@@ -9,6 +9,6 @@ export async function getTenantContext(client: SupabaseClient, userId: string) {
   if (error || !data) return null;
   return {
     tenantId: data.tenant_id as string,
-    role: data.role as "owner" | "admin" | "member",
+    role: data.role as "owner" | "admin" | "member" | "viewer",
   };
 }

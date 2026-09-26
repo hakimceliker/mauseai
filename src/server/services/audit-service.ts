@@ -1,5 +1,7 @@
 import { getSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
+type AdminClient = ReturnType<typeof getSupabaseAdminClient>;
+
 export async function writeAudit(params: {
   tenantId: string;
   taskId?: string;
@@ -12,8 +14,7 @@ export async function writeAudit(params: {
   payload?: Record<string, unknown>;
   costCents?: number;
   riskLevel?: string;
-}) {
-  const supabase = getSupabaseAdminClient();
+}, supabase: Pick<AdminClient, "from"> = getSupabaseAdminClient()) {
   const { error } = await supabase.from("audit_logs").insert({
     tenant_id: params.tenantId,
     task_id: params.taskId ?? null,
