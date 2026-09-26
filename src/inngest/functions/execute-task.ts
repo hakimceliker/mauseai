@@ -2,6 +2,9 @@ import { inngest } from '../client';
 import { TaskRepository } from '@/src/lib/db/task-repository';
 import { CheckpointRepository } from '@/src/lib/db/checkpoint-repository';
 import { IdempotencyRepository } from '@/src/lib/db/idempotency-repository';
+import { CostTracker } from '@/src/lib/cost/cost-tracker';
+import { AuditService } from '@/src/lib/audit/audit-service';
+import { AIRouter } from '@/src/lib/ai/ai-router';
 import * as Domain from '@/src/types/domain';
 
 /**
@@ -51,7 +54,30 @@ export const executeTask = inngest.createFunction(
       // Execute each step
       const results: Record<string, unknown> = {};
 
+      let totalCost = 0;
+
       for (const workflowStep of workflowSteps) {
+        // Check cost limit before executing
+        await step.run(
+          `check-cost-limit-step-${workflowStep.order}`,
+          async () => {
+            const remaining = await CostTracker.getTenantRemaining(
+              tenantId as Domain.TenantId
+            );
+            const estimatedCost = 0.0001; // Estimate per step
+
+            if (remaining < estimatedCost) {
+              await AuditService.logCostLimitExceeded(
+                tenantId as Domain.TenantId,
+                taskId as Domain.TaskId,
+                totalCost,
+                remaining + totalCost
+              );
+              throw new Error('Tenant cost limit exceeded');
+            }
+          }
+        );
+
         // Check idempotency before executing
         const cachedResult = await step.run(
           `check-idempotency-step-${workflowStep.order}`,
@@ -64,29 +90,36 @@ export const executeTask = inngest.createFunction(
         );
 
         let stepResult: Record<string, unknown> | null = cachedResult;
+        let stepCost = 0;
 
         // If not cached, execute step
         if (!cachedResult) {
           stepResult = (await step.run(
             `execute-step-${workflowStep.order}`,
             async () => {
-              // Simulate step execution with timeout
-              const timeoutMs = 30000; // 30 seconds per step
-              const stepPromise = new Promise(resolve => setTimeout(resolve, 100));
-
-              return await Promise.race([
-                stepPromise.then(() => ({
-                  step_id: workflowStep.id,
-                  step_name: workflowStep.name,
-                  result: `Completed: ${workflowStep.name}`,
-                  executed_at: new Date().toISOString(),
-                })),
-                new Promise((_, reject) =>
-                  setTimeout(() => reject(new Error('Step timeout')), timeoutMs)
-                ),
+              // Call AI provider for this step
+              const aiResponse = await AIRouter.execute([
+                {
+                  role: 'user',
+                  content: `Execute ${workflowStep.name}`,
+                },
               ]);
+
+              stepCost = aiResponse.cost || 0.0001;
+
+              return {
+                step_id: workflowStep.id,
+                step_name: workflowStep.name,
+                result: aiResponse.content,
+                provider: aiResponse.provider,
+                tokens_used: aiResponse.tokens_used,
+                cost: stepCost,
+                executed_at: new Date().toISOString(),
+              };
             }
           )) as Record<string, unknown>;
+
+          totalCost += stepCost;
 
           // Record execution for idempotency
           await step.run(
@@ -96,6 +129,20 @@ export const executeTask = inngest.createFunction(
                 taskId as Domain.TaskId,
                 workflowStep.id,
                 stepResult as Record<string, unknown>
+              );
+            }
+          );
+
+          // Log cost incurred
+          await step.run(
+            `log-cost-step-${workflowStep.order}`,
+            async () => {
+              const aiProvider = (stepResult as Record<string, unknown>)?.provider || 'unknown';
+              await AuditService.logCostIncurred(
+                tenantId as Domain.TenantId,
+                taskId as Domain.TaskId,
+                stepCost,
+                aiProvider as string
               );
             }
           );
@@ -117,7 +164,7 @@ export const executeTask = inngest.createFunction(
         results[`step_${workflowStep.order}`] = stepResult;
       }
 
-      // Update task to completed
+      // Update task to completed and record final cost
       await step.run('update-task-completed', async () => {
         await TaskRepository.updateTaskStatus(
           taskId as Domain.TaskId,
@@ -125,15 +172,26 @@ export const executeTask = inngest.createFunction(
           Domain.TaskStatus.COMPLETED,
           results
         );
+        await CostTracker.recordTaskCost(
+          taskId as Domain.TaskId,
+          tenantId as Domain.TenantId,
+          totalCost
+        );
+        await AuditService.logTaskCompleted(
+          tenantId as Domain.TenantId,
+          taskId as Domain.TaskId,
+          totalCost
+        );
       });
 
       return {
         success: true,
         taskId,
         results,
+        totalCost,
       };
     } catch (error) {
-      // Update task to failed
+      // Update task to failed and log error
       await step.run('update-task-failed', async () => {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         await TaskRepository.updateTaskStatus(
@@ -141,6 +199,11 @@ export const executeTask = inngest.createFunction(
           tenantId as Domain.TenantId,
           Domain.TaskStatus.FAILED,
           undefined,
+          errorMessage
+        );
+        await AuditService.logTaskFailed(
+          tenantId as Domain.TenantId,
+          taskId as Domain.TaskId,
           errorMessage
         );
       });
