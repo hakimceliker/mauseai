@@ -4,6 +4,7 @@ import { getPaymentAdapter } from '@/src/lib/integrations';
 import { getNotificationAdapter } from '@/src/lib/integrations';
 import { getAnalyticsAdapter } from '@/src/lib/integrations';
 import { getRealtimeProvider } from '@/src/lib/integrations';
+import { getReadiness } from '@/src/lib/health/readiness';
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -38,7 +39,7 @@ export async function GET() {
       status: 'ready',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
     };
-  } catch (_error) {
+  } catch {
     integrations.payment = {
       status: 'error',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
@@ -52,7 +53,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.NOTIFICATION_TYPE || 'console',
     };
-  } catch (_error) {
+  } catch {
     integrations.notifications = {
       status: 'error',
       type: process.env.NOTIFICATION_TYPE || 'console',
@@ -66,7 +67,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.ANALYTICS_TYPE || 'console',
     };
-  } catch (_error) {
+  } catch {
     integrations.analytics = {
       status: 'error',
       type: process.env.ANALYTICS_TYPE || 'console',
@@ -79,7 +80,7 @@ export async function GET() {
       status: realtimeProvider.isConnected() ? 'connected' : 'disconnected',
       connected: realtimeProvider.isConnected(),
     };
-  } catch (_error) {
+  } catch {
     integrations.realtime = {
       status: 'error',
     };
@@ -115,18 +116,15 @@ export async function GET() {
 }
 
 /**
- * Readiness check endpoint
- * Returns 200 only if all critical systems are healthy
- * Used by orchestration systems (Kubernetes, etc.) to determine if service can receive traffic
+ * Readiness check (same contract as GET /api/health/ready)
+ * Returns 200 only when no critical dependency check fails, otherwise 503
  */
 export async function HEAD() {
-  // For readiness checks, we use a simpler check
-  // Returns 200 if service is ready to handle requests
-  // TODO: Implement critical system checks
-  const result = NextResponse.json(
-    { ready: true },
-    { status: 200 }
-  );
+  const report = await getReadiness();
+  const result = NextResponse.json(report, {
+    status: report.ready ? 200 : 503,
+    headers: { 'Cache-Control': 'no-store' },
+  });
 
   addSecurityHeaders(result);
   return result;

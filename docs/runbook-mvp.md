@@ -10,7 +10,13 @@
 
 ## Sağlık kontrolü
 
-- `GET /api/health`
+- `GET /api/health` — liveness: süreç ayakta mı (her zaman 200).
+- `GET /api/health/ready` (veya `HEAD`) — readiness: trafik alınabilir mi. Tüm kontroller geçerse 200, biri `fail` ise 503 döner.
+  - `config`: `ALLOWED_ORIGINS`, `LOG_LEVEL`, `LOG_FORMAT` Zod doğrulaması.
+  - `database`: Supabase yapılandırılmışsa `/rest/v1/` erişimi; mock modda `skipped`.
+  - `auth`: `AUTH_PROVIDER=supabase` ise `/auth/v1/health` erişimi; `mock` ise `ok`.
+  - `inngest`: event + signing key; yalnızca `VERCEL_ENV=production` ise zorunlu, aksi halde `skipped`.
+  - Her dış kontrol 3 sn zaman aşımına sahip; yanıtlar secret içermez ve önbelleğe alınmaz.
 - `GET /api/inngest`
 - Supabase migration ve RLS testleri
 - Worker loglarında secret bulunmaması
