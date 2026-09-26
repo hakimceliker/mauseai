@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/src/lib/auth/mock-auth';
 import { OfferRepository } from '@/src/lib/db/offer-repository';
 import { z } from 'zod';
+import {
+  ApiErrorHandler,
+  AuthError,
+  NotFoundError,
+  ValidationError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 const UpdateStatusSchema = z.object({
   status: z.enum(['draft', 'active', 'archived']),
@@ -21,16 +28,10 @@ export async function GET(
     const offer = await OfferRepository.getOffer(params.id, auth.tenantId);
 
     if (!offer) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Offer not found',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'offer', id: params.id });
     }
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -46,15 +47,21 @@ export async function GET(
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }
 
@@ -73,28 +80,16 @@ export async function PUT(
     const validation = UpdateStatusSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid request: ${validation.error.message}`,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError(validation.error.flatten());
     }
 
     const offer = await OfferRepository.updateOfferStatus(params.id, auth.tenantId, validation.data.status);
 
     if (!offer) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Offer not found',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'offer', id: params.id });
     }
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -110,14 +105,20 @@ export async function PUT(
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'PUT',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'PUT',
+    });
   }
 }

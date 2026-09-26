@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/src/lib/auth/mock-auth';
 import { TaskService } from '@/src/lib/services/task-service';
 import * as Domain from '@/src/types/domain';
+import {
+  ApiErrorHandler,
+  AuthError,
+  NotFoundError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 /**
  * GET /api/tasks/:id
@@ -19,13 +25,7 @@ export async function GET(
     const task = TaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Task not found',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'task', id: params.id });
     }
 
     // Format response
@@ -45,22 +45,28 @@ export async function GET(
       completed_at: task.completed_at?.toISOString(),
     };
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: response,
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }
 
@@ -80,13 +86,7 @@ export async function DELETE(
     const task = TaskService.cancelTask(params.id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Task not found or cannot be cancelled',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'task', id: params.id });
     }
 
     // Format response
@@ -106,21 +106,27 @@ export async function DELETE(
       completed_at: task.completed_at?.toISOString(),
     };
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: response,
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'DELETE',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'DELETE',
+    });
   }
 }

@@ -3,6 +3,12 @@ import { requireAuth } from '@/src/lib/auth/mock-auth';
 import { OfferRepository } from '@/src/lib/db/offer-repository';
 import { PolicyEngine } from '@/src/lib/policy/policy-engine';
 import { z } from 'zod';
+import {
+  ApiErrorHandler,
+  AuthError,
+  ValidationError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 const CreateOfferSchema = z.object({
   template_id: z.string().min(1),
@@ -23,13 +29,7 @@ export async function POST(request: NextRequest) {
     const validation = CreateOfferSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid request: ${validation.error.message}`,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError(validation.error.flatten());
     }
 
     const { template_id, discount_percent, price_cap, base_price } = validation.data;
@@ -50,13 +50,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!policyCheck.valid) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Policy validation failed: ${policyCheck.reason}`,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError({ reason: policyCheck.reason });
     }
 
     // Create offer
@@ -68,7 +62,7 @@ export async function POST(request: NextRequest) {
       'draft'
     );
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -84,15 +78,21 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'POST',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'POST',
+    });
   }
 }
 
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
       (status as 'draft' | 'active' | 'archived' | null) || undefined
     );
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: offers.map(o => ({
@@ -126,14 +126,20 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }

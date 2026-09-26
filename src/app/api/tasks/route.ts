@@ -3,6 +3,12 @@ import { requireAuth } from '@/src/lib/auth/mock-auth';
 import { TaskService } from '@/src/lib/services/task-service';
 import { CreateTaskRequestSchema } from '@/src/lib/schemas/api-requests';
 import * as Domain from '@/src/types/domain';
+import {
+  ApiErrorHandler,
+  ValidationError,
+  AuthError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 /**
  * POST /api/tasks
@@ -18,13 +24,7 @@ export async function POST(request: NextRequest) {
     const validation = CreateTaskRequestSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid request: ${validation.error.message}`,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError(validation.error.flatten());
     }
 
     // Create task
@@ -52,22 +52,28 @@ export async function POST(request: NextRequest) {
       completed_at: task.completed_at?.toISOString(),
     };
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: response,
       },
       { status: 201 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'POST',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'POST',
+    });
   }
 }
 
@@ -100,21 +106,27 @@ export async function GET(request: NextRequest) {
       completed_at: task.completed_at?.toISOString(),
     }));
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: response,
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }

@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/src/lib/auth/mock-auth';
 import { ConversationRepository } from '@/src/lib/db/conversation-repository';
+import {
+  ApiErrorHandler,
+  AuthError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 /**
  * POST /api/conversations
@@ -15,7 +20,7 @@ export async function POST(request: NextRequest) {
       auth.userId
     );
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -29,15 +34,21 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'POST',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'POST',
+    });
   }
 }
 
@@ -51,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     const conversations = await ConversationRepository.getTenantConversations(auth.tenantId);
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: conversations.map(c => ({
@@ -65,14 +76,20 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }

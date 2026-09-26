@@ -5,6 +5,13 @@ import {
   ConversationState,
 } from '@/src/lib/db/conversation-repository';
 import { z } from 'zod';
+import {
+  ApiErrorHandler,
+  AuthError,
+  NotFoundError,
+  ValidationError,
+} from '@/src/lib/errors/api-error-handler';
+import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 
 const TransitionStateSchema = z.object({
   state: z.enum(['idle', 'pending', 'review', 'approved', 'completed']),
@@ -27,18 +34,12 @@ export async function GET(
     );
 
     if (!conversation) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Conversation not found',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'conversation', id: params.id });
     }
 
     const messages = await ConversationRepository.getMessages(params.id);
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -58,15 +59,21 @@ export async function GET(
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'GET',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'GET',
+    });
   }
 }
 
@@ -85,13 +92,7 @@ export async function PUT(
     const validation = TransitionStateSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid request: ${validation.error.message}`,
-        },
-        { status: 400 }
-      );
+      throw new ValidationError(validation.error.flatten());
     }
 
     const conversation = await ConversationRepository.transitionState(
@@ -101,16 +102,10 @@ export async function PUT(
     );
 
     if (!conversation) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Conversation not found',
-        },
-        { status: 404 }
-      );
+      throw new NotFoundError({ resource: 'conversation', id: params.id });
     }
 
-    return NextResponse.json(
+    const result = NextResponse.json(
       {
         success: true,
         data: {
@@ -124,14 +119,20 @@ export async function PUT(
       },
       { status: 200 }
     );
+
+    addSecurityHeaders(result);
+    return result;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return NextResponse.json(
-      {
-        success: false,
-        error: message,
-      },
-      { status: error instanceof Error && error.message.includes('Unauthorized') ? 401 : 500 }
-    );
+    if (error instanceof AuthError) {
+      return ApiErrorHandler.handle(error, {
+        requestPath: request.nextUrl.pathname,
+        method: 'PUT',
+      });
+    }
+
+    return ApiErrorHandler.handle(error, {
+      requestPath: request.nextUrl.pathname,
+      method: 'PUT',
+    });
   }
 }
