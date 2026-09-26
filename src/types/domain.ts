@@ -1,99 +1,88 @@
-import { ActorType, RiskLevel, StepStatus, TaskStatus } from "./enums";
+// Core domain types - tenant-aware, audit-ready
 
-export interface TenantContext {
-  tenantId: string;
-  userId: string;
-  role: "owner" | "admin" | "member";
+export type TenantId = string & { readonly __brand: 'TenantId' };
+export type TaskId = string & { readonly __brand: 'TaskId' };
+export type WorkflowId = string & { readonly __brand: 'WorkflowId' };
+export type StepId = string & { readonly __brand: 'StepId' };
+export type CheckpointId = string & { readonly __brand: 'CheckpointId' };
+export type AuditEventId = string & { readonly __brand: 'AuditEventId' };
+
+// Task statuses
+export enum TaskStatus {
+  PENDING = 'pending',
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
 }
 
-export interface Task {
-  id: string;
-  tenantId: string;
-  createdBy: string;
-  goal: string;
-  status: TaskStatus;
-  riskLevel: RiskLevel;
-  workflowId?: string | null;
-  currentStepId?: string | null;
-  budgetLimitCents?: number | null;
-  spentCents: number;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-  startedAt?: string | null;
-  completedAt?: string | null;
-}
-
+// Workflow entity
 export interface Workflow {
-  id: string;
-  tenantId: string;
-  taskId: string;
+  id: WorkflowId;
+  tenant_id: TenantId;
   name: string;
-  version: number;
-  graph: WorkflowGraph;
-  createdAt: string;
-  updatedAt: string;
+  description?: string;
+  steps: Step[];
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface WorkflowGraph {
-  nodes: WorkflowNode[];
-  edges: WorkflowEdge[];
-}
-
-export interface WorkflowNode {
-  id: string;
-  type: "start" | "ai" | "tool" | "approval" | "condition" | "end";
-  name: string;
-  config?: Record<string, unknown>;
-}
-
-export interface WorkflowEdge {
-  id: string;
-  source: string;
-  target: string;
-  condition?: string;
-}
-
+// Step in workflow
 export interface Step {
-  id: string;
-  tenantId: string;
-  taskId: string;
-  workflowId: string;
-  nodeId: string;
+  id: StepId;
+  workflow_id: WorkflowId;
+  order: number;
   name: string;
-  status: StepStatus;
-  attempt: number;
-  input?: Record<string, unknown> | null;
-  output?: Record<string, unknown> | null;
-  error?: string | null;
-  startedAt?: string | null;
-  completedAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  type: 'ai_call' | 'transformation' | 'decision' | 'action';
+  config: Record<string, unknown>;
+  retries: number;
+  timeout_ms: number;
 }
 
+// Task - single execution of workflow
+export interface Task {
+  id: TaskId;
+  tenant_id: TenantId;
+  user_id: string;
+  workflow_id: WorkflowId;
+  status: TaskStatus;
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  error?: string;
+  cost_estimate: number;
+  cost_actual?: number;
+  created_at: Date;
+  started_at?: Date;
+  completed_at?: Date;
+}
+
+// Checkpoint - resumption point
 export interface Checkpoint {
-  id: string;
-  tenantId: string;
-  taskId: string;
-  stepId: string;
+  id: CheckpointId;
+  task_id: TaskId;
+  step_id: StepId;
   state: Record<string, unknown>;
-  version: number;
-  createdAt: string;
+  created_at: Date;
+}
+
+// Audit event
+export enum AuditAction {
+  TASK_CREATED = 'task_created',
+  TASK_STARTED = 'task_started',
+  TASK_COMPLETED = 'task_completed',
+  TASK_FAILED = 'task_failed',
+  STEP_EXECUTED = 'step_executed',
+  CHECKPOINT_CREATED = 'checkpoint_created',
+  COST_INCURRED = 'cost_incurred',
 }
 
 export interface AuditEvent {
-  id: string;
-  tenantId: string;
-  taskId?: string | null;
-  stepId?: string | null;
-  actorType: ActorType;
-  actorId: string;
-  action: string;
-  resourceType: string;
-  resourceId?: string | null;
-  payload?: Record<string, unknown> | null;
-  costCents?: number | null;
-  riskLevel?: RiskLevel | null;
-  createdAt: string;
+  id: AuditEventId;
+  tenant_id: TenantId;
+  action: AuditAction;
+  entity_type: 'task' | 'step' | 'checkpoint' | 'cost';
+  entity_id: string;
+  actor: string;
+  details: Record<string, unknown>;
+  timestamp: Date;
 }
