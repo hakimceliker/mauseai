@@ -48,7 +48,6 @@ export default function DiagramPage() {
           aria-label="Diyagram görseli, yatay kaydırılabilir"
         >
           {/* The original SVG is served untouched; the explorer below is its text alternative. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={DIAGRAM_PUBLIC_URL}
             width={2200}

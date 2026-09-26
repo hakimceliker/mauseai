@@ -540,6 +540,20 @@ Supabase Realtime is already integrated and working. It uses:
 
 ---
 
+### Optional A–Z Channels and Ingestion (diagram cards C, G, N, O)
+
+These variables unlock A–Z features that are reported as unavailable until they are set. Nothing is faked when they are missing: `GET /api/channels` shows `requires_credentials`, publishing returns `channel_not_configured`, and notifications are stored with `skipped_channel_not_configured`.
+
+| Variable | Card | Effect when missing |
+|---|---|---|
+| `INGEST_WEBHOOK_SECRET` | G | `POST /api/ingest/webhook/{sourceId}` answers 503 `secret_not_configured` |
+| `EMAIL_PROVIDER_KEY` | C, N, O | e-posta kanalı `requires_credentials` |
+| `SLACK_WEBHOOK_URL`, `SLACK_SIGNING_SECRET` | C, N, O | Slack kanalı `requires_credentials` |
+| `TEAMS_WEBHOOK_URL` | C, N, O | Teams kanalı `requires_credentials` |
+| `CRM_API_KEY` | C, O | CRM kanalı `requires_credentials` |
+
+The AI core runs on the mock GPT/Claude providers only; every answer carries `mock: true`. Real model keys are a separate, later step.
+
 ## Testing Integrations
 
 ### Run All Integration Tests

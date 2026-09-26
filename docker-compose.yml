@@ -1,0 +1,31 @@
+# Local development stack: Postgres with the repo migrations + Inngest dev server.
+# Development credentials only; no real secrets belong here.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mauseai
+      POSTGRES_PASSWORD: mauseai-dev-only
+      POSTGRES_DB: mauseai
+    ports:
+      - "54322:5432"
+    volumes:
+      - ./supabase/migrations:/migrations:ro
+      - ./scripts/db/init-local.sh:/docker-entrypoint-initdb.d/10-init-local.sh:ro
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mauseai -d mauseai"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  inngest:
+    image: inngest/inngest:latest
+    command: "inngest dev -u http://host.docker.internal:3000/api/inngest"
+    ports:
+      - "8288:8288"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  db-data:
