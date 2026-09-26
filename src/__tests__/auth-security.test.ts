@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * Mock NextRequest for testing
@@ -32,6 +33,11 @@ class MockNextRequest {
   }
 }
 
+// Type helper to cast MockNextRequest to NextRequest for testing
+function createTestRequest(url: string, init?: RequestInit & { headers?: Record<string, string> }) {
+  return new MockNextRequest(url, init) as unknown as NextRequest;
+}
+
 import {
   validateTenantAccess,
   createDevSession,
@@ -49,6 +55,7 @@ import {
   DEFAULT_RATE_LIMIT_CONFIG,
   RateLimitStore,
 } from '@/src/lib/middleware/rate-limit';
+import * as Domain from '@/src/types/domain';
 
 describe('Auth Security', () => {
   beforeEach(() => {
@@ -63,7 +70,7 @@ describe('Auth Security', () => {
   describe('Tenant Isolation - Header Trust Prevention', () => {
     it('should reject requests without bearer token', () => {
       // Create a request without Authorization header
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           // No Authorization header
           'x-tenant-id': 'tenant-123', // These headers should be ignored
@@ -79,7 +86,7 @@ describe('Auth Security', () => {
     });
 
     it('should reject requests with malformed Authorization header', () => {
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'Authorization': 'InvalidFormat token123',
         },
@@ -92,7 +99,7 @@ describe('Auth Security', () => {
     });
 
     it('should reject invalid bearer tokens', () => {
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'Authorization': 'Bearer invalid-token-that-does-not-exist',
         },
@@ -108,7 +115,7 @@ describe('Auth Security', () => {
       // Create a valid session
       const token = createDevSession('tenant-123', 'user-456');
 
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'Authorization': `Bearer ${token}`,
           // These should be ignored, only token matters
@@ -130,7 +137,7 @@ describe('Auth Security', () => {
       const token = createDevSession('tenant-123', 'user-456');
 
       // Try to use that token to access a different tenant
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -147,11 +154,11 @@ describe('Auth Security', () => {
       const scenarios = [
         {
           name: 'no token',
-          request: new MockNextRequest('http://localhost/api/tasks', {}),
+          request: createTestRequest('http://localhost/api/tasks', {}),
         },
         {
           name: 'invalid token',
-          request: new MockNextRequest('http://localhost/api/tasks', {
+          request: createTestRequest('http://localhost/api/tasks', {
             headers: { 'Authorization': 'Bearer invalid' },
           }),
         },
@@ -159,7 +166,7 @@ describe('Auth Security', () => {
           name: 'wrong tenant',
           request: (() => {
             const token = createDevSession('tenant-a', 'user-1');
-            return new MockNextRequest('http://localhost/api/tasks', {
+            return createTestRequest('http://localhost/api/tasks', {
               headers: { 'Authorization': `Bearer ${token}` },
             });
           })(),
@@ -178,7 +185,7 @@ describe('Auth Security', () => {
     it('should expire sessions after timeout', async () => {
       const token = createDevSession('tenant-123', 'user-456');
 
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -192,7 +199,7 @@ describe('Auth Security', () => {
     it('should be able to revoke sessions', () => {
       const token = createDevSession('tenant-123', 'user-456');
 
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -248,7 +255,7 @@ describe('Auth Security', () => {
       const middleware = enforceTenantisolation(mockHandler);
 
       const token = createDevSession('tenant-123', 'user-456');
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -263,7 +270,7 @@ describe('Auth Security', () => {
 
       const middleware = enforceTenantisolation(mockHandler);
 
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'Authorization': 'Bearer invalid-token' },
       });
 
@@ -283,11 +290,11 @@ describe('Request Limits', () => {
         searchParams.set(`param${i}`, `value${i}`);
       }
 
-      const mockRequest = new MockNextRequest(
+      const mockRequest = createTestRequest(
         `http://localhost/api/tasks?${searchParams.toString()}`
       );
 
-      const result = validateRequestLimits(mockRequest as unknown as any);
+      const result = validateRequestLimits(mockRequest as unknown as NextRequest);
 
       expect(result.valid).toBe(true);
     });
@@ -298,11 +305,11 @@ describe('Request Limits', () => {
         searchParams.set(`param${i}`, `value${i}`);
       }
 
-      const mockRequest = new MockNextRequest(
+      const mockRequest = createTestRequest(
         `http://localhost/api/tasks?${searchParams.toString()}`
       );
 
-      const result = validateRequestLimits(mockRequest as unknown as any, DEFAULT_REQUEST_LIMITS);
+      const result = validateRequestLimits(mockRequest as unknown as NextRequest, DEFAULT_REQUEST_LIMITS);
 
       expect(result.valid).toBe(false);
       expect(result.error).toContain('exceed limit');
@@ -312,7 +319,7 @@ describe('Request Limits', () => {
   describe('Payload Size Validation', () => {
     it('should reject payload exceeding size limit', () => {
       // Create a request with content-length exceeding limit
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Length': (DEFAULT_REQUEST_LIMITS.maxJsonPayloadBytes + 1).toString(),
@@ -326,7 +333,7 @@ describe('Request Limits', () => {
     });
 
     it('should allow payload under size limit', () => {
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         method: 'POST',
         headers: {
           'Content-Length': '1000',
@@ -339,7 +346,7 @@ describe('Request Limits', () => {
     });
 
     it('should ignore content-length for GET requests', () => {
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         method: 'GET',
         headers: {
           'Content-Length': (DEFAULT_REQUEST_LIMITS.maxJsonPayloadBytes + 1).toString(),
@@ -356,7 +363,7 @@ describe('Request Limits', () => {
     it('should reject requests with excessive headers', () => {
       // Create headers that exceed limit
       const largeHeaderValue = 'x'.repeat(5000);
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'X-Large-Header-1': largeHeaderValue,
           'X-Large-Header-2': largeHeaderValue,
@@ -371,7 +378,7 @@ describe('Request Limits', () => {
     });
 
     it('should allow reasonable header sizes', () => {
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: {
           'Authorization': 'Bearer ' + 'x'.repeat(100),
           'User-Agent': 'test-client/1.0',
@@ -419,7 +426,7 @@ describe('Rate Limiting', () => {
 
     it('should return 429 when rate limit exceeded', async () => {
       const mockHandler = async () =>
-        new Response(JSON.stringify({ success: true }));
+        NextResponse.json({ success: true });
 
       const rateLimited = withRateLimit(mockHandler, {
         unauthenticatedLimitPerMin: 2,
@@ -427,7 +434,7 @@ describe('Rate Limiting', () => {
       });
 
       // Use same IP for multiple requests
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'X-Forwarded-For': '192.168.1.1' },
       });
 
@@ -452,7 +459,7 @@ describe('Rate Limiting', () => {
       process.env.DEVELOPMENT = 'true';
 
       const mockHandler = async () =>
-        new Response(JSON.stringify({ success: true }));
+        NextResponse.json({ success: true });
 
       const rateLimited = withRateLimit(mockHandler, {
         unauthenticatedLimitPerMin: 10,
@@ -463,12 +470,12 @@ describe('Rate Limiting', () => {
 
       // Authenticated request with higher limit
       for (let i = 0; i < 100; i++) {
-        const request = new MockNextRequest('http://localhost/api/tasks', {
+        const request = createTestRequest('http://localhost/api/tasks', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
         const response = await rateLimited(request, {
-          tenantId: 'tenant-123',
+          tenantId: 'tenant-123' as Domain.TenantId,
           userId: 'user-456',
         });
 
@@ -480,14 +487,14 @@ describe('Rate Limiting', () => {
 
     it('should include Retry-After header on rate limit', async () => {
       const mockHandler = async () =>
-        new Response(JSON.stringify({ success: true }));
+        NextResponse.json({ success: true });
 
       const rateLimited = withRateLimit(mockHandler, {
         unauthenticatedLimitPerMin: 1,
         authenticatedLimitPerMin: 1000,
       });
 
-      const request = new MockNextRequest('http://localhost/api/tasks', {
+      const request = createTestRequest('http://localhost/api/tasks', {
         headers: { 'X-Forwarded-For': '192.168.1.100' },
       });
 
@@ -536,7 +543,7 @@ describe('Security Integration', () => {
 
   it('should prevent common attack patterns', () => {
     // Test 1: Header spoofing should not work
-    const request1 = new MockNextRequest('http://localhost/api/tasks', {
+    const request1 = createTestRequest('http://localhost/api/tasks', {
       headers: {
         'x-tenant-id': 'admin-tenant',
         'x-user-id': 'admin-user',
@@ -548,7 +555,7 @@ describe('Security Integration', () => {
 
     // Test 2: Using someone else's token should not work
     const token = createDevSession('tenant-a', 'user-a');
-    const request2 = new MockNextRequest('http://localhost/api/tasks', {
+    const request2 = createTestRequest('http://localhost/api/tasks', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'x-tenant-id': 'tenant-b', // Try to override with header
@@ -566,7 +573,7 @@ describe('Security Integration', () => {
       searchParams.set(`param${i}`, 'value');
     }
 
-    const request = new MockNextRequest(
+    const request = createTestRequest(
       `http://localhost/api/tasks?${searchParams.toString()}`,
       {
         method: 'POST',

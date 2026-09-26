@@ -33,12 +33,12 @@ export async function GET() {
   const integrations: HealthStatus['integrations'] = {};
 
   try {
-    const paymentAdapter = getPaymentAdapter();
+    getPaymentAdapter();
     integrations.payment = {
       status: 'ready',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
     };
-  } catch (error) {
+  } catch (_error) {
     integrations.payment = {
       status: 'error',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
@@ -52,7 +52,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.NOTIFICATION_TYPE || 'console',
     };
-  } catch (error) {
+  } catch (_error) {
     integrations.notifications = {
       status: 'error',
       type: process.env.NOTIFICATION_TYPE || 'console',
@@ -66,7 +66,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.ANALYTICS_TYPE || 'console',
     };
-  } catch (error) {
+  } catch (_error) {
     integrations.analytics = {
       status: 'error',
       type: process.env.ANALYTICS_TYPE || 'console',
@@ -79,7 +79,7 @@ export async function GET() {
       status: realtimeProvider.isConnected() ? 'connected' : 'disconnected',
       connected: realtimeProvider.isConnected(),
     };
-  } catch (error) {
+  } catch (_error) {
     integrations.realtime = {
       status: 'error',
     };

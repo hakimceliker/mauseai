@@ -1,7 +1,11 @@
 /**
  * Error logging utility
- * Logs errors with context but avoids logging sensitive data
+ * Logs errors with context using structured logger
+ * Avoids logging sensitive data like passwords, tokens, full IDs
  */
+
+import { StructuredLogger, type LogContext } from './structured-logger';
+import { randomUUID } from 'crypto';
 
 interface ErrorLogContext {
   errorId: string;
@@ -9,8 +13,8 @@ interface ErrorLogContext {
   userId?: string;
   tenantId?: string;
   method?: string;
-  timestamp?: string;
   userAgent?: string;
+  requestId?: string;
 }
 
 interface ErrorLogEntry {
@@ -25,7 +29,7 @@ interface ErrorLogEntry {
 
 export class ErrorLogger {
   /**
-   * Log an error with context
+   * Log an error with context using structured logger
    * Avoids logging sensitive data like passwords, tokens, full IDs
    */
   static logError(error: unknown, context: ErrorLogContext): void {
@@ -40,51 +44,36 @@ export class ErrorLogger {
       errorId: context.errorId,
       errorType,
       errorMessage,
-      context: {
-        ...context,
-        timestamp,
-      },
+      context,
       stack,
     };
 
-    // Log to console in development
+    // Build context for structured logger
+    const logContext: LogContext = {
+      errorId: context.errorId,
+      ...(context.requestPath && { requestPath: context.requestPath }),
+      ...(context.method && { method: context.method }),
+      ...(context.userId && { userId: context.userId }),
+      ...(context.tenantId && { tenantId: context.tenantId }),
+      ...(context.userAgent && { userAgent: context.userAgent }),
+      ...(context.requestId && { requestId: context.requestId }),
+      errorType,
+    };
+
+    // Log using structured logger
+    StructuredLogger.error(
+      `Error occurred: ${errorMessage}`,
+      logContext,
+      error instanceof Error ? error : new Error(errorMessage)
+    );
+
+    // Also log details in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('[ERROR]', {
+      console.error('[ERROR_DETAILS]', {
         ...logEntry,
-        stack: stack ? stack.split('\n').slice(0, 5).join('\n') : undefined,
+        stack: stack ? stack.split('\n').slice(0, 10).join('\n') : undefined,
       });
     }
-
-    // In production, you would send this to a logging service
-    // Example: Datadog, Sentry, CloudWatch, etc.
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to production logging service
-      // logToProductionService(logEntry);
-    }
-
-    // Always log to stderr for container/serverless environments
-    console.error(
-      JSON.stringify({
-        level: 'error',
-        timestamp,
-        errorId: context.errorId,
-        errorType,
-        errorMessage,
-        requestPath: context.requestPath,
-        method: context.method,
-        userId: context.userId ? this.hashId(context.userId) : undefined,
-        tenantId: context.tenantId ? this.hashId(context.tenantId) : undefined,
-      })
-    );
-  }
-
-  /**
-   * Hash IDs for logging (don't log full IDs)
-   * This allows correlation without exposing the actual ID
-   */
-  private static hashId(id: string): string {
-    // Return first 8 chars of ID hash for correlation
-    return id.substring(0, 8);
   }
 
   /**
@@ -97,35 +86,73 @@ export class ErrorLogger {
       userId?: string;
       tenantId?: string;
       userAgent?: string;
+      requestId?: string;
     }
   ): void {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[REQUEST]', {
-        timestamp: new Date().toISOString(),
-        method,
-        path,
-        userIdHash: context.userId ? this.hashId(context.userId) : undefined,
-        tenantIdHash: context.tenantId ? this.hashId(context.tenantId) : undefined,
-      });
-    }
+    const logContext: LogContext = {
+      method,
+      path,
+      ...(context.userId && { userId: context.userId }),
+      ...(context.tenantId && { tenantId: context.tenantId }),
+      ...(context.requestId && { requestId: context.requestId }),
+    };
+
+    StructuredLogger.debug(`HTTP Request: ${method} ${path}`, logContext);
   }
 
   /**
-   * Sanitize an error message for logging (remove sensitive patterns)
+   * Generate a unique error ID for correlation
    */
-  private static sanitizeMessage(message: string): string {
-    // Remove common sensitive patterns
-    let sanitized = message;
+  static generateErrorId(): string {
+    return randomUUID();
+  }
 
-    // Remove email addresses
-    sanitized = sanitized.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]');
+  /**
+   * Log a validation error
+   */
+  static logValidationError(
+    message: string,
+    context: ErrorLogContext,
+    details?: Record<string, unknown>
+  ): void {
+    const logContext: LogContext = {
+      errorId: context.errorId,
+      ...(context.requestPath && { requestPath: context.requestPath }),
+      ...(context.method && { method: context.method }),
+      ...(context.userId && { userId: context.userId }),
+      ...(context.tenantId && { tenantId: context.tenantId }),
+      ...(details && { validationDetails: details }),
+    };
 
-    // Remove potential tokens/keys (long base64-like strings)
-    sanitized = sanitized.replace(/[A-Za-z0-9\-_]{32,}/g, '[REDACTED]');
+    StructuredLogger.warn(`Validation error: ${message}`, logContext);
+  }
 
-    // Remove SQL patterns (basic)
-    sanitized = sanitized.replace(/SELECT\s+.*?\s+FROM\s+\w+/gi, 'SELECT [REDACTED]');
+  /**
+   * Log an authentication error
+   */
+  static logAuthError(message: string, context: ErrorLogContext): void {
+    const logContext: LogContext = {
+      errorId: context.errorId,
+      ...(context.requestPath && { requestPath: context.requestPath }),
+      ...(context.method && { method: context.method }),
+    };
 
-    return sanitized;
+    StructuredLogger.warn(`Authentication error: ${message}`, logContext);
+  }
+
+  /**
+   * Log a permission denied error
+   */
+  static logPermissionDenied(message: string, context: ErrorLogContext, details?: Record<string, unknown>): void {
+    const logContext: LogContext = {
+      errorId: context.errorId,
+      ...(context.requestPath && { requestPath: context.requestPath }),
+      ...(context.method && { method: context.method }),
+      ...(context.userId && { userId: context.userId }),
+      ...(context.tenantId && { tenantId: context.tenantId }),
+      ...(details && { details }),
+    };
+
+    StructuredLogger.warn(`Permission denied: ${message}`, logContext);
   }
 }

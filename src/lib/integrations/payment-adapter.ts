@@ -59,7 +59,7 @@ class MockPaymentProvider implements IPaymentProvider {
     };
   }
 
-  verifyWebhookSignature(signature: string, body: string): boolean {
+  verifyWebhookSignature(_signature: string, _body: string): boolean {
     // Mock always returns true for development
     console.log('[MOCK] Verifying webhook signature');
     return true;
@@ -81,11 +81,11 @@ class StripePaymentProvider implements IPaymentProvider {
   }
 
   async processPayment(
-    amount: number,
-    currency: string,
-    customerId: string,
-    description?: string,
-    metadata?: Record<string, unknown>
+    _amount: number,
+    _currency: string,
+    _customerId: string,
+    _description?: string,
+    _metadata?: Record<string, unknown>
   ): Promise<PaymentTransaction> {
     // TODO: Implement Stripe charge creation
     // TODO: Handle Stripe errors and convert to standard format
@@ -93,7 +93,7 @@ class StripePaymentProvider implements IPaymentProvider {
     throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
   }
 
-  async refund(transactionId: string, amount?: number): Promise<RefundResult> {
+  async refund(_transactionId: string, _amount?: number): Promise<RefundResult> {
     // TODO: Implement Stripe refund
     // TODO: Handle full and partial refunds
     // TODO: Return refund details
@@ -106,7 +106,7 @@ class StripePaymentProvider implements IPaymentProvider {
     throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
   }
 
-  verifyWebhookSignature(signature: string, body: string): boolean {
+  verifyWebhookSignature(_signature: string, _body: string): boolean {
     // TODO: Implement Stripe webhook signature verification
     // TODO: Use Stripe's hmac-sha256 verification
     throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
@@ -128,11 +128,11 @@ class SquarePaymentProvider implements IPaymentProvider {
   }
 
   async processPayment(
-    amount: number,
-    currency: string,
-    customerId: string,
-    description?: string,
-    metadata?: Record<string, unknown>
+    _amount: number,
+    _currency: string,
+    _customerId: string,
+    _description?: string,
+    _metadata?: Record<string, unknown>
   ): Promise<PaymentTransaction> {
     // TODO: Implement Square payment creation
     // TODO: Handle Square API responses
@@ -140,7 +140,7 @@ class SquarePaymentProvider implements IPaymentProvider {
     throw new Error('Square payment provider not configured. Set PAYMENT_API_KEY');
   }
 
-  async refund(transactionId: string, amount?: number): Promise<RefundResult> {
+  async refund(_transactionId: string, _amount?: number): Promise<RefundResult> {
     // TODO: Implement Square refund
     // TODO: Handle Square refund API
     throw new Error('Square payment provider not configured. Set PAYMENT_API_KEY');
@@ -152,7 +152,7 @@ class SquarePaymentProvider implements IPaymentProvider {
     throw new Error('Square payment provider not configured. Set PAYMENT_API_KEY');
   }
 
-  verifyWebhookSignature(signature: string, body: string): boolean {
+  verifyWebhookSignature(_signature: string, _body: string): boolean {
     // TODO: Implement Square webhook signature verification
     throw new Error('Square payment provider not configured. Set PAYMENT_API_KEY');
   }

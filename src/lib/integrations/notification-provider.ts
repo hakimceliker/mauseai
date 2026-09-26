@@ -210,7 +210,7 @@ class EmailNotificationProvider implements INotificationProvider {
     this.apiKey = apiKey;
   }
 
-  async sendEmail(message: EmailMessage): Promise<NotificationResult> {
+  async sendEmail(_message: EmailMessage): Promise<NotificationResult> {
     // TODO: Implement email sending with provider
     // TODO: Validate email addresses
     // TODO: Handle HTML and plain text
@@ -250,12 +250,11 @@ class SlackNotificationProvider implements INotificationProvider {
     throw new Error('Email not available with Slack provider');
   }
 
-  async sendSlack(message: SlackMessage): Promise<NotificationResult> {
-    const id = `slack_${Date.now()}`;
+  async sendSlack(_message: SlackMessage): Promise<NotificationResult> {
     // TODO: Implement Slack webhook posting
     // TODO: Support Block Kit formatting
     // TODO: Handle rate limiting (Slack allows 1 request/second per webhook)
-    console.log('[Slack Provider] Would send to webhook:', this.webhookUrl, message);
+    console.log('[Slack Provider] Would send to webhook:', this.webhookUrl);
     throw new Error('Slack provider not configured. Set SLACK_WEBHOOK_URL');
   }
 
@@ -293,7 +292,7 @@ export function createNotificationAdapter(): INotificationProvider {
   const notificationType = (process.env.NOTIFICATION_TYPE || 'console').toLowerCase();
 
   switch (notificationType) {
-    case 'email':
+    case 'email': {
       const emailKey = process.env.EMAIL_PROVIDER_KEY;
       if (!emailKey) {
         console.error(
@@ -302,8 +301,9 @@ export function createNotificationAdapter(): INotificationProvider {
         );
       }
       return new EmailNotificationProvider(emailKey || '');
+    }
 
-    case 'slack':
+    case 'slack': {
       const slackUrl = process.env.SLACK_WEBHOOK_URL;
       if (!slackUrl) {
         console.error(
@@ -312,20 +312,23 @@ export function createNotificationAdapter(): INotificationProvider {
         );
       }
       return new SlackNotificationProvider(slackUrl || '');
+    }
 
-    case 'multi':
+    case 'multi': {
       // TODO: Implement multi-provider that sends to multiple channels
       console.warn('Multi-provider not yet implemented, using console');
       return new ConsoleNotificationProvider();
+    }
 
     case 'console':
-    default:
+    default: {
       if (notificationType !== 'console') {
         console.warn(
           `Unknown notification type: ${notificationType}. Defaulting to console provider`
         );
       }
       return new ConsoleNotificationProvider();
+    }
   }
 }
 

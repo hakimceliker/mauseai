@@ -145,7 +145,7 @@ export class SupabaseRealtimeProvider implements IRealtimeProvider {
     const subscription: RealtimeSubscription = {
       channel,
       unsubscribe: () => this.unsubscribe(channel),
-      onMessage: (callback: (message: RealtimeMessage) => void) => {
+      onMessage: (_callback: (message: RealtimeMessage) => void) => {
         // TODO: Hook up message callbacks
         console.log('[Supabase Realtime] Setting up message callback for:', channel);
       },

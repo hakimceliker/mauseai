@@ -196,27 +196,27 @@ class MixpanelAnalyticsProvider implements IAnalyticsProvider {
     this.apiKey = apiKey;
   }
 
-  async trackEvent(data: EventData): Promise<void> {
+  async trackEvent(_data: EventData): Promise<void> {
     // TODO: Implement Mixpanel event tracking
     // TODO: Use Mixpanel SDK or HTTP API
     // TODO: Handle batching
     throw new Error('Mixpanel not configured. Set ANALYTICS_API_KEY');
   }
 
-  async trackPage(data: PageData): Promise<void> {
+  async trackPage(_data: PageData): Promise<void> {
     // TODO: Implement page tracking
     throw new Error('Mixpanel not configured. Set ANALYTICS_API_KEY');
   }
 
-  async trackUser(properties: UserProperties): Promise<void> {
+  async trackUser(_properties: UserProperties): Promise<void> {
     // TODO: Implement user identification
     throw new Error('Mixpanel not configured. Set ANALYTICS_API_KEY');
   }
 
   async trackConversion(
-    name: string,
-    value?: number,
-    properties?: Record<string, unknown>
+    _name: string,
+    _value?: number,
+    _properties?: Record<string, unknown>
   ): Promise<void> {
     // TODO: Implement conversion tracking
     throw new Error('Mixpanel not configured. Set ANALYTICS_API_KEY');
@@ -245,26 +245,26 @@ class SegmentAnalyticsProvider implements IAnalyticsProvider {
     this.apiKey = apiKey;
   }
 
-  async trackEvent(data: EventData): Promise<void> {
+  async trackEvent(_data: EventData): Promise<void> {
     // TODO: Implement Segment event tracking
     // TODO: Forward to all configured destinations
     throw new Error('Segment not configured. Set ANALYTICS_API_KEY');
   }
 
-  async trackPage(data: PageData): Promise<void> {
+  async trackPage(_data: PageData): Promise<void> {
     // TODO: Implement Segment page tracking
     throw new Error('Segment not configured. Set ANALYTICS_API_KEY');
   }
 
-  async trackUser(properties: UserProperties): Promise<void> {
+  async trackUser(_properties: UserProperties): Promise<void> {
     // TODO: Implement Segment identify
     throw new Error('Segment not configured. Set ANALYTICS_API_KEY');
   }
 
   async trackConversion(
-    name: string,
-    value?: number,
-    properties?: Record<string, unknown>
+    _name: string,
+    _value?: number,
+    _properties?: Record<string, unknown>
   ): Promise<void> {
     // TODO: Implement conversion tracking via Segment
     throw new Error('Segment not configured. Set ANALYTICS_API_KEY');
