@@ -4,6 +4,11 @@ export default function Home() {
       <header style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: '20px', marginBottom: '20px' }}>
         <h1>Mause AI v0.1.0</h1>
         <p style={{ color: '#666' }}>Multi-agent workflow engine with Supabase, Inngest, and AI routing</p>
+        <p style={{ marginTop: '10px' }}>
+          <a href="/dashboard/operations" style={{ color: '#0066cc', textDecoration: 'none', fontWeight: 'bold' }}>
+            → Dashboard'a Git
+          </a>
+        </p>
       </header>
 
       <section style={{ marginBottom: '40px' }}>
