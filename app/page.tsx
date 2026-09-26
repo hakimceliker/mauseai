@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const cards = [
   ["Task Engine", "Breaks goals into tasks and steps."],
   ["Checkpoint", "Resumes paused work from where it left off."],
@@ -22,6 +24,9 @@ export default function Home() {
           </article>
         ))}
       </section>
+      <p>
+        <Link href="/diagram">A–Z mimari diyagramı ve kapsam matrisi →</Link>
+      </p>
     </main>
   );
 }

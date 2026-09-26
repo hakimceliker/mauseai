@@ -28,8 +28,9 @@ export interface LabelledFeedback {
   queue: { enqueue: boolean; priority: ImprovementPriority | null; reason: string | null };
 }
 
-const UNSAFE_WORDS = /\b(tehlikeli|zararlı|kişisel veri|gizli|unsafe|harmful|leak)\b/i;
-const WRONG_WORDS = /\b(yanlış|hatalı|uydurma|doğru değil|wrong|incorrect|hallucinat)/i;
+// JS \b treats Turkish letters (ı, ş, ğ…) as non-word characters, so boundaries are Unicode letter lookarounds.
+const UNSAFE_WORDS = /(?<!\p{L})(tehlikeli|zararlı|kişisel veri|gizli|unsafe|harmful|leak)(?!\p{L})/iu;
+const WRONG_WORDS = /(?<!\p{L})(yanlış|hatalı|uydurma|doğru değil|wrong|incorrect|hallucinat)/iu;
 
 export function labelFeedback(input: FeedbackInput): LabelledFeedback {
   const comment = input.comment ? maskPii(input.comment).text : null;

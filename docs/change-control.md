@@ -4,6 +4,14 @@
 
 Kullanıcı tarafından gönderilen her metin, öneri veya kod parçası önce taslak kabul edilir. Mevcut mimari, veri modeli, güvenlik kanunu ve iş akışıyla karşılaştırılmadan bağlayıcı karar sayılmaz.
 
+## Çalışma alanı ve repo ayrımı (temel kural)
+
+- MauseAI yalnızca `https://github.com/hakimceliker/mauseai` reposunda ve yerelde `C:\Users\Administrator\Documents\Codex\2026-09-26\ya-3\mauseai` altında çalışır.
+- TechCriptoAI ayrı bir projedir: kendi reposunda ve yerelde `C:\Users\Administrator\Documents\Codex\2026-09-26\ya-3\techcriptoai-backend` altında çalışır.
+- İki proje arasında dosya, branch, commit veya PR karıştırılmaz. Commit öncesinde `git remote -v` çıktısının `hakimceliker/mauseai` olduğu doğrulanır.
+- `main` dalına doğrudan push yapılmaz; her değişiklik bir özellik branch'inde yapılır ve PR ile gelir.
+- Her iş raporunda repo URL'si, branch adı, commit SHA'sı ve PR numarası açıkça yazılır.
+
 ## Uygulama sırası
 
 1. Mevcut dosya ve sözleşme kontrol edilir.

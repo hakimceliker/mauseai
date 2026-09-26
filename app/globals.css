@@ -50,3 +50,34 @@ body {
 .muted {
   color: #64748b;
 }
+
+/* A–Z diagram page */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.diagram-page a { color: #7c9cff; }
+.diagram-page h1 { font-size: clamp(1.4rem, 3vw, 2.2rem); }
+.diagram-summary dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin: 20px 0; }
+.diagram-summary dl div { border: 1px solid #2a3560; border-radius: 10px; padding: 10px 12px; }
+.diagram-summary dt { font-size: 12px; color: #98a5cf; }
+.diagram-summary dd { margin: 4px 0 0; font-size: 22px; font-weight: 700; }
+.diagram-figure { margin: 0 0 32px; }
+.diagram-scroll { overflow: auto; max-height: 80vh; border: 1px solid #2a3560; border-radius: 12px; background: #0b1020; }
+.diagram-scroll img { display: block; width: 100%; min-width: 900px; height: auto; }
+.diagram-scroll:focus-visible, .table-scroll:focus-visible, .node-button:focus-visible, .link-button:focus-visible { outline: 3px solid #35d0ba; outline-offset: 2px; }
+.explorer-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .explorer-grid { grid-template-columns: 1fr; } }
+.lane h3 { font-size: 13px; letter-spacing: .04em; color: #aeb9df; margin: 16px 0 8px; }
+.lane ul, .edge-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.node-button { width: 100%; display: flex; justify-content: space-between; gap: 8px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid #2a3560; background: #111a35; color: #fff; cursor: pointer; font: inherit; }
+.node-button[aria-pressed="true"] { border-color: #7c5cff; background: #1b2350; }
+.node-core { background: linear-gradient(135deg, #7c5cff55, #35d0ba55); }
+.node-detail { border: 1px solid #2a3560; border-radius: 12px; padding: 16px; position: sticky; top: 16px; }
+.node-detail table, .table-scroll table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.node-detail th, .node-detail td, .table-scroll th, .table-scroll td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid #222b50; }
+.node-detail code { font-size: 12px; word-break: break-all; }
+.note { display: block; font-weight: 400; margin-top: 4px; }
+.table-scroll { overflow-x: auto; }
+.link-button { background: none; border: 0; color: #7c9cff; cursor: pointer; font: inherit; text-decoration: underline; padding: 0; }
+.status { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.status-implemented { background: #0f3d34; color: #6ff0cf; }
+.status-partial { background: #45380c; color: #ffd66b; }
+.status-requires_credentials { background: #3d1f2e; color: #ff9cc0; }

@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { getSupabaseServerClient } from "@/src/lib/supabase/server";
 import { getTenantContext } from "@/src/server/auth/tenant-context";
 import { evaluateGuard, type Permission, type Role } from "@/src/lib/isolation/guard";
+import { ServiceError } from "@/src/server/az/records";
 
 /**
  * Shared request pipeline for the A–Z routes, mirroring the served task routes:
@@ -72,6 +73,7 @@ export async function withTenant(
     return await handler({ client, tenantId: tenant.tenantId, userId: user.id, role: tenant.role as Role });
   } catch (error) {
     if (error instanceof HttpError) return json({ error: error.code, ...(error.details ? { details: error.details } : {}) }, error.status);
+    if (error instanceof ServiceError) return json({ error: error.code }, error.status);
     return json({ error: "internal_error" }, 500);
   }
 }

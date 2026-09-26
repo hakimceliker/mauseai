@@ -351,3 +351,14 @@ Supabase automatically backs up daily. Access:
 - **Documentation**: See README.md and ARCHITECTURE.md
 - **Status Page**: [status.supabase.com](https://status.supabase.com)
 - **Community**: Supabase Discord
+
+## A–Z Pilot → Production Runbook (diyagram kartı P)
+
+Bu bölüm `public/diagrams/masuai-a-z-diyagram.svg` içindeki **P — Pilot → Production** kartının operasyon runbook'udur. Kapsam matrisi: `docs/diagrams/A-Z-COVERAGE.md`.
+
+1. **Pilot (%5):** `POST /api/rollouts` ile `feature_key`, `version`, `owner`, `rollback_plan`, `runbook_url` zorunlu kaydedilir. Pilot kullanıcılar `allowlist` ile de eklenebilir.
+2. **Kapı kontrolü:** `GET /api/rollouts/check` son eval koşusunu (doğruluk ≥ 0.80, regresyon yok), açık yüksek/kritik risk olaylarını ve 24 saatlik SLO'yu (p95 ≤ 4000 ms, hata ≤ %2, fallback ≤ %20) raporlar. Kapılardan biri kırmızıysa ilerletilmez.
+3. **İlerletme:** `POST /api/rollouts/{id}` `{ "action": "advance" }` pilot → beta (%25) → ga (%100). Her geçiş `gate_history` ve `audit_logs` içine yazılır.
+4. **Geri dönüş:** `POST /api/rollouts/{id}` `{ "action": "rollback" }` sürümü `rolled_back` yapar ve herkes için kapatır; kayıtlı `rollback_plan` uygulanır, olay `risk_incidents` üzerinden takip edilir.
+5. **Sahiplik:** Onay ve SLA bildirimleri RACI tablosundaki sorumlu ekibe gider (`GET /api/ownership`). Onay SLA'sı aşılırsa Inngest `mouseai-approval-sla-sweep` (15 dakikada bir) eskalasyon bildirimi üretir.
+6. **Gözlem:** `GET /api/ops/slo` alarm ve kapasite planı, `GET /api/growth` sürüm ve elde tutma, `GET /api/kpi` KPI değerlerini döner.
