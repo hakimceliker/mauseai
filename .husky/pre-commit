@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
 
-npx lint-staged
+if command -v npm >/dev/null 2>&1; then
+  NPM_BIN=npm
+else
+  NPM_BIN=npm.cmd
+fi
+
+"$NPM_BIN" run lint-staged

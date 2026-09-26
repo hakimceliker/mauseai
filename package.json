@@ -1,5 +1,5 @@
 {
-  "name": "mauseai",
+  "name": "mouseai-core",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,27 +7,37 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "lint:check": "eslint .",
+    "format:check": "prettier --check \"app/**/*.{ts,tsx,css}\" \"src/**/*.{ts,tsx}\" \"tests/**/*.{ts,tsx}\" \"*.{json,mjs,ts}\"",
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "next": "16.3.6",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "@supabase/ssr": "latest",
+    "@supabase/supabase-js": "latest",
+    "inngest": "latest",
+    "next": "15.5.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "zod": "latest"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.39.5",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.6",
-    "eslint-config-prettier": "^10.1.8",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "15.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.9.9",
+    "prettier": "latest",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "latest",
+    "vitest": "latest"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": [
