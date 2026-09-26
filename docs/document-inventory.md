@@ -74,3 +74,4 @@ Yeni gönderilen her belge önce bu envanterdeki ilgili başlıkla karşılaşt�
 
 - `execution-and-tool-responsibility-plan.md` — GitHub, GPT/Kodex, Claude, masaüstü araçları, bulut servisleri, onay kapıları ve teslim şablonu
 - `mouseai-final-flow-and-bi.md` — ana iş akışı, görev paylaşımı ve iş zekâsı geri besleme diyagramları
+- `customer-hosted-agent-architecture.md` — müşteri sunucusu, Docker Agent ve hibrit çalışma mimarisi

@@ -29,6 +29,10 @@ flowchart LR
     Q --> R[Dashboard ve iş zekâsı]
     R --> S[Politika ve plan iyileştirmesi]
     S --> D
+    J -.-> A1[Müşteri MouseAI Agent]
+    A1 --> A2[Müşteri Docker veya sunucu ortamı]
+    A2 --> A3[Yerel connector ve dosyalar]
+    A3 --> J
 ```
 
 ## Görev ve araç paylaşımı
@@ -108,3 +112,7 @@ flowchart LR
 `hedef gir → task oluşur → worker çalışır → mock AI seçilir → checkpoint yazılır → maliyet ve audit oluşur → dashboard sonucu gösterir`
 
 Bu senaryo geçmeden gerçek müşteri e-postası, ödeme, WhatsApp veya canlı masaüstü işlemi açılmaz.
+
+## Hibrit yürütme eklemesi
+
+İş yükü, `MouseAI Agent` üzerinden müşterinin Docker, Kubernetes, masaüstü veya özel bulut ortamında çalıştırılabilir. Cloud kontrol düzlemi task, politika, lisans, audit özeti ve iş zekâsını korur; Agent ise müşterinin yerel API, CRM, ERP, dosya ve masaüstü işlemlerini yürütür. Ayrıntılı karar `customer-hosted-agent-architecture.md` içindedir.
