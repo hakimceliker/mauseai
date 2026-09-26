@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getAllowedOrigins } from '@/src/lib/config/validation';
 
 /**
  * Security headers configuration
@@ -35,8 +36,8 @@ export const SECURITY_HEADERS = {
  * CORS configuration
  */
 export const CORS_CONFIG = {
-  // Allowed origins (configure via environment variables for production)
-  allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(','),
+  // Allowed origins, validated from ALLOWED_ORIGINS (comma-separated)
+  allowedOrigins: getAllowedOrigins(),
 
   // Allowed methods
   allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

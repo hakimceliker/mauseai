@@ -30,6 +30,13 @@ Edit `.env.local` and fill in the required values:
 - `INNGEST_EVENT_KEY` - Your Inngest event key
 - `INNGEST_SIGNING_KEY` - Your Inngest signing key
 - `AI_PROVIDER` - Set to `mock` for development (or `openai`/`anthropic` with API keys)
+- `ALLOWED_ORIGINS` - Comma-separated CORS origins, e.g. `https://app.example.com,http://localhost:3000` (default `http://localhost:3000`; `*` allows all)
+- `LOG_LEVEL` - `debug`, `info`, `warn` or `error` (default `info`)
+- `LOG_FORMAT` - `json` for log aggregation or `text` for local reading (default `json`)
+
+`ALLOWED_ORIGINS`, `LOG_LEVEL` and `LOG_FORMAT` are validated with Zod in
+`src/lib/config/validation.ts`. An invalid value falls back to the safe default
+at runtime and makes `GET /api/health/ready` return 503 until it is fixed.
 
 ### 4. Run Development Server
 ```bash

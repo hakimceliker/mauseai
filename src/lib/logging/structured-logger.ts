@@ -4,6 +4,8 @@
  * No sensitive data (passwords, tokens, full IDs) is logged
  */
 
+import { getLogFormat, getLogLevel as getConfiguredLogLevel } from '@/src/lib/config/validation';
+
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
 export interface LogContext {
@@ -40,14 +42,10 @@ export class StructuredLogger {
   private static currentLogLevel: LogLevel = this.getLogLevel();
 
   /**
-   * Get log level from environment or default to INFO
+   * Get log level from validated LOG_LEVEL config (defaults to INFO)
    */
   private static getLogLevel(): LogLevel {
-    const envLevel = process.env.LOG_LEVEL?.toUpperCase();
-    if (envLevel === 'DEBUG' || envLevel === 'INFO' || envLevel === 'WARN' || envLevel === 'ERROR') {
-      return envLevel;
-    }
-    return 'INFO';
+    return getConfiguredLogLevel().toUpperCase() as LogLevel;
   }
 
   /**
@@ -129,7 +127,7 @@ export class StructuredLogger {
    * Output log entry to console
    */
   private static output(entry: StructuredLogEntry): void {
-    const logFormat = process.env.LOG_FORMAT || 'json';
+    const logFormat = getLogFormat();
     const isError = entry.level === 'ERROR';
 
     if (logFormat === 'text') {
