@@ -1,0 +1,51 @@
+import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
+import { MockGPTProvider } from './providers/mock-gpt';
+import { MockClaudeProvider } from './providers/mock-claude';
+
+/**
+ * AI Router - selects appropriate provider based on environment configuration
+ * Supports: gpt, claude, mock (default)
+ */
+export class AIRouter {
+  private provider: AIProvider;
+
+  constructor() {
+    const aiProvider = process.env.AI_PROVIDER || 'mock';
+
+    switch (aiProvider) {
+      case 'gpt':
+        this.provider = new MockGPTProvider();
+        break;
+      case 'claude':
+        this.provider = new MockClaudeProvider();
+        break;
+      case 'mock':
+      default:
+        // Default to GPT mock for 'mock' provider
+        this.provider = new MockGPTProvider();
+        break;
+    }
+  }
+
+  /**
+   * Get current provider name
+   */
+  getProviderName(): string {
+    return this.provider.name;
+  }
+
+  /**
+   * Call the AI provider
+   */
+  async call(messages: AIMessage[]): Promise<AIResponse> {
+    return this.provider.call(messages);
+  }
+
+  /**
+   * Static method for easy access
+   */
+  static async execute(messages: AIMessage[]): Promise<AIResponse> {
+    const router = new AIRouter();
+    return router.call(messages);
+  }
+}
