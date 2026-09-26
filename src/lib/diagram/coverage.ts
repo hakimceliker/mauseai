@@ -100,7 +100,7 @@ export const NODE_COVERAGE: NodeCoverage[] = [
     ["Kullanıcı geri bildirimi", "implemented", ["src/lib/feedback/feedback.ts", "app/api/feedback/route.ts", "src/server/az/pipeline-service.ts"], [T.strategy, T.services, T.routes]],
     ["Etiketleme", "implemented", ["src/lib/feedback/feedback.ts", M.pipelines], [T.strategy, T.services]],
     ["İyileştirme kuyruğu", "implemented", ["src/lib/feedback/feedback.ts", "src/server/az/pipeline-service.ts"], [T.strategy, T.services]],
-    ["İnsan onayı noktaları", "implemented", ["src/lib/feedback/feedback.ts", "app/api/approvals/[id]/route.ts"], [T.strategy, T.services]],
+    ["İnsan onayı gereken noktalar", "implemented", ["src/lib/feedback/feedback.ts", "app/api/approvals/[id]/route.ts"], [T.strategy, T.services]],
   ]),
   node("G", [
     ["Dosya", "implemented", ["src/lib/ingestion/ingestion.ts", "app/api/ingest/route.ts"], [T.dataCore, T.services]],
@@ -138,7 +138,7 @@ export const NODE_COVERAGE: NodeCoverage[] = [
     ["Kaynak gösterme", "implemented", ["src/lib/quality/output-quality.ts"], [T.dataCore]],
     ["Yapılandırılmış çıktı", "implemented", ["src/lib/quality/output-quality.ts"], [T.dataCore]],
     ["Guardrail", "implemented", ["src/lib/quality/output-quality.ts", "src/lib/risk/risk-scanner.ts"], [T.dataCore]],
-    ["Düşük güvende eskalasyon", "implemented", ["src/lib/quality/output-quality.ts", "src/server/az/core-service.ts"], [T.dataCore, T.services]],
+    ["Düşük güven durumunda eskalasyon", "implemented", ["src/lib/quality/output-quality.ts", "src/server/az/core-service.ts"], [T.dataCore, T.services]],
   ]),
   node("K", [
     ["Hızlı başlangıç", "implemented", ["src/lib/ux/experience.ts", "app/api/quickstart/route.ts"], [T.product]],
@@ -180,8 +180,8 @@ export const NODE_COVERAGE: NodeCoverage[] = [
   node("P", [
     ["Küçük kullanıcı grubu", "implemented", ["src/lib/rollout/rollout.ts"], [T.product]],
     ["Güvenlik/kalite kapıları", "implemented", ["src/lib/rollout/rollout.ts", "src/server/az/ops-service.ts"], [T.product, T.services]],
-    ["Kademeli yaygınlaştırma", "implemented", ["src/lib/rollout/rollout.ts", "app/api/rollouts/[id]/route.ts"], [T.product]],
-    ["Akış sahibi", "implemented", ["src/lib/rollout/rollout.ts", M.platform], [T.product]],
+    ["Kademeli yaygınlaştır", "implemented", ["src/lib/rollout/rollout.ts", "app/api/rollouts/[id]/route.ts"], [T.product]],
+    ["Her akış için sahip", "implemented", ["src/lib/rollout/rollout.ts", M.platform], [T.product]],
     ["Geri dönüş planı", "implemented", ["src/lib/rollout/rollout.ts"], [T.product]],
     ["Operasyon runbook’u", "implemented", ["RUNBOOK.md", "src/lib/rollout/rollout.ts"], [T.product]],
   ]),
