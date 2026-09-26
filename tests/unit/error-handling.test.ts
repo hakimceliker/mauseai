@@ -182,7 +182,7 @@ describe('ApiErrorHandler', () => {
       ApiErrorHandler.handle(error, context);
 
       expect(ErrorLogger.logError).toHaveBeenCalled();
-      const callArgs = (ErrorLogger.logError as any).mock.calls[0];
+      const callArgs = vi.mocked(ErrorLogger.logError).mock.calls[0];
       expect(callArgs[1]).toMatchObject({
         requestPath: context.requestPath,
         method: context.method,
