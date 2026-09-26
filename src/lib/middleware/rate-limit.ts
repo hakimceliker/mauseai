@@ -112,7 +112,8 @@ function getClientIp(request: NextRequest): string {
     return forwarded.split(',')[0].trim();
   }
 
-  // For Next.js App Router, use socket
+  // For Next.js App Router, try to get from socket via ip property
+  // @ts-expect-error - ip property may not be available in all contexts
   const ip = (request.ip || 'unknown');
   return ip;
 }

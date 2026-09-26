@@ -19,25 +19,23 @@ export function withMiddleware(
     requestLimits?: RequestLimitsConfig;
   } = {}
 ) {
-  let wrappedHandler = handler;
+  const requestLimitsConfig = middleware.requestLimits || DEFAULT_REQUEST_LIMITS;
+  const rateLimitConfig = middleware.rateLimit || DEFAULT_RATE_LIMIT_CONFIG;
 
-  // Apply request limits middleware (first, to fail fast on invalid requests)
-  if (middleware.requestLimits !== false) {
-    wrappedHandler = (req: NextRequest, auth?: AuthContext) =>
-      withRequestLimits(
-        async (r) => handler(r, auth),
-        middleware.requestLimits || DEFAULT_REQUEST_LIMITS
-      )(req);
-  }
+  // Apply both request limits and rate limiting middleware
+  const wrappedHandler = (req: NextRequest, auth?: AuthContext) => {
+    // First apply request limits (fail fast on invalid requests)
+    const withLimits = withRequestLimits(
+      async (r) => handler(r, auth),
+      requestLimitsConfig
+    );
 
-  // Apply rate limiting middleware
-  if (middleware.rateLimit !== false) {
-    wrappedHandler = (req: NextRequest, auth?: AuthContext) =>
-      withRateLimit(
-        async (r) => handler(r, auth),
-        middleware.rateLimit || DEFAULT_RATE_LIMIT_CONFIG
-      )(req, auth);
-  }
+    // Then apply rate limiting
+    return withRateLimit(
+      async (r) => withLimits(r),
+      rateLimitConfig
+    )(req, auth);
+  };
 
   return wrappedHandler;
 }

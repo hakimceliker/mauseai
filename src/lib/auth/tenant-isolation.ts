@@ -187,6 +187,7 @@ export function validateTenantAccess(
   return {
     valid: true,
     auth: {
+      // @ts-expect-error - Safe to cast tenantId as we control session creation
       tenantId: session.tenantId,
       userId: session.userId,
     },

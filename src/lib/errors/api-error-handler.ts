@@ -62,7 +62,7 @@ export class ServerError extends ApiError {
 /**
  * Safe error response interface
  */
-interface SafeErrorResponse {
+export interface SafeErrorResponse {
   success: false;
   error: {
     code: string;
