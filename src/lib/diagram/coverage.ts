@@ -37,13 +37,24 @@ const T = {
   rls: "tests/db/az-rls.test.ts",
   services: "tests/db/az-services.test.ts",
   routes: "tests/api/az-routes.test.ts",
+  ai: "tests/integrations/ai-providers.test.ts",
+  rate: "tests/integrations/rate-limit.test.ts",
+  notify: "tests/integrations/notifications.test.ts",
+  crm: "tests/integrations/crm.test.ts",
+  delivery: "tests/db/az-delivery-crm.test.ts",
+  config: "tests/config/production-checks.test.ts",
+  ui: "tests/ui/diagram-ui.test.tsx",
 } as const;
 
 const M = {
   platform: "supabase/migrations/0004_a_z_platform.sql",
   reconcile: "supabase/migrations/0003_schema_reconciliation.sql",
   pipelines: "src/inngest/functions/a-z-pipelines.ts",
+  delivery: "supabase/migrations/0005_delivery_and_crm.sql",
 } as const;
+
+const AI = ["src/lib/ai/provider-registry.ts", "src/lib/ai/providers/openai.ts", "src/lib/ai/providers/anthropic.ts", "src/lib/core/model-routing.ts"];
+const SEND = ["src/lib/notifications/senders.ts", "src/server/az/notification-dispatch.ts", M.delivery];
 
 type Cap = [capability: string, status: CoverageStatus, code: string[], tests: string[], note?: string];
 
@@ -76,11 +87,11 @@ export const NODE_COVERAGE: NodeCoverage[] = [
   ]),
   node("C", [
     ["Web", "implemented", ["src/lib/channels/channels.ts", "app/api/channels/inbound/route.ts"], [T.strategy, T.services]],
-    ["Mobil", "partial", ["src/lib/channels/channels.ts"], [T.strategy], "Kanal 'planned' olarak raporlanır; mobil istemci yok, API kanalı üzerinden erişilebilir."],
+    ["Mobil", "partial", ["src/lib/channels/channels.ts", "app/diagram/diagram-explorer.tsx", "app/globals.css"], [T.strategy, T.ui], "Web arayüzü telefon ve tablette çalışır (duyarlı, dokunmatik hedefler); yerel mobil istemci yok, kanal 'planned'."],
     ["API", "implemented", ["src/lib/channels/channels.ts", "app/api/channels/inbound/route.ts"], [T.strategy, T.services]],
-    ["E-posta", "requires_credentials", ["src/lib/channels/channels.ts"], [T.strategy], "EMAIL_PROVIDER_KEY tanımlanana kadar 'requires_credentials'."],
-    ["Slack/Teams", "requires_credentials", ["src/lib/channels/channels.ts"], [T.strategy], "SLACK_WEBHOOK_URL + SLACK_SIGNING_SECRET / TEAMS_WEBHOOK_URL gerekir."],
-    ["CRM yüzeyleri", "requires_credentials", ["src/lib/channels/channels.ts"], [T.strategy], "CRM_API_KEY gerekir."],
+    ["E-posta", "requires_credentials", [...SEND, "src/lib/channels/channels.ts"], [T.notify, T.delivery], "Resend adapter'ı, retry ve teslim kaydı hazır; EMAIL_PROVIDER_KEY + EMAIL_FROM olmadan teslimat channel_not_configured."],
+    ["Slack/Teams", "requires_credentials", [...SEND, "src/lib/channels/signatures.ts", "app/api/channels/slack/events/route.ts", "app/api/channels/teams/messages/route.ts"], [T.notify, T.delivery, T.routes], "Webhook gönderimi ve imza doğrulaması hazır; SLACK_WEBHOOK_URL, SLACK_SIGNING_SECRET, TEAMS_WEBHOOK_URL, TEAMS_OUTGOING_WEBHOOK_SECRET gerekir."],
+    ["CRM yüzeyleri", "requires_credentials", ["src/lib/crm/crm-adapter.ts", "src/server/az/crm-service.ts", "app/api/crm/contacts/route.ts", M.delivery], [T.crm, T.delivery, T.routes], "HubSpot adapter'ı (tenant izolasyonu, timeout/retry, audit) hazır; CRM_API_KEY olmadan 503 crm_not_configured."],
   ]),
   node("D", [
     ["Sözlük", "implemented", ["src/lib/knowledge/knowledge.ts", "app/api/knowledge/glossary/route.ts", M.platform], [T.strategy, T.rls]],
@@ -119,7 +130,7 @@ export const NODE_COVERAGE: NodeCoverage[] = [
     ["İzlenebilirlik", "implemented", ["src/lib/preparation/prepare.ts", M.platform], [T.dataCore, T.services]],
   ]),
   node("CORE", [
-    ["Model yönlendirme", "partial", ["src/lib/core/model-routing.ts"], [T.dataCore], "Yalnızca mock GPT/Claude sağlayıcıları; gerçek sağlayıcı anahtarı gerekir."],
+    ["Model yönlendirme", "requires_credentials", AI, [T.ai, T.dataCore, T.routes], "OpenAI ve Anthropic adapter'ları (resmi SDK, timeout/retry) hazır; production'da anahtar yoksa 503 ai_provider_not_configured, mock yalnızca test/development."],
     ["RAG", "implemented", ["src/lib/core/retrieval.ts", "src/server/az/core-service.ts"], [T.dataCore, T.services]],
     ["Araç çağrısı", "implemented", ["src/lib/core/tools.ts", "app/api/tools/[name]/route.ts"], [T.dataCore, T.routes]],
     ["Prompt politikası", "implemented", ["src/lib/core/prompt-policy.ts"], [T.dataCore]],
@@ -130,7 +141,7 @@ export const NODE_COVERAGE: NodeCoverage[] = [
   node("I", [
     ["Tenant sınırları", "implemented", ["src/lib/isolation/guard.ts", M.reconcile, M.platform], [T.dataCore, T.rls]],
     ["RBAC", "implemented", ["src/lib/isolation/guard.ts", "src/server/http/tenant-route.ts"], [T.dataCore, T.routes]],
-    ["Oran limitleri", "partial", ["src/lib/isolation/guard.ts"], [T.dataCore], "Bellek içi sayaç (instance başına); dağıtık limit için Redis/KV gerekir."],
+    ["Oran limitleri", "requires_credentials", ["src/lib/isolation/guard.ts", "src/lib/ratelimit/distributed.ts"], [T.rate, T.dataCore], "Upstash/Vercel KV REST sayacı hazır; UPSTASH_REDIS_REST_* veya KV_REST_API_* olmadan instance başına bellek sayacı."],
     ["Bütçe kontrolü", "implemented", ["src/lib/isolation/guard.ts", "src/server/az/core-service.ts"], [T.dataCore, T.services]],
     ["Güvenli varsayılanlar", "implemented", ["src/lib/isolation/guard.ts", "src/server/http/tenant-route.ts"], [T.dataCore, T.routes]],
   ]),
@@ -157,7 +168,7 @@ export const NODE_COVERAGE: NodeCoverage[] = [
   node("M", [
     ["Araştır", "implemented", ["src/lib/flows/flows.ts", "src/server/az/flow-service.ts"], [T.product, T.services]],
     ["Özetle", "implemented", ["src/lib/flows/flows.ts", "src/lib/core/tools.ts"], [T.product, T.services]],
-    ["Üret", "partial", ["src/server/az/flow-service.ts"], [T.services], "Üretim adımı mock sağlayıcı ile çalışır."],
+    ["Üret", "requires_credentials", ["src/server/az/flow-service.ts", "src/lib/ai/task-ai.ts", ...AI], [T.services, T.ai], "Üretim adımı gerçek sağlayıcı registry'sini kullanır; anahtar yoksa production'da ai_provider_not_configured, mock yalnızca test/development."],
     ["Onaylat", "implemented", ["src/lib/flows/flows.ts", "src/server/az/flow-service.ts"], [T.product, T.services]],
     ["Yayınla", "implemented", ["src/lib/core/tools.ts"], [T.dataCore, T.services], "Yalnızca yapılandırılmış kanala; aksi halde channel_not_configured."],
     ["Takip et", "implemented", ["src/server/az/flow-service.ts"], [T.services]],
@@ -169,10 +180,10 @@ export const NODE_COVERAGE: NodeCoverage[] = [
     ["Özet", "implemented", ["src/lib/notifications/notifications.ts"], [T.product]],
     ["İnsan onayı", "implemented", ["src/server/az/records.ts", "app/api/approvals/[id]/route.ts"], [T.services]],
     ["SLA takibi", "implemented", ["src/lib/notifications/notifications.ts", M.pipelines], [T.product, T.services]],
-    ["Doğru kişiye, doğru zamanda", "partial", ["src/lib/notifications/notifications.ts", M.platform], [T.product], "Uygulama içi + Supabase realtime; e-posta/Slack teslimi kanal anahtarı gerektirir."],
+    ["Doğru kişiye, doğru zamanda", "implemented", ["src/lib/notifications/notifications.ts", "src/lib/notifications/routing.ts", "src/server/az/notification-dispatch.ts", "app/api/notifications/routes/route.ts", M.pipelines, M.delivery], [T.product, T.notify, T.delivery], "RACI ekibi + tenant rotası + öncelik + sessiz saat (saat dilimi); harici teslim ilgili kanal anahtarını gerektirir."],
   ]),
   node("O", [
-    ["Web + API + ekip araçları", "partial", ["src/lib/channels/channels.ts", "app/api/channels/route.ts"], [T.strategy], "Web ve API hazır; ekip araçları anahtar bekliyor."],
+    ["Web + API + ekip araçları", "requires_credentials", ["src/lib/channels/channels.ts", "app/api/channels/route.ts", "app/api/channels/slack/events/route.ts", "app/api/channels/teams/messages/route.ts"], [T.strategy, T.routes, T.notify], "Web ve API çalışır; Slack/Teams uç noktaları imza doğrulamalı hazır, anahtar bekliyor."],
     ["Tek kimlik", "implemented", ["src/lib/channels/channels.ts", "app/api/channels/identities/route.ts"], [T.strategy, T.services]],
     ["Tek bağlam", "implemented", ["src/lib/channels/channels.ts", "src/server/az/core-service.ts"], [T.strategy, T.services]],
     ["Kesintisiz kullanıcı yolculuğu", "implemented", ["app/api/channels/inbound/route.ts"], [T.services]],

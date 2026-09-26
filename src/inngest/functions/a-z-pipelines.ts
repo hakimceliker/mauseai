@@ -9,6 +9,7 @@ import {
   sweepApprovalSla,
 } from "@/src/server/az/pipeline-service";
 import { audit } from "@/src/server/az/records";
+import { planRecentNotifications, sendDueDeliveries } from "@/src/server/az/notification-dispatch";
 
 /**
  * Inngest functions for the A–Z diagram's asynchronous edges. Each handler
@@ -79,4 +80,23 @@ export const deletionExecutorFn = inngest.createFunction(
   },
 );
 
-export const azFunctions = [prepareDocumentFn, processFeedbackFn, flowRunnerFn, approvalSlaSweepFn, retentionReportFn, deletionExecutorFn];
+/** N → C/O: plan external deliveries for new notifications and send the due ones (email, Slack, Teams). */
+export const notificationDispatchFn = inngest.createFunction(
+  { id: "mouseai-notification-dispatch", concurrency: { limit: 1 } },
+  { cron: "* * * * *" },
+  async ({ step }: { step: StepTools }) => {
+    const planned = await step.run("plan", () => planRecentNotifications(getSupabaseAdminClient()));
+    const sent = await step.run("send", () => sendDueDeliveries(getSupabaseAdminClient()));
+    return { planned, sent };
+  },
+);
+
+export const azFunctions = [
+  prepareDocumentFn,
+  processFeedbackFn,
+  flowRunnerFn,
+  approvalSlaSweepFn,
+  retentionReportFn,
+  deletionExecutorFn,
+  notificationDispatchFn,
+];

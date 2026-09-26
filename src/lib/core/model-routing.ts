@@ -1,6 +1,6 @@
 import type { AIMessage, AIProvider, AIResponse } from "@/src/lib/ai/providers/base-provider";
-import { MockClaudeProvider } from "@/src/lib/ai/providers/mock-claude";
-import { MockGPTProvider } from "@/src/lib/ai/providers/mock-gpt";
+import { sharedProviders } from "@/src/lib/ai/provider-registry";
+import { ProviderError } from "@/src/lib/ai/providers/provider-error";
 
 /**
  * Model routing with fallback (diagram cards CORE — "Model yönlendirme" and
@@ -8,9 +8,10 @@ import { MockGPTProvider } from "@/src/lib/ai/providers/mock-gpt";
  * a per-provider circuit breaker moves traffic to the next candidate after
  * repeated failures.
  *
- * Only the mock providers are registered: no real model API key exists in
- * this environment, and every response carries `mock: true` so it is never
- * presented as real model output.
+ * Providers come from the registry (src/lib/ai/provider-registry.ts): the
+ * real OpenAI and Anthropic adapters when their keys are configured; the mock
+ * providers only in test/development. Every response carries `mock` so a
+ * mock answer is never presented as real model output.
  */
 
 export interface RoutedProvider {
@@ -19,6 +20,10 @@ export interface RoutedProvider {
   /** Estimated cost in cents per 1K tokens, used for budget-aware routing. */
   centsPer1kTokens: number;
   tier: "standard" | "careful";
+  /** Model id for real providers. */
+  model?: string;
+  /** Exact cost from provider-reported usage; falls back to the per-1K estimate when absent. */
+  costFor?: (usage: { inputTokens: number; outputTokens: number }) => number;
 }
 
 export interface RouteDecision {
@@ -29,7 +34,7 @@ export interface RouteDecision {
 
 export interface RoutedResponse extends AIResponse {
   mock: boolean;
-  attempts: Array<{ provider: string; ok: boolean; error?: string; latencyMs: number }>;
+  attempts: Array<{ provider: string; ok: boolean; error?: string; retryable?: boolean; latencyMs: number }>;
   fallbackUsed: boolean;
 }
 
@@ -65,11 +70,9 @@ export class CircuitBreaker {
   }
 }
 
+/** Providers for the current runtime; throws ConfigurationError("ai_provider_not_configured") in production without keys. */
 export function defaultProviders(): RoutedProvider[] {
-  return [
-    { provider: new MockGPTProvider(), mock: true, centsPer1kTokens: 1, tier: "standard" },
-    { provider: new MockClaudeProvider(), mock: true, centsPer1kTokens: 2, tier: "careful" },
-  ];
+  return sharedProviders();
 }
 
 export function decideRoute(
@@ -120,10 +123,12 @@ export async function callWithFallback(
       return { ...response, mock: entry.mock, attempts, fallbackUsed: name !== decision.primary };
     } catch (error) {
       breaker.recordFailure(name);
+      // Only the normalised code is kept: provider messages may echo request content.
       attempts.push({
         provider: name,
         ok: false,
-        error: error instanceof Error ? error.message : "provider_error",
+        error: error instanceof ProviderError ? error.code : "provider_error",
+        retryable: error instanceof ProviderError ? error.retryable : true,
         latencyMs: now() - started,
       });
     }

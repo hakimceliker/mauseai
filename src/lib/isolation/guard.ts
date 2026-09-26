@@ -1,4 +1,4 @@
-import { RateLimitStore } from "@/src/lib/middleware/rate-limit";
+import { createRateLimiter } from "@/src/lib/ratelimit/distributed";
 
 /**
  * Isolation gate (diagram card I): tenant boundary, RBAC, rate limits and
@@ -29,7 +29,10 @@ export type Permission =
   | "compliance.request"
   | "compliance.decide"
   | "tool.invoke.read"
-  | "tool.invoke.write";
+  | "tool.invoke.write"
+  | "notification.manage"
+  | "crm.sync"
+  | "config.read";
 
 const MEMBER: Permission[] = [
   "core.ask",
@@ -55,6 +58,9 @@ const ADMIN: Permission[] = [
   "risk.scan",
   "ops.read",
   "tool.invoke.write",
+  "notification.manage",
+  "crm.sync",
+  "config.read",
 ];
 const OWNER: Permission[] = [...ADMIN, "ownership.manage", "compliance.decide"];
 
@@ -91,23 +97,24 @@ export type GuardDecision =
   | { allowed: true }
   | { allowed: false; reason: "tenant_mismatch" | "forbidden" | "rate_limited" | "budget_exceeded" | "invalid_context"; status: 400 | 403 | 429 | 402 };
 
+/** Sync (tests, in-memory) or async (distributed store) limiter. */
 export interface RateLimiter {
-  isAllowed(key: string, limit: number): boolean;
+  isAllowed(key: string, limit: number): boolean | Promise<boolean>;
 }
 
 export const TENANT_REQUESTS_PER_MINUTE = 600;
 
 let defaultLimiter: RateLimiter | null = null;
 function getDefaultLimiter(): RateLimiter {
-  if (!defaultLimiter) defaultLimiter = new RateLimitStore();
+  if (!defaultLimiter) defaultLimiter = createRateLimiter();
   return defaultLimiter;
 }
 
-export function evaluateGuard(
+export async function evaluateGuard(
   ctx: GuardContext,
   request: GuardRequest,
   limiter: RateLimiter = getDefaultLimiter(),
-): GuardDecision {
+): Promise<GuardDecision> {
   if (!ctx.tenantId || !ctx.userId) return { allowed: false, reason: "invalid_context", status: 400 };
   if (request.resourceTenantId && request.resourceTenantId !== ctx.tenantId)
     return { allowed: false, reason: "tenant_mismatch", status: 403 };
@@ -116,7 +123,7 @@ export function evaluateGuard(
     const next = request.budget.spentCents + (request.estimatedCostCents ?? 0);
     if (next > request.budget.limitCents) return { allowed: false, reason: "budget_exceeded", status: 402 };
   }
-  if (!limiter.isAllowed(`tenant:${ctx.tenantId}`, TENANT_REQUESTS_PER_MINUTE))
+  if (!(await limiter.isAllowed(`tenant:${ctx.tenantId}`, TENANT_REQUESTS_PER_MINUTE)))
     return { allowed: false, reason: "rate_limited", status: 429 };
   return { allowed: true };
 }

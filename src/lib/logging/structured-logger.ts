@@ -4,6 +4,8 @@
  * No sensitive data (passwords, tokens, full IDs) is logged
  */
 
+import { redactText } from '../security/redact';
+
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 
 export interface LogContext {
@@ -100,7 +102,7 @@ export class StructuredLogger {
       entry.error = {
         type: error.constructor.name,
         message: this.sanitizeMessage(error.message),
-        stack: error.stack,
+        stack: error.stack ? redactText(error.stack) : undefined,
       };
     }
 
@@ -216,7 +218,8 @@ export class StructuredLogger {
       return String(message);
     }
 
-    let sanitized = message;
+    // Known secret env values and credential shapes first, then PII.
+    let sanitized = redactText(message);
 
     // Remove email addresses
     sanitized = sanitized.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]');

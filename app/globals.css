@@ -64,7 +64,7 @@ body {
 .diagram-scroll img { display: block; width: 100%; min-width: 900px; height: auto; }
 .diagram-scroll:focus-visible, .table-scroll:focus-visible, .node-button:focus-visible, .link-button:focus-visible { outline: 3px solid #35d0ba; outline-offset: 2px; }
 .explorer-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
-@media (max-width: 860px) { .explorer-grid { grid-template-columns: 1fr; } }
+@media (max-width: 859px) { .explorer-grid { grid-template-columns: 1fr; } }
 .lane h3 { font-size: 13px; letter-spacing: .04em; color: #aeb9df; margin: 16px 0 8px; }
 .lane ul, .edge-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .node-button { width: 100%; display: flex; justify-content: space-between; gap: 8px; align-items: center; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid #2a3560; background: #111a35; color: #fff; cursor: pointer; font: inherit; }
@@ -81,3 +81,35 @@ body {
 .status-implemented { background: #0f3d34; color: #6ff0cf; }
 .status-partial { background: #45380c; color: #ffd66b; }
 .status-requires_credentials { background: #3d1f2e; color: #ff9cc0; }
+
+/* A–Z diagram: phones and tablets, touch targets, motion and contrast */
+.diagram-page { --diagram-muted: #a3aecb; }
+.diagram-page .muted { color: var(--diagram-muted); }
+.skip-link { position: absolute; left: -9999px; top: 8px; padding: 10px 14px; border-radius: 8px; background: #7c5cff; color: #fff; z-index: 10; }
+.skip-link:focus { left: 16px; }
+.node-button, .link-button { min-height: 44px; }
+.link-button { display: inline-flex; align-items: center; padding: 0 4px; }
+.node-detail:focus-visible { outline: 3px solid #35d0ba; outline-offset: 2px; }
+.scroll-hint { display: none; font-size: 13px; margin: 8px 0 0; }
+.node-button > span:first-child { overflow-wrap: anywhere; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+@media (forced-colors: active) { .status { border: 1px solid CanvasText; } .node-button[aria-pressed="true"] { outline: 3px solid Highlight; } }
+/* Tablet: two lanes side by side above the detail panel. */
+@media (min-width: 600px) and (max-width: 859px) {
+  .lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+  .node-detail { position: static; }
+}
+/* Phone: single column, no sticky panel, tables become labelled cards. */
+@media (max-width: 599px) {
+  .shell.diagram-page { padding: 24px 16px; }
+  .diagram-summary dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .diagram-scroll { max-height: 60vh; }
+  .diagram-scroll img { min-width: 720px; }
+  .scroll-hint { display: block; }
+  .node-detail { position: static; padding: 12px; }
+  .stack-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .stack-table, .stack-table tbody, .stack-table tr, .stack-table th, .stack-table td { display: block; width: 100%; }
+  .stack-table tr { border: 1px solid #222b50; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+  .stack-table th, .stack-table td { border-bottom: 0; padding: 4px 0; }
+  .stack-table td[data-label]::before { content: attr(data-label) ": "; color: var(--diagram-muted); font-size: 12px; }
+}

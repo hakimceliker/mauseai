@@ -109,7 +109,7 @@ export async function ask(db: Db, admin: Db, input: AskInput, deps: CoreDeps = {
           mock: result.usage.mock,
           ok: true,
           latency_ms: result.usage.latencyMs,
-          tokens: result.usage.estimatedTokens,
+          tokens: result.usage.inputTokens + result.usage.outputTokens,
           cost_cents: result.usage.costCents,
           fallback_used: result.usage.fallbackUsed,
           outcome: result.status,
@@ -123,8 +123,8 @@ export async function ask(db: Db, admin: Db, input: AskInput, deps: CoreDeps = {
       tenant_id: input.tenantId,
       provider: result.usage.provider,
       cost_cents: result.usage.costCents,
-      input_tokens: result.usage.estimatedTokens,
-      output_tokens: 0,
+      input_tokens: result.usage.inputTokens,
+      output_tokens: result.usage.outputTokens,
     });
     if (cost.error) throw new Error("cost_record_failed");
     await db.from("channel_messages").insert({

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import {
   DIAGRAM_EDGES,
@@ -16,10 +16,14 @@ export const metadata: Metadata = {
   description: "Resmi A–Z diyagramı, erişilebilir gezgin ve kapsam matrisi",
 };
 
+// Explicit so the page scales on phones and tablets and users can still zoom.
+export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+
 export default function DiagramPage() {
   const summary = coverageSummary();
   return (
     <main className="shell diagram-page" lang="tr">
+      <a className="skip-link" href="#diagram-explorer-heading">Diyagram gezginine atla</a>
       <nav aria-label="Sayfa yolu" className="muted">
         <Link href="/">MouseAI</Link> / A–Z diyagramı
       </nav>
@@ -56,6 +60,7 @@ export default function DiagramPage() {
             aria-describedby="diagram-explorer-heading"
           />
         </div>
+        <p className="muted scroll-hint" aria-hidden="true">Görseli yatay kaydırın veya aşağıdaki gezgini kullanın.</p>
         <figcaption className="muted">
           Özgün dosya: <a href={DIAGRAM_PUBLIC_URL}>masuai-a-z-diyagram.svg</a> (değiştirilmeden sunulur). Kapsam JSON:{" "}
           <a href="/api/diagram">/api/diagram</a>

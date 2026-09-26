@@ -5,7 +5,7 @@
   "buildCommand": "npm run build",
   "functions": {
     "app/api/inngest/route.ts": { "maxDuration": 60 },
-    "app/api/core/ask/route.ts": { "maxDuration": 30 }
+    "app/api/core/ask/route.ts": { "maxDuration": 60 }
   },
   "headers": [
     {

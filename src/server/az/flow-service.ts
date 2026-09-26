@@ -114,13 +114,13 @@ export async function executeRun(admin: Db, tenantId: string, runId: string, dep
           mock: result.usage.mock,
           ok: true,
           latency_ms: result.usage.latencyMs,
-          tokens: result.usage.estimatedTokens,
+          tokens: result.usage.inputTokens + result.usage.outputTokens,
           cost_cents: result.usage.costCents,
           fallback_used: result.usage.fallbackUsed,
           outcome: result.status,
           question: input.question.slice(0, 2000),
         });
-        await admin.from("cost_events").insert({ tenant_id: tenantId, provider: result.usage.provider, cost_cents: result.usage.costCents, input_tokens: result.usage.estimatedTokens, output_tokens: 0 });
+        await admin.from("cost_events").insert({ tenant_id: tenantId, provider: result.usage.provider, cost_cents: result.usage.costCents, input_tokens: result.usage.inputTokens, output_tokens: result.usage.outputTokens });
         return explainResult(result);
       },
       requestApproval: async (config, stepId) => {

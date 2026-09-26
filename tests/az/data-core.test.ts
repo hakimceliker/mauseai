@@ -146,13 +146,13 @@ describe("CORE — retrieval, routing, prompt policy, memory", () => {
 
 describe("I — isolation", () => {
   const ctx = { tenantId: T1, userId: "u1", role: "member" };
-  it("enforces tenant boundary, RBAC, budget and rate limits with safe defaults", () => {
-    expect(evaluateGuard(ctx, { permission: "core.ask", resourceTenantId: "tenant-2" }, allow)).toMatchObject({ reason: "tenant_mismatch", status: 403 });
-    expect(evaluateGuard(ctx, { permission: "rollout.manage" }, allow)).toMatchObject({ reason: "forbidden", status: 403 });
-    expect(evaluateGuard(ctx, { permission: "core.ask", estimatedCostCents: 5, budget: { spentCents: 98, limitCents: 100 } }, allow)).toMatchObject({ reason: "budget_exceeded", status: 402 });
-    expect(evaluateGuard(ctx, { permission: "core.ask" }, { isAllowed: () => false })).toMatchObject({ reason: "rate_limited", status: 429 });
-    expect(evaluateGuard({ ...ctx, tenantId: "" }, { permission: "core.ask" }, allow)).toMatchObject({ reason: "invalid_context" });
-    expect(evaluateGuard(ctx, { permission: "core.ask" }, allow)).toEqual({ allowed: true });
+  it("enforces tenant boundary, RBAC, budget and rate limits with safe defaults", async () => {
+    expect(await evaluateGuard(ctx, { permission: "core.ask", resourceTenantId: "tenant-2" }, allow)).toMatchObject({ reason: "tenant_mismatch", status: 403 });
+    expect(await evaluateGuard(ctx, { permission: "rollout.manage" }, allow)).toMatchObject({ reason: "forbidden", status: 403 });
+    expect(await evaluateGuard(ctx, { permission: "core.ask", estimatedCostCents: 5, budget: { spentCents: 98, limitCents: 100 } }, allow)).toMatchObject({ reason: "budget_exceeded", status: 402 });
+    expect(await evaluateGuard(ctx, { permission: "core.ask" }, { isAllowed: () => false })).toMatchObject({ reason: "rate_limited", status: 429 });
+    expect(await evaluateGuard({ ...ctx, tenantId: "" }, { permission: "core.ask" }, allow)).toMatchObject({ reason: "invalid_context" });
+    expect(await evaluateGuard(ctx, { permission: "core.ask" }, allow)).toEqual({ allowed: true });
   });
 
   it("unknown roles get nothing; viewers cannot ask or write", () => {

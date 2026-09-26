@@ -21,6 +21,7 @@ class Query implements PromiseLike<Result> {
   private returning: string | null = null;
   private payload: Record<string, unknown>[] = [];
   private onConflict: string | undefined;
+  private ignoreDuplicates = false;
   private filters: Filter[] = [];
   private orders: string[] = [];
   private limitN: number | null = null;
@@ -41,10 +42,11 @@ class Query implements PromiseLike<Result> {
     this.payload = Array.isArray(values) ? values : [values];
     return this;
   }
-  upsert(values: Record<string, unknown> | Record<string, unknown>[], options: { onConflict?: string } = {}) {
+  upsert(values: Record<string, unknown> | Record<string, unknown>[], options: { onConflict?: string; ignoreDuplicates?: boolean } = {}) {
     this.op = "upsert";
     this.payload = Array.isArray(values) ? values : [values];
     this.onConflict = options.onConflict;
+    this.ignoreDuplicates = options.ignoreDuplicates ?? false;
     return this;
   }
   update(values: Record<string, unknown>) {
@@ -124,7 +126,7 @@ class Query implements PromiseLike<Result> {
       if (this.op === "upsert") {
         const target = (this.onConflict ?? "id").split(",").map((c) => ident(c.trim()));
         const updates = keys.filter((k) => !target.includes(ident(k))).map((k) => `${ident(k)} = EXCLUDED.${ident(k)}`);
-        sql += ` ON CONFLICT (${target.join(", ")}) ${updates.length ? `DO UPDATE SET ${updates.join(", ")}` : "DO NOTHING"}`;
+        sql += ` ON CONFLICT (${target.join(", ")}) ${updates.length && !this.ignoreDuplicates ? `DO UPDATE SET ${updates.join(", ")}` : "DO NOTHING"}`;
       }
       sql += ` RETURNING ${this.returning ? this.cols(this.returning) : "*"}`;
     } else if (this.op === "update") {

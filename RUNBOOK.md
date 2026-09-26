@@ -362,3 +362,12 @@ Bu bölüm `public/diagrams/masuai-a-z-diyagram.svg` içindeki **P — Pilot →
 4. **Geri dönüş:** `POST /api/rollouts/{id}` `{ "action": "rollback" }` sürümü `rolled_back` yapar ve herkes için kapatır; kayıtlı `rollback_plan` uygulanır, olay `risk_incidents` üzerinden takip edilir.
 5. **Sahiplik:** Onay ve SLA bildirimleri RACI tablosundaki sorumlu ekibe gider (`GET /api/ownership`). Onay SLA'sı aşılırsa Inngest `mouseai-approval-sla-sweep` (15 dakikada bir) eskalasyon bildirimi üretir.
 6. **Gözlem:** `GET /api/ops/slo` alarm ve kapasite planı, `GET /api/growth` sürüm ve elde tutma, `GET /api/kpi` KPI değerlerini döner.
+
+## A–Z Bildirim teslimi, oran limiti ve yapılandırma raporu
+
+- **Yapılandırma durumu:** `GET /api/ops/config` (owner/admin) eksik ayarları yalnızca adlarıyla listeler. Açılışta eksik kritik ayar varsa log `production_config_incomplete` içerir. Kurulum: `docs/deploy/PRODUCTION_SETUP.md`.
+- **Bildirim teslimi:** Inngest `mouseai-notification-dispatch` her dakika çalışır: son 15 dakikanın bildirimlerini rotalara göre planlar, zamanı gelen teslimatları gönderir. Durumlar: `pending`, `deferred` (sessiz saat), `sent`, `failed` (5 deneme sonrası, `audit_logs` → `notification.delivery_failed`), `channel_not_configured`.
+  - Takılı teslimatları görmek için: `SELECT status, count(*) FROM notification_deliveries GROUP BY status;`
+  - Kanal anahtarı sonradan eklendiyse `channel_not_configured` satırları kendiliğinden yeniden denenmez; yeni bildirimler normal akar. Gerekirse ilgili satırları `status='pending', attempts=0` yaparak yeniden kuyruğa alın.
+- **Oran limiti:** Upstash/KV erişilemezse limiter bellek içi sayaca düşer ve bir kez `rate_limit_store_unavailable` loglar. Bu durumda limitler instance başına sayılır; Upstash durumunu kontrol edin.
+- **AI hataları:** API yanıtlarında `ai_timeout`, `ai_rate_limited`, `ai_auth_failed`, `ai_unavailable`, `ai_refused` kodları görülür; `ai_auth_failed` anahtarın geçersiz olduğunu gösterir (değer loglanmaz).

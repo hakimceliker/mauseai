@@ -540,19 +540,32 @@ Supabase Realtime is already integrated and working. It uses:
 
 ---
 
-### Optional A–Z Channels and Ingestion (diagram cards C, G, N, O)
+### A–Z real adapters (diagram cards C, G, I, N, O, CORE)
 
-These variables unlock A–Z features that are reported as unavailable until they are set. Nothing is faked when they are missing: `GET /api/channels` shows `requires_credentials`, publishing returns `channel_not_configured`, and notifications are stored with `skipped_channel_not_configured`.
+Nothing is faked when a setting is missing. Production (`NODE_ENV=production`, which includes Vercel preview builds) never falls back to mocks; development and tests may. `GET /api/ops/config` (owner/admin) and the startup log (`production_config_incomplete`) list missing settings by **name only**. Full setup, including Vercel domain/DNS/SSL: [`docs/deploy/PRODUCTION_SETUP.md`](docs/deploy/PRODUCTION_SETUP.md).
 
-| Variable | Card | Effect when missing |
+| Variable(s) | Card | Effect when missing |
 |---|---|---|
-| `INGEST_WEBHOOK_SECRET` | G | `POST /api/ingest/webhook/{sourceId}` answers 503 `secret_not_configured` |
-| `EMAIL_PROVIDER_KEY` | C, N, O | e-posta kanalı `requires_credentials` |
-| `SLACK_WEBHOOK_URL`, `SLACK_SIGNING_SECRET` | C, N, O | Slack kanalı `requires_credentials` |
-| `TEAMS_WEBHOOK_URL` | C, N, O | Teams kanalı `requires_credentials` |
-| `CRM_API_KEY` | C, O | CRM kanalı `requires_credentials` |
+| `OPENAI_API_KEY` and/or `ANTHROPIC_API_KEY` | CORE, M | production: `503 ai_provider_not_configured`; dev/test: mock providers (`mock: true`) |
+| `UPSTASH_REDIS_REST_URL` + `_TOKEN` or `KV_REST_API_URL` + `_TOKEN` | I | in-memory counting per instance; critical check fails in production unless `RATE_LIMIT_BACKEND=memory` |
+| `EMAIL_PROVIDER_KEY` + `EMAIL_FROM` | C, N | e-mail deliveries recorded as `channel_not_configured` |
+| `SLACK_WEBHOOK_URL` / `TEAMS_WEBHOOK_URL` | C, N | Slack/Teams deliveries recorded as `channel_not_configured` |
+| `SLACK_SIGNING_SECRET` | C, O | `POST /api/channels/slack/events` answers `503 channel_not_configured` |
+| `TEAMS_OUTGOING_WEBHOOK_SECRET` | C, O | `POST /api/channels/teams/messages` answers `503 channel_not_configured` |
+| `CRM_API_KEY` | C | `POST /api/crm/contacts` answers `503 crm_not_configured` |
+| `INGEST_WEBHOOK_SECRET` | G | `POST /api/ingest/webhook/{sourceId}` answers `503 secret_not_configured` |
 
-The AI core runs on the mock GPT/Claude providers only; every answer carries `mock: true`. Real model keys are a separate, later step.
+**AI.** Official SDKs (`openai`, `@anthropic-ai/sdk`) with per-request timeout (`AI_TIMEOUT_MS`, default 25 s) and SDK retries (`AI_MAX_RETRIES`, default 1) on 408/409/429/5xx. OpenAI serves the standard tier, Anthropic the careful tier; if one fails the router falls back to the other. Anthropic calls enable the server-side refusal fallback beta (`server-side-fallback-2026-07-01`); set `ANTHROPIC_REFUSAL_FALLBACK=off` to disable it. Costs use real token usage; OpenAI prices are estimates until `OPENAI_PRICE_*_CENTS_PER_1M` is set (the config report flags this).
+
+**Rate limit.** Fixed window per tenant (600 requests/minute) counted with `INCR` + `PEXPIRE` over the Upstash/KV REST pipeline, shared by every instance. If the store is unreachable the limiter degrades to an in-memory counter (it never fails open) and logs `rate_limit_store_unavailable` once.
+
+**Notifications ("doğru kişiye, doğru zamanda").** Admins add routes with `POST /api/notifications/routes` (team, channel, destination, minimum priority, quiet hours, time zone). The Inngest cron `mouseai-notification-dispatch` (every minute) plans deliveries for the notification's RACI teams, defers non-urgent messages until quiet hours end in the route's time zone (urgent, and high-priority alert/SLA messages, go out immediately), sends with retries/backoff and marks a delivery `failed` after 5 attempts (audited as `notification.delivery_failed`). `GET /api/notifications/deliveries?notificationId=…` shows the state.
+
+**Inbound Slack/Teams.** Requests are signature-verified (Slack v0 HMAC with a 5-minute replay window; Teams `Authorization: HMAC`). The tenant and user come only from a linked `channel_identities` row; unknown or ambiguous identities are refused. Messages join the user's single context; answers are shown in the web/API channel (a bot token for in-channel replies is not part of this release).
+
+**CRM.** HubSpot private app token. Contacts are upserted by e-mail, notes are associated to the contact, mappings are kept per tenant in `crm_sync_records` (RLS), and every attempt is audited with the e-mail domain only. With `CRM_TENANT_PROPERTY` set, contacts are stamped with the tenant id and a contact owned by another tenant is refused with `409 crm_record_owned_by_other_tenant`.
+
+---
 
 ## Testing Integrations
 

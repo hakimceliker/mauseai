@@ -1,8 +1,9 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { signWebhook } from "@/src/lib/ingestion/ingestion";
+import { slackSignature, teamsSignature } from "@/src/lib/channels/signatures";
 import { createMigratedDb } from "../db/harness";
 import { seedTenant, type TenantFixture } from "../db/fixtures";
 import { asClient } from "../db/pg-client";
@@ -37,7 +38,8 @@ vi.mock("@/src/inngest/client", () => ({
 }));
 
 const API = path.resolve(__dirname, "../../app/api");
-const OPEN_ROUTES = new Set(["diagram", "health", "inngest", "ingest/webhook/[sourceId]"]);
+// Signature-authenticated webhooks and public endpoints; each has its own tests below.
+const OPEN_ROUTES = new Set(["diagram", "health", "inngest", "ingest/webhook/[sourceId]", "channels/slack/events", "channels/teams/messages"]);
 const LEGACY = (rel: string) => rel.startsWith("tasks");
 
 function routeFiles(dir = API, rel = ""): string[] {
@@ -213,5 +215,100 @@ describe("A–Z API route contracts", () => {
     expect((res.body.nodes as unknown[]).length).toBe(23);
     expect((res.body.edges as unknown[]).length).toBe(21);
     expect((res.body.summary as { unmapped: string[] }).unmapped).toEqual([]);
+  });
+
+  describe("channels, delivery routes, CRM and config (0005)", () => {
+    afterEach(() => vi.unstubAllEnvs());
+    const SLACK_SECRET = "slack-signing-secret-test";
+    const TEAMS_SECRET = Buffer.from("teams-hmac-secret-test").toString("base64");
+    const slackHeaders = (raw: string, ts = String(Math.floor(Date.now() / 1000))) => ({
+      "x-slack-request-timestamp": ts,
+      "x-slack-signature": slackSignature(SLACK_SECRET, ts, raw),
+    });
+
+    it("Slack events: 503 without a secret, 401 on a bad signature, answers the URL challenge", async () => {
+      vi.stubEnv("SLACK_SIGNING_SECRET", "");
+      const challenge = JSON.stringify({ type: "url_verification", challenge: "abc123" });
+      expect(await call("channels/slack/events", "POST", { raw: challenge })).toMatchObject({ status: 503, body: { error: "channel_not_configured" } });
+      vi.stubEnv("SLACK_SIGNING_SECRET", SLACK_SECRET);
+      const bad = await call("channels/slack/events", "POST", { raw: challenge, headers: { ...slackHeaders(challenge), "x-slack-signature": "v0=00" } });
+      expect(bad).toMatchObject({ status: 401, body: { error: "invalid_signature" } });
+      const stale = await call("channels/slack/events", "POST", { raw: challenge, headers: slackHeaders(challenge, "1000") });
+      expect(stale).toMatchObject({ status: 401, body: { error: "stale_timestamp" } });
+      expect(await call("channels/slack/events", "POST", { raw: challenge, headers: slackHeaders(challenge) })).toMatchObject({ status: 200, body: { challenge: "abc123" } });
+    });
+
+    it("Slack events: a verified message from a linked user joins that user's context; bots are ignored", async () => {
+      vi.stubEnv("SLACK_SIGNING_SECRET", SLACK_SECRET);
+      await state.db.query("INSERT INTO channel_identities (tenant_id, user_id, channel, external_user_id) VALUES ($1, $2, 'slack', 'U-HTTP')", [t.tenantId, t.memberId]);
+      const raw = JSON.stringify({ type: "event_callback", event: { type: "message", user: "U-HTTP", text: "Açık onaylar neler?" } });
+      expect(await call("channels/slack/events", "POST", { raw, headers: slackHeaders(raw) })).toMatchObject({ status: 200, body: { ok: true, status: "recorded" } });
+      const bot = JSON.stringify({ type: "event_callback", event: { type: "message", user: "U-HTTP", text: "echo", bot_id: "B1" } });
+      expect(await call("channels/slack/events", "POST", { raw: bot, headers: slackHeaders(bot) })).toMatchObject({ status: 200, body: { ignored: true } });
+      const rows = await state.db.query("SELECT 1 FROM channel_messages WHERE tenant_id = $1 AND channel = 'slack' AND user_id = $2", [t.tenantId, t.memberId]);
+      expect(rows.rows).toHaveLength(1);
+    });
+
+    it("Teams messages: 503 without a secret, 401 on a bad HMAC, replies to verified messages", async () => {
+      const raw = JSON.stringify({ type: "message", text: "<at>MouseAI</at> merhaba", from: { aadObjectId: "AAD-UNLINKED" } });
+      vi.stubEnv("TEAMS_OUTGOING_WEBHOOK_SECRET", "");
+      expect(await call("channels/teams/messages", "POST", { raw })).toMatchObject({ status: 503, body: { error: "channel_not_configured" } });
+      vi.stubEnv("TEAMS_OUTGOING_WEBHOOK_SECRET", TEAMS_SECRET);
+      expect(await call("channels/teams/messages", "POST", { raw, headers: { authorization: "HMAC AAAA" } })).toMatchObject({ status: 401 });
+      const ok = await call("channels/teams/messages", "POST", { raw, headers: { authorization: teamsSignature(TEAMS_SECRET, raw) } });
+      expect(ok).toMatchObject({ status: 200, body: { type: "message", text: "Bu Teams hesabı bir MouseAI kullanıcısına bağlı değil." } });
+    });
+
+    it("notification routes: admins create (201, reporting missing env), members are forbidden, bad input is 400, duplicates 409", async () => {
+      vi.stubEnv("SLACK_WEBHOOK_URL", "");
+      state.user = t.memberId;
+      const route = { team: "engineering", channel: "slack", destination: "#http", quietStartHour: 22, quietEndHour: 8 };
+      expect(await call("notifications/routes", "POST", { body: route })).toMatchObject({ status: 403, body: { error: "forbidden" } });
+      state.user = t.ownerId;
+      const created = await call("notifications/routes", "POST", { body: route });
+      expect(created).toMatchObject({ status: 201, body: { channelConfigured: false, missingEnv: ["SLACK_WEBHOOK_URL"] } });
+      expect(await call("notifications/routes", "POST", { body: route })).toMatchObject({ status: 409, body: { error: "route_exists" } });
+      expect((await call("notifications/routes", "POST", { body: { ...route, channel: "email", destination: "not-an-email" } })).status).toBe(400);
+      expect((await call("notifications/routes", "POST", { body: { ...route, destination: "#tz", timezone: "Mars/Olympus" } })).status).toBe(400);
+      expect((await call("notifications/routes", "POST", { body: { ...route, destination: "#half", quietEndHour: null } })).status).toBe(400);
+      state.user = other.ownerId;
+      const list = await call("notifications/routes", "GET");
+      expect((list.body.routes as Array<{ destination: string }>).some((r) => r.destination === "#http")).toBe(false);
+      expect((await call("notifications/deliveries", "GET", { query: "?notificationId=nope" })).status).toBe(400);
+    });
+
+    it("CRM: 503 crm_not_configured without CRM_API_KEY, 403 for members", async () => {
+      vi.stubEnv("CRM_API_KEY", "");
+      state.user = t.memberId;
+      expect(await call("crm/contacts", "POST", { body: { contact: { email: "a@example.com" } } })).toMatchObject({ status: 403 });
+      state.user = t.ownerId;
+      expect(await call("crm/contacts", "POST", { body: { contact: { email: "a@example.com" } } })).toMatchObject({
+        status: 503,
+        body: { error: "crm_not_configured", missing: ["CRM_API_KEY"] },
+      });
+      expect((await call("crm/contacts", "POST", { body: { contact: { email: "bad" } } })).status).toBe(400);
+    });
+
+    it("ops config: admins see names and flags only, members are forbidden", async () => {
+      vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-value-never-returned");
+      state.user = t.memberId;
+      expect((await call("ops/config", "GET")).status).toBe(403);
+      state.user = t.ownerId;
+      const res = await call("ops/config", "GET");
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.checks)).toBe(true);
+      expect(JSON.stringify(res.body)).not.toContain("service-role-value-never-returned");
+    });
+
+    it("CORE in production without AI keys fails closed with 503 ai_provider_not_configured (no mock)", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("VITEST", "");
+      vi.stubEnv("OPENAI_API_KEY", "");
+      vi.stubEnv("ANTHROPIC_API_KEY", "");
+      state.user = t.ownerId;
+      const res = await call("core/ask", "POST", { body: { question: "İade süresi nedir?" } });
+      expect(res).toMatchObject({ status: 503, body: { error: "ai_provider_not_configured" } });
+      expect(res.body.missing).toEqual(["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]);
+    });
   });
 });

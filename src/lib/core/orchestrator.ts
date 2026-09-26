@@ -40,7 +40,18 @@ export type CoreResult =
   | {
       status: "answered" | "escalated";
       quality: QualityAssessment;
-      usage: { provider: string; mock: boolean; fallbackUsed: boolean; estimatedTokens: number; costCents: number; latencyMs: number };
+      usage: {
+        provider: string;
+        model: string | null;
+        mock: boolean;
+        fallbackUsed: boolean;
+        estimatedTokens: number;
+        /** Provider-reported tokens when available, else the estimate. */
+        inputTokens: number;
+        outputTokens: number;
+        costCents: number;
+        latencyMs: number;
+      };
       trace: TraceStep[];
     };
 
@@ -74,7 +85,7 @@ export async function runCore(request: CoreRequest, deps: CoreDeps = {}): Promis
   trace.push({ stage: "decision", detail: { ...route, estimatedTokens, estimatedCostCents } });
 
   // CORE → I: the decision is checked against tenant, RBAC, rate and budget limits.
-  const guard = evaluateGuard(request.ctx, { permission: "core.ask", estimatedCostCents, budget: request.budget }, deps.limiter);
+  const guard = await evaluateGuard(request.ctx, { permission: "core.ask", estimatedCostCents, budget: request.budget }, deps.limiter);
   trace.push({ stage: "isolation", detail: guard.allowed ? { allowed: true } : { allowed: false, reason: guard.reason } });
   if (!guard.allowed) return { status: "denied", guard, trace };
 
@@ -92,11 +103,26 @@ export async function runCore(request: CoreRequest, deps: CoreDeps = {}): Promis
   trace.push({ stage: "quality", detail: { passed: quality.passed, escalate: quality.escalate, reasons: quality.reasons, confidence: quality.answer.confidence } });
 
   const entry = providers.find((p) => p.provider.name === response.provider)!;
-  const costCents = Math.max(1, Math.ceil((entry.centsPer1kTokens * estimatedTokens) / 1000));
+  const inputTokens = response.usage?.inputTokens ?? estimatedTokens;
+  const outputTokens = response.usage?.outputTokens ?? 0;
+  const costCents =
+    response.usage && entry.costFor
+      ? entry.costFor(response.usage)
+      : Math.max(1, Math.ceil((entry.centsPer1kTokens * estimatedTokens) / 1000));
   return {
     status: quality.escalate ? "escalated" : "answered",
     quality,
-    usage: { provider: response.provider, mock: response.mock, fallbackUsed: response.fallbackUsed, estimatedTokens, costCents, latencyMs },
+    usage: {
+      provider: response.provider,
+      model: response.model ?? entry.model ?? null,
+      mock: response.mock,
+      fallbackUsed: response.fallbackUsed,
+      estimatedTokens,
+      inputTokens,
+      outputTokens,
+      costCents,
+      latencyMs,
+    },
     trace,
   };
 }

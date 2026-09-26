@@ -25,7 +25,7 @@ export const CHANNELS: ChannelDefinition[] = [
   { id: "web", label: "Web uygulaması", direction: ["inbound", "outbound"], requiredEnv: [] },
   { id: "api", label: "REST API", direction: ["inbound", "outbound"], requiredEnv: [] },
   { id: "mobile", label: "Mobil uygulama", direction: ["inbound", "outbound"], requiredEnv: [], planned: true },
-  { id: "email", label: "E-posta", direction: ["inbound", "outbound"], requiredEnv: ["EMAIL_PROVIDER_KEY"] },
+  { id: "email", label: "E-posta", direction: ["outbound"], requiredEnv: ["EMAIL_PROVIDER_KEY", "EMAIL_FROM"] },
   { id: "slack", label: "Slack", direction: ["inbound", "outbound"], requiredEnv: ["SLACK_WEBHOOK_URL", "SLACK_SIGNING_SECRET"] },
   { id: "teams", label: "Microsoft Teams", direction: ["inbound", "outbound"], requiredEnv: ["TEAMS_WEBHOOK_URL"] },
   { id: "crm", label: "CRM", direction: ["inbound", "outbound"], requiredEnv: ["CRM_API_KEY"] },

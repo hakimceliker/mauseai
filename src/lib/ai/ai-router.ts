@@ -1,29 +1,31 @@
+import { ConfigurationError, mocksAllowed, type Env } from '@/src/lib/config/runtime';
 import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
 import { MockClaudeProvider } from './providers/mock-claude';
+import { realProviders } from './provider-registry';
 
 /**
- * AI Router - selects appropriate provider based on environment configuration
- * Supports: gpt, claude, mock (default)
+ * AI Router - selects a provider from environment configuration.
+ *
+ * AI_PROVIDER=gpt|openai prefers OpenAI, claude|anthropic prefers Anthropic.
+ * A real adapter is used whenever its key is configured. Mock providers are
+ * only returned in test/development; in production a missing key raises
+ * ConfigurationError("ai_provider_not_configured").
  */
 export class AIRouter {
   private provider: AIProvider;
 
-  constructor() {
-    const aiProvider = process.env.AI_PROVIDER || 'mock';
-
-    switch (aiProvider) {
-      case 'gpt':
-        this.provider = new MockGPTProvider();
-        break;
-      case 'claude':
-        this.provider = new MockClaudeProvider();
-        break;
-      case 'mock':
-      default:
-        // Default to GPT mock for 'mock' provider
-        this.provider = new MockGPTProvider();
-        break;
+  constructor(env: Env = process.env) {
+    const preference = (env.AI_PROVIDER || 'mock').toLowerCase();
+    const wantsClaude = preference === 'claude' || preference === 'anthropic';
+    const real = preference === 'mock' && mocksAllowed(env) ? [] : realProviders(env);
+    const preferred = real.find((p) => (wantsClaude ? p.tier === 'careful' : p.tier === 'standard')) ?? real[0];
+    if (preferred) {
+      this.provider = preferred.provider;
+    } else if (mocksAllowed(env)) {
+      this.provider = wantsClaude ? new MockClaudeProvider() : new MockGPTProvider();
+    } else {
+      throw new ConfigurationError('ai_provider_not_configured', ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']);
     }
   }
 

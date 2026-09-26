@@ -31,6 +31,7 @@ function StatusBadge({ status }: { status: CoverageStatus }) {
 export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props) {
   const [selected, setSelected] = useState<string>("CORE");
   const buttons = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const detail = useRef<HTMLElement>(null);
   const order = useMemo(() => lanes.flatMap((l) => nodes.filter((n) => n.lane === l.id).map((n) => n.id)), [lanes, nodes]);
 
   const node = nodes.find((n) => n.id === selected);
@@ -41,6 +42,14 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
   const focusNode = (id: string) => {
     setSelected(id);
     buttons.current.get(id)?.focus();
+  };
+
+  // On phones and tablets the detail panel sits below the card list: bring it into view after a tap.
+  const selectAndReveal = (id: string) => {
+    setSelected(id);
+    if (typeof window === "undefined" || !window.matchMedia?.("(max-width: 859px)").matches) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => detail.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" }));
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, id: string) => {
@@ -86,7 +95,7 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
                           aria-pressed={selected === n.id}
                           aria-controls="node-detail"
                           tabIndex={selected === n.id ? 0 : -1}
-                          onClick={() => setSelected(n.id)}
+                          onClick={() => selectAndReveal(n.id)}
                           onKeyDown={(e) => onKeyDown(e, n.id)}
                         >
                           <span>{n.title}</span>
@@ -100,11 +109,12 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
           ))}
         </div>
 
-        <article id="node-detail" className="node-detail" aria-live="polite">
+        <article id="node-detail" ref={detail} className="node-detail" aria-live="polite" aria-labelledby="node-detail-title" tabIndex={-1}>
           {node ? (
             <>
-              <h3>{node.title}</h3>
-              <table>
+              <h3 id="node-detail-title">{node.title}</h3>
+              <div className="table-scroll" tabIndex={0} role="region" aria-label={`${node.title} yetenek tablosu`}>
+              <table className="stack-table">
                 <caption className="sr-only">{node.title} yetenekleri ve kapsam durumu</caption>
                 <thead>
                   <tr>
@@ -120,12 +130,13 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
                         {c.capability}
                         {c.note ? <small className="muted note">{c.note}</small> : null}
                       </th>
-                      <td><StatusBadge status={c.status} /></td>
-                      <td><code>{c.code[0]}</code>{c.code.length > 1 ? <small className="muted"> +{c.code.length - 1}</small> : null}</td>
+                      <td data-label="Durum"><StatusBadge status={c.status} /></td>
+                      <td data-label="Kod"><code>{c.code[0]}</code>{c.code.length > 1 ? <small className="muted"> +{c.code.length - 1}</small> : null}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              </div>
               <h4>Bağlantılar</h4>
               <ul className="edge-list">
                 {[...incoming, ...outgoing].map((e) => {
@@ -148,9 +159,9 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
         </article>
       </div>
 
-      <h3>Tüm bağlantılar ({edges.length})</h3>
+      <h3 id="all-edges-heading">Tüm bağlantılar ({edges.length})</h3>
       <div className="table-scroll" tabIndex={0} role="region" aria-label="Bağlantı tablosu">
-        <table>
+        <table className="stack-table">
           <thead>
             <tr>
               <th scope="col">Kenar</th>
@@ -165,9 +176,9 @@ export default function DiagramExplorer({ lanes, nodes, edges, coverage }: Props
               return (
                 <tr key={e.id}>
                   <th scope="row">{e.from} → {e.to}</th>
-                  <td>{e.kind === "sync" ? "Düz (senkron)" : "Kesikli (asenkron)"}</td>
-                  <td>{e.label}</td>
-                  <td>{cov ? <StatusBadge status={cov.status} /> : "eşleşmedi"}</td>
+                  <td data-label="Tür">{e.kind === "sync" ? "Düz (senkron)" : "Kesikli (asenkron)"}</td>
+                  <td data-label="Anlam">{e.label}</td>
+                  <td data-label="Durum">{cov ? <StatusBadge status={cov.status} /> : "eşleşmedi"}</td>
                 </tr>
               );
             })}

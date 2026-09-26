@@ -14,7 +14,7 @@ import {
   getLatestCheckpoint,
   saveCheckpoint,
 } from "@/src/server/services/checkpoint.service";
-import { routeMockAI } from "@/src/lib/ai/mock-router";
+import { routeTaskAI } from "@/src/lib/ai/task-ai";
 import { recordCost } from "@/src/server/services/cost-service";
 import { writeAudit } from "@/src/server/services/audit-service";
 
@@ -117,7 +117,7 @@ export const taskWorker = inngest.createFunction(
 
     try {
       const aiResult = await step.run(`ai-${taskId}:${stepId}:1`, async () =>
-        routeMockAI({ taskId, goal: task.goal, riskLevel: task.risk_level }),
+        routeTaskAI({ taskId, goal: task.goal, riskLevel: task.risk_level }),
       );
       const aiData = aiResult as AIResult;
       await step.run(`cost-${taskId}:${stepId}:1`, async () =>

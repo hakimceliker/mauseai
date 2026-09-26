@@ -96,6 +96,8 @@ vercel --prod
 | `OPENAI_API_KEY` | (optional) OpenAI API key | `sk-...` |
 | `ANTHROPIC_API_KEY` | (optional) Anthropic API key | `sk-ant-...` |
 
+> A–Z real adapters (AI, distributed rate limit, e-mail/Slack/Teams, CRM) add more variables, and production never uses mock providers. The complete list, the Vercel domain/DNS/SSL steps and the go-live verification are in [`docs/deploy/PRODUCTION_SETUP.md`](docs/deploy/PRODUCTION_SETUP.md).
+
 ## Post-Deployment
 
 ### Monitor Deployment

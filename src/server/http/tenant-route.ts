@@ -4,6 +4,10 @@ import { getSupabaseServerClient } from "@/src/lib/supabase/server";
 import { getTenantContext } from "@/src/server/auth/tenant-context";
 import { evaluateGuard, type Permission, type Role } from "@/src/lib/isolation/guard";
 import { ServiceError } from "@/src/server/az/records";
+import { ConfigurationError } from "@/src/lib/config/runtime";
+import { ProviderError } from "@/src/lib/ai/providers/provider-error";
+import { StructuredLogger } from "@/src/lib/logging/structured-logger";
+import { safeErrorMessage } from "@/src/lib/security/redact";
 
 /**
  * Shared request pipeline for the A–Z routes, mirroring the served task routes:
@@ -68,12 +72,17 @@ export async function withTenant(
     if (!user) return json({ error: "unauthorized" }, 401);
     const tenant = await getTenantContext(client, user.id);
     if (!tenant) return json({ error: "tenant_context_required" }, 403);
-    const decision = evaluateGuard({ tenantId: tenant.tenantId, userId: user.id, role: tenant.role }, { permission });
+    const decision = await evaluateGuard({ tenantId: tenant.tenantId, userId: user.id, role: tenant.role }, { permission });
     if (!decision.allowed) return json({ error: decision.reason }, decision.status);
     return await handler({ client, tenantId: tenant.tenantId, userId: user.id, role: tenant.role as Role });
   } catch (error) {
     if (error instanceof HttpError) return json({ error: error.code, ...(error.details ? { details: error.details } : {}) }, error.status);
     if (error instanceof ServiceError) return json({ error: error.code }, error.status);
+    // Missing adapter configuration: env var names are safe to return, values never are.
+    if (error instanceof ConfigurationError) return json({ error: error.code, missing: error.missingEnv }, 503);
+    if (error instanceof ProviderError) return json({ error: `ai_${error.code}` }, error.retryable ? 503 : 502);
+    if (error instanceof Error && error.message === "all_providers_failed") return json({ error: "ai_unavailable" }, 503);
+    StructuredLogger.error("tenant_route_failed", { permission }, error instanceof Error ? new Error(safeErrorMessage(error)) : undefined);
     return json({ error: "internal_error" }, 500);
   }
 }

@@ -12,6 +12,10 @@ export interface AIResponse {
   provider: string;
   tokens_used?: number;
   cost?: number;
+  /** Model id that produced the answer (real providers only). */
+  model?: string;
+  /** Token usage reported by the provider (real providers only). */
+  usage?: { inputTokens: number; outputTokens: number };
 }
 
 export interface AIProvider {

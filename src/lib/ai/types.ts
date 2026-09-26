@@ -1,4 +1,4 @@
-export type AIProviderName = "mock-gpt" | "mock-claude";
+export type AIProviderName = "mock-gpt" | "mock-claude" | "openai" | "anthropic";
 
 export type AIRequest = {
   taskId: string;
@@ -7,7 +7,7 @@ export type AIRequest = {
 };
 
 export type AIResult = {
-  provider: AIProviderName;
+  provider: AIProviderName | string;
   output: Record<string, unknown>;
   inputTokens: number;
   outputTokens: number;

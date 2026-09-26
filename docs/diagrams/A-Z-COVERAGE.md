@@ -4,7 +4,7 @@
 
 Kaynak: `public/diagrams/masuai-a-z-diyagram.svg` · Kart: 23 (eşlenen 23) · Bağlantı: 21 (eşlenen 21) · Yetenek: 117
 
-Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen kart: yok
+Durum: implemented 130 · partial 1 · requires_credentials 7 · eşleşmeyen kart: yok
 
 ## Kartlar
 
@@ -31,11 +31,11 @@ Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen ka
 | # | Yetenek | Durum | Kod | Test | Not |
 |---|---|---|---|---|---|
 | C#1 | Web | implemented | `src/lib/channels/channels.ts`<br>`app/api/channels/inbound/route.ts` | `tests/az/strategy.test.ts`<br>`tests/db/az-services.test.ts` |  |
-| C#2 | Mobil | partial | `src/lib/channels/channels.ts` | `tests/az/strategy.test.ts` | Kanal 'planned' olarak raporlanır; mobil istemci yok, API kanalı üzerinden erişilebilir. |
+| C#2 | Mobil | partial | `src/lib/channels/channels.ts`<br>`app/diagram/diagram-explorer.tsx`<br>`app/globals.css` | `tests/az/strategy.test.ts`<br>`tests/ui/diagram-ui.test.tsx` | Web arayüzü telefon ve tablette çalışır (duyarlı, dokunmatik hedefler); yerel mobil istemci yok, kanal 'planned'. |
 | C#3 | API | implemented | `src/lib/channels/channels.ts`<br>`app/api/channels/inbound/route.ts` | `tests/az/strategy.test.ts`<br>`tests/db/az-services.test.ts` |  |
-| C#4 | E-posta | requires_credentials | `src/lib/channels/channels.ts` | `tests/az/strategy.test.ts` | EMAIL_PROVIDER_KEY tanımlanana kadar 'requires_credentials'. |
-| C#5 | Slack/Teams | requires_credentials | `src/lib/channels/channels.ts` | `tests/az/strategy.test.ts` | SLACK_WEBHOOK_URL + SLACK_SIGNING_SECRET / TEAMS_WEBHOOK_URL gerekir. |
-| C#6 | CRM yüzeyleri | requires_credentials | `src/lib/channels/channels.ts` | `tests/az/strategy.test.ts` | CRM_API_KEY gerekir. |
+| C#4 | E-posta | requires_credentials | `src/lib/notifications/senders.ts`<br>`src/server/az/notification-dispatch.ts`<br>`supabase/migrations/0005_delivery_and_crm.sql`<br>`src/lib/channels/channels.ts` | `tests/integrations/notifications.test.ts`<br>`tests/db/az-delivery-crm.test.ts` | Resend adapter'ı, retry ve teslim kaydı hazır; EMAIL_PROVIDER_KEY + EMAIL_FROM olmadan teslimat channel_not_configured. |
+| C#5 | Slack/Teams | requires_credentials | `src/lib/notifications/senders.ts`<br>`src/server/az/notification-dispatch.ts`<br>`supabase/migrations/0005_delivery_and_crm.sql`<br>`src/lib/channels/signatures.ts`<br>`app/api/channels/slack/events/route.ts`<br>`app/api/channels/teams/messages/route.ts` | `tests/integrations/notifications.test.ts`<br>`tests/db/az-delivery-crm.test.ts`<br>`tests/api/az-routes.test.ts` | Webhook gönderimi ve imza doğrulaması hazır; SLACK_WEBHOOK_URL, SLACK_SIGNING_SECRET, TEAMS_WEBHOOK_URL, TEAMS_OUTGOING_WEBHOOK_SECRET gerekir. |
+| C#6 | CRM yüzeyleri | requires_credentials | `src/lib/crm/crm-adapter.ts`<br>`src/server/az/crm-service.ts`<br>`app/api/crm/contacts/route.ts`<br>`supabase/migrations/0005_delivery_and_crm.sql` | `tests/integrations/crm.test.ts`<br>`tests/db/az-delivery-crm.test.ts`<br>`tests/api/az-routes.test.ts` | HubSpot adapter'ı (tenant izolasyonu, timeout/retry, audit) hazır; CRM_API_KEY olmadan 503 crm_not_configured. |
 
 ### D — Domain Bilgisi
 
@@ -92,7 +92,7 @@ Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen ka
 
 | # | Yetenek | Durum | Kod | Test | Not |
 |---|---|---|---|---|---|
-| CORE#1 | Model yönlendirme | partial | `src/lib/core/model-routing.ts` | `tests/az/data-core.test.ts` | Yalnızca mock GPT/Claude sağlayıcıları; gerçek sağlayıcı anahtarı gerekir. |
+| CORE#1 | Model yönlendirme | requires_credentials | `src/lib/ai/provider-registry.ts`<br>`src/lib/ai/providers/openai.ts`<br>`src/lib/ai/providers/anthropic.ts`<br>`src/lib/core/model-routing.ts` | `tests/integrations/ai-providers.test.ts`<br>`tests/az/data-core.test.ts`<br>`tests/api/az-routes.test.ts` | OpenAI ve Anthropic adapter'ları (resmi SDK, timeout/retry) hazır; production'da anahtar yoksa 503 ai_provider_not_configured, mock yalnızca test/development. |
 | CORE#2 | RAG | implemented | `src/lib/core/retrieval.ts`<br>`src/server/az/core-service.ts` | `tests/az/data-core.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | CORE#3 | Araç çağrısı | implemented | `src/lib/core/tools.ts`<br>`app/api/tools/[name]/route.ts` | `tests/az/data-core.test.ts`<br>`tests/api/az-routes.test.ts` |  |
 | CORE#4 | Prompt politikası | implemented | `src/lib/core/prompt-policy.ts` | `tests/az/data-core.test.ts` |  |
@@ -106,7 +106,7 @@ Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen ka
 |---|---|---|---|---|---|
 | I#1 | Tenant sınırları | implemented | `src/lib/isolation/guard.ts`<br>`supabase/migrations/0003_schema_reconciliation.sql`<br>`supabase/migrations/0004_a_z_platform.sql` | `tests/az/data-core.test.ts`<br>`tests/db/az-rls.test.ts` |  |
 | I#2 | RBAC | implemented | `src/lib/isolation/guard.ts`<br>`src/server/http/tenant-route.ts` | `tests/az/data-core.test.ts`<br>`tests/api/az-routes.test.ts` |  |
-| I#3 | Oran limitleri | partial | `src/lib/isolation/guard.ts` | `tests/az/data-core.test.ts` | Bellek içi sayaç (instance başına); dağıtık limit için Redis/KV gerekir. |
+| I#3 | Oran limitleri | requires_credentials | `src/lib/isolation/guard.ts`<br>`src/lib/ratelimit/distributed.ts` | `tests/integrations/rate-limit.test.ts`<br>`tests/az/data-core.test.ts` | Upstash/Vercel KV REST sayacı hazır; UPSTASH_REDIS_REST_* veya KV_REST_API_* olmadan instance başına bellek sayacı. |
 | I#4 | Bütçe kontrolü | implemented | `src/lib/isolation/guard.ts`<br>`src/server/az/core-service.ts` | `tests/az/data-core.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | I#5 | Güvenli varsayılanlar | implemented | `src/lib/isolation/guard.ts`<br>`src/server/http/tenant-route.ts` | `tests/az/data-core.test.ts`<br>`tests/api/az-routes.test.ts` |  |
 
@@ -145,7 +145,7 @@ Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen ka
 |---|---|---|---|---|---|
 | M#1 | Araştır | implemented | `src/lib/flows/flows.ts`<br>`src/server/az/flow-service.ts` | `tests/az/product.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | M#2 | Özetle | implemented | `src/lib/flows/flows.ts`<br>`src/lib/core/tools.ts` | `tests/az/product.test.ts`<br>`tests/db/az-services.test.ts` |  |
-| M#3 | Üret | partial | `src/server/az/flow-service.ts` | `tests/db/az-services.test.ts` | Üretim adımı mock sağlayıcı ile çalışır. |
+| M#3 | Üret | requires_credentials | `src/server/az/flow-service.ts`<br>`src/lib/ai/task-ai.ts`<br>`src/lib/ai/provider-registry.ts`<br>`src/lib/ai/providers/openai.ts`<br>`src/lib/ai/providers/anthropic.ts`<br>`src/lib/core/model-routing.ts` | `tests/db/az-services.test.ts`<br>`tests/integrations/ai-providers.test.ts` | Üretim adımı gerçek sağlayıcı registry'sini kullanır; anahtar yoksa production'da ai_provider_not_configured, mock yalnızca test/development. |
 | M#4 | Onaylat | implemented | `src/lib/flows/flows.ts`<br>`src/server/az/flow-service.ts` | `tests/az/product.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | M#5 | Yayınla | implemented | `src/lib/core/tools.ts` | `tests/az/data-core.test.ts`<br>`tests/db/az-services.test.ts` | Yalnızca yapılandırılmış kanala; aksi halde channel_not_configured. |
 | M#6 | Takip et | implemented | `src/server/az/flow-service.ts` | `tests/db/az-services.test.ts` |  |
@@ -160,13 +160,13 @@ Durum: implemented 129 · partial 6 · requires_credentials 3 · eşleşmeyen ka
 | N#3 | Özet | implemented | `src/lib/notifications/notifications.ts` | `tests/az/product.test.ts` |  |
 | N#4 | İnsan onayı | implemented | `src/server/az/records.ts`<br>`app/api/approvals/[id]/route.ts` | `tests/db/az-services.test.ts` |  |
 | N#5 | SLA takibi | implemented | `src/lib/notifications/notifications.ts`<br>`src/inngest/functions/a-z-pipelines.ts` | `tests/az/product.test.ts`<br>`tests/db/az-services.test.ts` |  |
-| N#6 | Doğru kişiye, doğru zamanda | partial | `src/lib/notifications/notifications.ts`<br>`supabase/migrations/0004_a_z_platform.sql` | `tests/az/product.test.ts` | Uygulama içi + Supabase realtime; e-posta/Slack teslimi kanal anahtarı gerektirir. |
+| N#6 | Doğru kişiye, doğru zamanda | implemented | `src/lib/notifications/notifications.ts`<br>`src/lib/notifications/routing.ts`<br>`src/server/az/notification-dispatch.ts`<br>`app/api/notifications/routes/route.ts`<br>`src/inngest/functions/a-z-pipelines.ts`<br>`supabase/migrations/0005_delivery_and_crm.sql` | `tests/az/product.test.ts`<br>`tests/integrations/notifications.test.ts`<br>`tests/db/az-delivery-crm.test.ts` | RACI ekibi + tenant rotası + öncelik + sessiz saat (saat dilimi); harici teslim ilgili kanal anahtarını gerektirir. |
 
 ### O — Omnichannel
 
 | # | Yetenek | Durum | Kod | Test | Not |
 |---|---|---|---|---|---|
-| O#1 | Web + API + ekip araçları | partial | `src/lib/channels/channels.ts`<br>`app/api/channels/route.ts` | `tests/az/strategy.test.ts` | Web ve API hazır; ekip araçları anahtar bekliyor. |
+| O#1 | Web + API + ekip araçları | requires_credentials | `src/lib/channels/channels.ts`<br>`app/api/channels/route.ts`<br>`app/api/channels/slack/events/route.ts`<br>`app/api/channels/teams/messages/route.ts` | `tests/az/strategy.test.ts`<br>`tests/api/az-routes.test.ts`<br>`tests/integrations/notifications.test.ts` | Web ve API çalışır; Slack/Teams uç noktaları imza doğrulamalı hazır, anahtar bekliyor. |
 | O#2 | Tek kimlik | implemented | `src/lib/channels/channels.ts`<br>`app/api/channels/identities/route.ts` | `tests/az/strategy.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | O#3 | Tek bağlam | implemented | `src/lib/channels/channels.ts`<br>`src/server/az/core-service.ts` | `tests/az/strategy.test.ts`<br>`tests/db/az-services.test.ts` |  |
 | O#4 | Kesintisiz kullanıcı yolculuğu | implemented | `app/api/channels/inbound/route.ts` | `tests/db/az-services.test.ts` |  |
