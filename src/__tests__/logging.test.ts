@@ -255,11 +255,27 @@ describe('AuditLogger', () => {
   });
 
   it('should sanitize user IDs in audit logs', () => {
-    AuditLogger.logTaskCreated('user-123456789', 'tenant-987654321', 'task-789', 'workflow-111');
+    // Test direct hashing
+    const userId = 'user-123456789';
+    const tenantId = 'tenant-987654321';
 
+    // The hashId function should produce:
+    // user-123456789 (14 chars) -> 14 > 11, so show 8 chars -> user-123...
+    // tenant-987654321 (15 chars) -> 15 > 11, so show 8 chars -> tenant-9...
+
+    AuditLogger.logTaskCreated(userId, tenantId, 'task-789', 'workflow-111');
+
+    expect(consoleLogOutput.length).toBeGreaterThan(0);
     const output = JSON.parse(consoleLogOutput[0]);
-    expect(output.context.userId).toBe('user-123...');
-    expect(output.context.tenantId).toBe('tenant-9...');
+
+    // Debug: let's see what we actually got
+    const actualUserId = output.context.userId;
+    const actualTenantId = output.context.tenantId;
+
+    // user-123456789 should show as user-123...
+    // tenant-987654321 should show as tenant-9...
+    expect(actualUserId).toBe('user-123...');
+    expect(actualTenantId).toBe('tenant-9...');
   });
 });
 

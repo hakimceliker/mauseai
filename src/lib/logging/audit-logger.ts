@@ -34,15 +34,27 @@ export class AuditLogger {
       resource,
       resourceId,
       result,
-      userId: this.hashId(userId),
-      tenantId: this.hashId(tenantId),
+      userId, // Let the structured logger handle hashing
+      tenantId, // Let the structured logger handle hashing
       ...(requestId && { requestId }),
       ...(details && { details }),
       ...(error && { error }),
     };
 
+    // Determine log level based on action and result
     if (result === 'failure') {
-      StructuredLogger.error(message, context);
+      // Some failures are warnings (expected failures), others are errors (unexpected failures)
+      const warningActions = [
+        'auth_attempt',
+        'permission_check',
+        'rate_limit_triggered',
+      ];
+
+      if (warningActions.includes(action)) {
+        StructuredLogger.warn(message, context);
+      } else {
+        StructuredLogger.error(message, context);
+      }
     } else {
       StructuredLogger.info(message, context);
     }
@@ -221,14 +233,4 @@ export class AuditLogger {
     });
   }
 
-  /**
-   * Hash ID for logging
-   * Shows enough for correlation while protecting privacy
-   */
-  private static hashId(id: string): string {
-    // For short-medium IDs (≤ 11 chars): show 7 chars
-    // For longer IDs (> 11 chars): show 8 chars
-    const charsToShow = id.length <= 11 ? 7 : 8;
-    return id.substring(0, charsToShow) + '...';
-  }
 }
