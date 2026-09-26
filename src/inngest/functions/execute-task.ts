@@ -1,11 +1,14 @@
 import { inngest } from '../client';
 import { TaskRepository } from '@/src/lib/db/task-repository';
 import { CheckpointRepository } from '@/src/lib/db/checkpoint-repository';
+import { IdempotencyRepository } from '@/src/lib/db/idempotency-repository';
 import * as Domain from '@/src/types/domain';
 
 /**
  * Execute a task with step-based execution
  * Saves checkpoint after each step for resumption capability
+ * Uses idempotency keys to prevent duplicate execution on retry
+ * Includes timeout and retry handling
  */
 export const executeTask = inngest.createFunction(
   {
@@ -26,8 +29,7 @@ export const executeTask = inngest.createFunction(
         );
       });
 
-      // Mock workflow steps for Phase 5
-      // In real implementation, would load workflow from DB
+      // Mock workflow steps
       const workflowSteps = [
         {
           id: 'step-1' as Domain.StepId,
@@ -50,19 +52,56 @@ export const executeTask = inngest.createFunction(
       const results: Record<string, unknown> = {};
 
       for (const workflowStep of workflowSteps) {
-        // Execute step
-        const stepResult = await step.run(`execute-step-${workflowStep.order}`, async () => {
-          // Simulate step execution
-          await new Promise(resolve => setTimeout(resolve, 100));
+        // Check idempotency before executing
+        const cachedResult = await step.run(
+          `check-idempotency-step-${workflowStep.order}`,
+          async () => {
+            return await IdempotencyRepository.checkIdempotency(
+              taskId as Domain.TaskId,
+              workflowStep.id
+            );
+          }
+        );
 
-          return {
-            step_id: workflowStep.id,
-            step_name: workflowStep.name,
-            result: `Completed: ${workflowStep.name}`,
-          };
-        });
+        let stepResult: Record<string, unknown> | null = cachedResult;
 
-        // Save checkpoint after step execution
+        // If not cached, execute step
+        if (!cachedResult) {
+          stepResult = (await step.run(
+            `execute-step-${workflowStep.order}`,
+            async () => {
+              // Simulate step execution with timeout
+              const timeoutMs = 30000; // 30 seconds per step
+              const stepPromise = new Promise(resolve => setTimeout(resolve, 100));
+
+              return await Promise.race([
+                stepPromise.then(() => ({
+                  step_id: workflowStep.id,
+                  step_name: workflowStep.name,
+                  result: `Completed: ${workflowStep.name}`,
+                  executed_at: new Date().toISOString(),
+                })),
+                new Promise((_, reject) =>
+                  setTimeout(() => reject(new Error('Step timeout')), timeoutMs)
+                ),
+              ]);
+            }
+          )) as Record<string, unknown>;
+
+          // Record execution for idempotency
+          await step.run(
+            `record-idempotency-step-${workflowStep.order}`,
+            async () => {
+              await IdempotencyRepository.recordExecution(
+                taskId as Domain.TaskId,
+                workflowStep.id,
+                stepResult as Record<string, unknown>
+              );
+            }
+          );
+        }
+
+        // Save checkpoint after step execution (cached or fresh)
         await step.run(`checkpoint-step-${workflowStep.order}`, async () => {
           await CheckpointRepository.saveCheckpoint(
             taskId as Domain.TaskId,
