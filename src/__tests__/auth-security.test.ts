@@ -1,6 +1,3 @@
-// @ts-nocheck - This test file uses MockNextRequest which doesn't implement the full NextRequest interface
-// but is sufficient for testing the auth and middleware logic. All tests pass with vitest.
-
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 /**
@@ -34,8 +31,6 @@ class MockNextRequest {
     return this.headers.entries();
   }
 }
-
-type NextRequest = MockNextRequest;
 
 import {
   validateTenantAccess,

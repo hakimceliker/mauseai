@@ -118,7 +118,7 @@ export class ErrorLogger {
     let sanitized = message;
 
     // Remove email addresses
-    sanitized = sanitized.replace(/[\w\.-]+@[\w\.-]+\.\w+/g, '[EMAIL]');
+    sanitized = sanitized.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]');
 
     // Remove potential tokens/keys (long base64-like strings)
     sanitized = sanitized.replace(/[A-Za-z0-9\-_]{32,}/g, '[REDACTED]');

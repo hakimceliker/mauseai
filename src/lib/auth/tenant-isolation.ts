@@ -247,7 +247,7 @@ export function enforceTenantisolation(handler: (req: NextRequest, auth: AuthCon
 
       // Request is authenticated, proceed to handler
       return handler(request, validation.auth!, tenantId);
-    } catch (error) {
+    } catch {
       // Don't expose error details
       return NextResponse.json(
         {

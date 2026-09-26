@@ -145,8 +145,6 @@ export function withRateLimit(
 
       // Check rate limit
       if (!rateLimitStore.isAllowed(rateLimitKey, limit)) {
-        const currentCount = rateLimitStore.getCount(rateLimitKey);
-
         return NextResponse.json(
           {
             success: false,
@@ -166,7 +164,7 @@ export function withRateLimit(
 
       // Request allowed, proceed to handler
       return handler(request, auth);
-    } catch (error) {
+    } catch {
       // On error, let it through (don't fail-closed on rate limit)
       return handler(request, auth);
     }
