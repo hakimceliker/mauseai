@@ -1,287 +1,255 @@
-create extension if not exists pgcrypto;
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-create table if not exists public.tenants (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  created_at timestamptz not null default now()
+-- Tenants table
+CREATE TABLE IF NOT EXISTS tenants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  monthly_limit DECIMAL(10, 2) NOT NULL DEFAULT 1000.00,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.profiles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  role text not null default 'member' check (role in ('owner','admin','member')),
-  display_name text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- Create index on tenants.id
+CREATE INDEX IF NOT EXISTS idx_tenants_id ON tenants(id);
+
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE(tenant_id, email)
 );
 
-create table if not exists public.tasks (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  created_by uuid not null references auth.users(id),
-  goal text not null check (char_length(goal) between 5 and 2000),
-  status text not null check (status in ('pending','planning','running','waiting_approval','paused','completed','failed','cancelled')),
-  risk_level text not null check (risk_level in ('L1','L2','L3','L4')),
-  workflow_id uuid,
-  current_step_id uuid,
-  budget_limit_cents integer check (budget_limit_cents is null or budget_limit_cents > 0),
-  spent_cents integer not null default 0 check (spent_cents >= 0),
-  metadata jsonb not null default '{}'::jsonb,
-  started_at timestamptz,
-  completed_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- Create indexes on users
+CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON users(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- Workflows table
+CREATE TABLE IF NOT EXISTS workflows (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  steps JSONB NOT NULL DEFAULT '[]',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.workflows (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  task_id uuid not null references public.tasks(id) on delete cascade,
-  name text not null,
-  version integer not null default 1 check (version > 0),
-  graph jsonb not null default '{"nodes":[],"edges":[]}'::jsonb,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- Create indexes on workflows
+CREATE INDEX IF NOT EXISTS idx_workflows_tenant_id ON workflows(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_workflows_created_at ON workflows(created_at);
+
+-- Steps table
+CREATE TABLE IF NOT EXISTS steps (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  workflow_id UUID NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,
+  "order" INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(50) NOT NULL,
+  config JSONB NOT NULL DEFAULT '{}',
+  retries INTEGER NOT NULL DEFAULT 0,
+  timeout_ms INTEGER NOT NULL DEFAULT 30000,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.steps (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  task_id uuid not null references public.tasks(id) on delete cascade,
-  workflow_id uuid not null references public.workflows(id) on delete cascade,
-  node_id text not null,
-  name text not null,
-  status text not null check (status in ('pending','running','completed','failed','skipped','waiting')),
-  attempt integer not null default 1 check (attempt > 0),
-  input jsonb,
-  output jsonb,
-  error text,
-  started_at timestamptz,
-  completed_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- Create indexes on steps
+CREATE INDEX IF NOT EXISTS idx_steps_workflow_id ON steps(workflow_id);
+CREATE INDEX IF NOT EXISTS idx_steps_order ON steps(workflow_id, "order");
+
+-- Tasks table
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  workflow_id UUID NOT NULL REFERENCES workflows(id) ON DELETE CASCADE,
+  status VARCHAR(50) NOT NULL DEFAULT 'pending',
+  input JSONB NOT NULL DEFAULT '{}',
+  output JSONB,
+  error TEXT,
+  cost_estimate DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  cost_actual DECIMAL(10, 2),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.checkpoints (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  task_id uuid not null references public.tasks(id) on delete cascade,
-  step_id uuid not null references public.steps(id) on delete cascade,
-  state jsonb not null,
-  version integer not null check (version > 0),
-  created_at timestamptz not null default now()
+-- Create indexes on tasks
+CREATE INDEX IF NOT EXISTS idx_tasks_tenant_id ON tasks(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_workflow_id ON tasks(workflow_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
+
+-- Checkpoints table
+CREATE TABLE IF NOT EXISTS checkpoints (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  step_id UUID NOT NULL REFERENCES steps(id) ON DELETE CASCADE,
+  state JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.audit_logs (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  task_id uuid references public.tasks(id) on delete set null,
-  step_id uuid references public.steps(id) on delete set null,
-  actor_type text not null check (actor_type in ('user','system','gpt','claude','worker','policy')),
-  actor_id text not null,
-  action text not null,
-  resource_type text not null,
-  resource_id uuid,
-  payload jsonb,
-  cost_cents integer check (cost_cents is null or cost_cents >= 0),
-  risk_level text check (risk_level is null or risk_level in ('L1','L2','L3','L4')),
-  created_at timestamptz not null default now()
+-- Create indexes on checkpoints
+CREATE INDEX IF NOT EXISTS idx_checkpoints_task_id ON checkpoints(task_id);
+CREATE INDEX IF NOT EXISTS idx_checkpoints_step_id ON checkpoints(step_id);
+CREATE INDEX IF NOT EXISTS idx_checkpoints_task_step ON checkpoints(task_id, step_id);
+
+-- Audit logs table
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  entity_id VARCHAR(255) NOT NULL,
+  actor VARCHAR(255) NOT NULL,
+  details JSONB NOT NULL DEFAULT '{}',
+  timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.idempotency_keys (
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  key text not null,
-  request_hash text not null,
-  status_code integer not null,
-  response jsonb not null,
-  created_at timestamptz not null default now(),
-  expires_at timestamptz not null,
-  primary key (tenant_id, key)
+-- Create indexes on audit_logs
+CREATE INDEX IF NOT EXISTS idx_audit_logs_tenant_id ON audit_logs(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity_type ON audit_logs(entity_type);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);
+
+-- Offers table
+CREATE TABLE IF NOT EXISTS offers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  template_id VARCHAR(255) NOT NULL,
+  discount_percent DECIMAL(5, 2) NOT NULL CHECK (discount_percent >= 0 AND discount_percent <= 100),
+  price_cap DECIMAL(10, 2) NOT NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'draft',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.cost_events (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  task_id uuid not null references public.tasks(id) on delete cascade,
-  step_id uuid references public.steps(id) on delete set null,
-  provider text not null,
-  input_tokens integer not null default 0,
-  output_tokens integer not null default 0,
-  cost_cents integer not null check (cost_cents >= 0),
-  created_at timestamptz not null default now()
+-- Create indexes on offers
+CREATE INDEX IF NOT EXISTS idx_offers_tenant_id ON offers(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_offers_status ON offers(status);
+
+-- Conversations table
+CREATE TABLE IF NOT EXISTS conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  state VARCHAR(50) NOT NULL DEFAULT 'idle',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.conversations (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  external_thread_id text,
-  channel text not null check (channel in ('email','whatsapp','system')),
-  state text not null default 'open' check (state in ('open','waiting_customer','waiting_approval','resolved','blocked')),
-  subject text,
-  customer_email text,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+-- Create indexes on conversations
+CREATE INDEX IF NOT EXISTS idx_conversations_tenant_id ON conversations(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_user_id ON conversations(user_id);
+
+-- Messages table
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  role VARCHAR(50) NOT NULL,
+  content TEXT NOT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-create table if not exists public.messages (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  conversation_id uuid not null references public.conversations(id) on delete cascade,
-  direction text not null check (direction in ('inbound','outbound','internal')),
-  sender_type text not null check (sender_type in ('customer','user','gpt','claude','system')),
-  body text not null,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
-);
+-- Create indexes on messages
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
 
-create table if not exists public.offers (
-  id uuid primary key default gen_random_uuid(),
-  tenant_id uuid not null references public.tenants(id) on delete cascade,
-  conversation_id uuid references public.conversations(id) on delete set null,
-  task_id uuid references public.tasks(id) on delete set null,
-  list_price_cents integer not null check (list_price_cents >= 0),
-  offered_price_cents integer not null check (offered_price_cents >= 0),
-  discount_limit_percent numeric(5,2) not null default 0,
-  status text not null default 'draft' check (status in ('draft','waiting_approval','approved','sent','accepted','rejected','expired')),
-  policy_result jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+-- Enable Row Level Security
+ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workflows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE steps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE checkpoints ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
-create index if not exists tasks_tenant_created_idx on public.tasks(tenant_id, created_at desc);
-create index if not exists idx_tasks_tenant_id on public.tasks(tenant_id);
-create index if not exists idx_tasks_tenant_status on public.tasks(tenant_id, status);
-create index if not exists idx_tasks_created_by on public.tasks(created_by);
-create index if not exists idx_tasks_active on public.tasks(tenant_id, created_at desc) where status not in ('completed', 'cancelled', 'failed');
-create index if not exists steps_task_idx on public.steps(task_id, created_at);
-create index if not exists idx_steps_tenant_task on public.steps(tenant_id, task_id);
-create unique index if not exists idx_steps_idempotent on public.steps(task_id, node_id, attempt);
-create index if not exists idx_checkpoints_tenant_task on public.checkpoints(tenant_id, task_id);
-create index if not exists audit_tenant_created_idx on public.audit_logs(tenant_id, created_at desc);
-create index if not exists profiles_tenant_idx on public.profiles(tenant_id);
-create index if not exists idx_conversations_tenant on public.conversations(tenant_id);
-create index if not exists conversations_tenant_updated_idx on public.conversations(tenant_id, updated_at desc);
-create index if not exists idx_messages_tenant_conversation on public.messages(tenant_id, conversation_id);
-create index if not exists messages_conversation_created_idx on public.messages(conversation_id, created_at);
-create index if not exists idx_offers_tenant on public.offers(tenant_id);
-create index if not exists offers_tenant_created_idx on public.offers(tenant_id, created_at desc);
-create index if not exists idx_idempotency_expires on public.idempotency_keys(expires_at);
-create index if not exists idx_cost_events_tenant_created on public.cost_events(tenant_id, created_at desc);
-create unique index if not exists idx_checkpoints_unique on public.checkpoints(task_id, step_id, version);
+-- RLS Policies (deny-by-default)
+-- For Phase 12 auth, these will enforce tenant isolation
 
-alter table public.tenants enable row level security;
-alter table public.profiles enable row level security;
-alter table public.tasks enable row level security;
-alter table public.workflows enable row level security;
-alter table public.steps enable row level security;
-alter table public.checkpoints enable row level security;
-alter table public.audit_logs enable row level security;
-alter table public.idempotency_keys enable row level security;
-alter table public.cost_events enable row level security;
-alter table public.conversations enable row level security;
-alter table public.messages enable row level security;
-alter table public.offers enable row level security;
+-- Function to get current tenant_id from JWT
+CREATE OR REPLACE FUNCTION auth.get_tenant_id()
+RETURNS UUID AS $$
+BEGIN
+  RETURN (auth.jwt() ->> 'tenant_id')::UUID;
+END;
+$$ LANGUAGE plpgsql STABLE;
 
-create or replace function public.current_tenant_id() returns uuid
-language sql stable security definer set search_path = public
-as $$ select tenant_id from public.profiles where user_id = auth.uid() limit 1 $$;
+-- Tenants RLS: only owner can read/write
+CREATE POLICY tenants_own_read ON tenants FOR SELECT
+  USING (id = auth.get_tenant_id());
 
-create or replace function public.current_user_role() returns text
-language sql stable security definer set search_path = public
-as $$ select role from public.profiles where user_id = auth.uid() limit 1 $$;
+CREATE POLICY tenants_own_write ON tenants FOR INSERT
+  WITH CHECK (id = auth.get_tenant_id());
 
-create or replace function public.is_tenant_member(check_tenant_id uuid) returns boolean
-language sql stable security definer set search_path = public
-as $$ select exists (select 1 from public.profiles where user_id = auth.uid() and tenant_id = check_tenant_id) $$;
+-- Users RLS: tenant isolation
+CREATE POLICY users_tenant_read ON users FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
 
-create or replace function public.protect_profile_security_fields() returns trigger
-language plpgsql security definer set search_path = public
-as $$
-begin
-  if auth.uid() = old.user_id and public.current_user_role() not in ('owner','admin') then
-    new.user_id := old.user_id;
-    new.tenant_id := old.tenant_id;
-    new.role := old.role;
-  end if;
-  return new;
-end;
-$$;
+CREATE POLICY users_tenant_write ON users FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
 
-drop trigger if exists protect_profile_security_fields on public.profiles;
-create trigger protect_profile_security_fields
-before update on public.profiles
-for each row execute function public.protect_profile_security_fields();
+-- Tasks RLS: tenant isolation
+CREATE POLICY tasks_tenant_read ON tasks FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
 
-drop policy if exists tenants_member_select on public.tenants;
-drop policy if exists tenants_select_own on public.tenants;
-drop policy if exists tenants_update_owner on public.tenants;
-create policy tenants_select_own on public.tenants for select using (id = public.current_tenant_id());
-create policy tenants_update_owner on public.tenants for update using (id = public.current_tenant_id() and public.current_user_role() = 'owner') with check (id = public.current_tenant_id());
+CREATE POLICY tasks_tenant_write ON tasks FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
 
-drop policy if exists profiles_self_or_tenant_select on public.profiles;
-drop policy if exists profiles_select_own on public.profiles;
-drop policy if exists profiles_select_tenant on public.profiles;
-drop policy if exists profiles_owner_admin_update on public.profiles;
-drop policy if exists profiles_update_own on public.profiles;
-create policy profiles_select_own on public.profiles for select using (user_id = auth.uid());
-create policy profiles_select_tenant on public.profiles for select using (tenant_id = public.current_tenant_id());
-create policy profiles_update_own on public.profiles for update using (user_id = auth.uid()) with check (user_id = auth.uid() and tenant_id = public.current_tenant_id());
-create policy profiles_owner_admin_update on public.profiles for update using (tenant_id = public.current_tenant_id() and public.current_user_role() in ('owner','admin')) with check (tenant_id = public.current_tenant_id());
+CREATE POLICY tasks_tenant_update ON tasks FOR UPDATE
+  USING (tenant_id = auth.get_tenant_id())
+  WITH CHECK (tenant_id = auth.get_tenant_id());
 
-drop policy if exists tasks_tenant_select on public.tasks;
-drop policy if exists tasks_select_tenant on public.tasks;
-drop policy if exists tasks_tenant_insert on public.tasks;
-drop policy if exists tasks_insert_member on public.tasks;
-drop policy if exists tasks_tenant_update on public.tasks;
-drop policy if exists tasks_update_owner_or_admin on public.tasks;
-drop policy if exists tasks_delete_admin on public.tasks;
-create policy tasks_select_tenant on public.tasks for select using (tenant_id = public.current_tenant_id());
-create policy tasks_insert_member on public.tasks for insert with check (tenant_id = public.current_tenant_id() and created_by = auth.uid());
-create policy tasks_update_owner_or_admin on public.tasks for update using (tenant_id = public.current_tenant_id() and (created_by = auth.uid() or public.current_user_role() in ('owner','admin'))) with check (tenant_id = public.current_tenant_id());
-create policy tasks_delete_admin on public.tasks for delete using (tenant_id = public.current_tenant_id() and public.current_user_role() in ('owner','admin'));
+CREATE POLICY tasks_tenant_delete ON tasks FOR DELETE
+  USING (tenant_id = auth.get_tenant_id());
 
-drop policy if exists workflows_tenant_all on public.workflows;
-create policy workflows_tenant_all on public.workflows for all using (tenant_id = public.current_tenant_id()) with check (tenant_id = public.current_tenant_id());
+-- Workflows RLS: tenant isolation
+CREATE POLICY workflows_tenant_read ON workflows FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
 
-drop policy if exists steps_tenant_all on public.steps;
-drop policy if exists steps_select_tenant on public.steps;
-drop policy if exists steps_insert_tenant on public.steps;
-drop policy if exists steps_update_tenant on public.steps;
-create policy steps_select_tenant on public.steps for select using (tenant_id = public.current_tenant_id());
-create policy steps_insert_tenant on public.steps for insert with check (tenant_id = public.current_tenant_id());
-create policy steps_update_tenant on public.steps for update using (tenant_id = public.current_tenant_id()) with check (tenant_id = public.current_tenant_id());
+CREATE POLICY workflows_tenant_write ON workflows FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
 
-drop policy if exists checkpoints_tenant_all on public.checkpoints;
-drop policy if exists checkpoints_select_tenant on public.checkpoints;
-drop policy if exists checkpoints_insert_tenant on public.checkpoints;
-create policy checkpoints_select_tenant on public.checkpoints for select using (tenant_id = public.current_tenant_id());
-create policy checkpoints_insert_tenant on public.checkpoints for insert with check (tenant_id = public.current_tenant_id());
+-- Checkpoints RLS: tenant isolation via task
+CREATE POLICY checkpoints_tenant_read ON checkpoints FOR SELECT
+  USING (task_id IN (SELECT id FROM tasks WHERE tenant_id = auth.get_tenant_id()));
 
-drop policy if exists audit_tenant_select on public.audit_logs;
-drop policy if exists audit_select_tenant on public.audit_logs;
-drop policy if exists audit_tenant_insert on public.audit_logs;
-create policy audit_select_tenant on public.audit_logs for select using (tenant_id = public.current_tenant_id());
+CREATE POLICY checkpoints_tenant_write ON checkpoints FOR INSERT
+  WITH CHECK (task_id IN (SELECT id FROM tasks WHERE tenant_id = auth.get_tenant_id()));
 
-drop policy if exists idempotency_tenant_select on public.idempotency_keys;
-drop policy if exists idempotency_tenant_insert on public.idempotency_keys;
-create policy idempotency_tenant_select on public.idempotency_keys for select using (tenant_id = public.current_tenant_id());
-create policy idempotency_tenant_insert on public.idempotency_keys for insert with check (tenant_id = public.current_tenant_id());
-drop policy if exists cost_events_tenant_select on public.cost_events;
-create policy cost_events_tenant_select on public.cost_events for select using (tenant_id = public.current_tenant_id());
+-- Audit logs RLS: tenant isolation
+CREATE POLICY audit_logs_tenant_read ON audit_logs FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
 
-drop policy if exists conversations_tenant_all on public.conversations;
-drop policy if exists conversations_all_tenant on public.conversations;
-create policy conversations_all_tenant on public.conversations for all using (tenant_id = public.current_tenant_id()) with check (tenant_id = public.current_tenant_id());
+CREATE POLICY audit_logs_tenant_write ON audit_logs FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
 
-drop policy if exists messages_tenant_all on public.messages;
-drop policy if exists messages_all_tenant on public.messages;
-create policy messages_all_tenant on public.messages for all using (tenant_id = public.current_tenant_id()) with check (tenant_id = public.current_tenant_id());
+-- Offers RLS: tenant isolation
+CREATE POLICY offers_tenant_read ON offers FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
 
-drop policy if exists offers_tenant_all on public.offers;
-drop policy if exists offers_select_tenant on public.offers;
-drop policy if exists offers_insert_member on public.offers;
-drop policy if exists offers_update_admin on public.offers;
-create policy offers_select_tenant on public.offers for select using (tenant_id = public.current_tenant_id());
-create policy offers_insert_member on public.offers for insert with check (tenant_id = public.current_tenant_id());
-create policy offers_update_admin on public.offers for update using (tenant_id = public.current_tenant_id() and public.current_user_role() in ('owner','admin')) with check (tenant_id = public.current_tenant_id());
+CREATE POLICY offers_tenant_write ON offers FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
+
+-- Conversations RLS: tenant isolation
+CREATE POLICY conversations_tenant_read ON conversations FOR SELECT
+  USING (tenant_id = auth.get_tenant_id());
+
+CREATE POLICY conversations_tenant_write ON conversations FOR INSERT
+  WITH CHECK (tenant_id = auth.get_tenant_id());
+
+-- Messages RLS: via conversation's tenant
+CREATE POLICY messages_tenant_read ON messages FOR SELECT
+  USING (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = auth.get_tenant_id()));
+
+CREATE POLICY messages_tenant_write ON messages FOR INSERT
+  WITH CHECK (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = auth.get_tenant_id()));
