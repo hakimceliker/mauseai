@@ -14,7 +14,8 @@ Bu belge, yüklenen MouseAI dokümanlarını tek bir uygulanabilir yol haritası
 2. `14-gunluk-cekirdek-uygulama-spesifikasyonu.md`: MVP stack’i, kapsamı ve 14 günlük kabul ölçütleri.
 3. `14-gunluk-master-backlog.md`: uygulama görevlerinin günlük dökümü.
 4. `MouseAI_Teknik_Sistem_Dokumani.md` ve `mouseai-tam-projeksiyon.md`: teknik ayrıntılar ve sonraki fazlar.
-5. Tekrarlı PDF/DOCX ve çıkarılmış kopyalar: ana kaynakların yerine geçmez; çelişkide yeni karar olarak değerlendirilir.
+5. `mouseai-final-flow-and-bi.md`: uçtan uca operasyon akışı, ekip devir modeli ve BI göstergeleri için referans.
+6. Tekrarlı PDF/DOCX ve çıkarılmış kopyalar: ana kaynakların yerine geçmez; çelişkide yeni karar olarak değerlendirilir.
 
 ### Depo başlangıç noktası
 
@@ -28,6 +29,23 @@ Yol haritası hazırlanırken depoda yalnızca temel README bulunuyordu; uygulam
 - Dış dünyada etkisi olan, finansal veya geri alınamaz işlem açık politika ve gerekli insan onayı olmadan çalışmaz.
 - Yeni connector ve provider önce mock/test ortamında doğrulanır; canlıya alınması ayrı bir onay kapısıdır.
 - Bir teslim “tamamlandı” sayılmak için kabul testi ve kanıt gerektirir.
+- BI ölçümleri politika veya görev önceliğini kendiliğinden değiştirmez; önce öneri üretir, değişiklik onay ve sürümlü dağıtım gerektirir.
+
+### Uçtan uca çalışma akışı
+
+1. Kullanıcı hedefi veya inbound olay alınır.
+2. Kimlik, tenant, rol, risk, bütçe ve politika kontrol edilir; reddedilen istek `BLOCKED` olarak audit edilir.
+3. Orchestrator hedefi plan ve atomik adımlara ayırır; yalnız izin verilen provider/tool seçeneklerini yönlendirir.
+4. Worker adımı idempotency, timeout ve retry kurallarıyla yürütür; checkpoint ve maliyet kaydı yazar.
+5. Her karar ve yan etki audit/event ledger’a kaydedilir.
+6. İnsan onayı gereken adımda yürütme durur; onay veya ret denetlenebilir şekilde kaydedilir.
+7. Tamamlanan iş raporlanır; operasyon, maliyet, kalite, güvenlik ve müşteri sonuçları BI katmanında ölçülür.
+
+Bu akış iki MVP demosuna da uygulanır. Gerçek mailbox/desktop connector’ları ve canlı müşteri iletişimi MVP kapsamı dışındadır.
+
+### Kod teslim ve inceleme akışı
+
+Her uygulama işi kabul kriterleri ve kapsamı tanımlı görev kartı/issue ile başlar; değişiklik izole branch’te yapılır, kalite kontrollerinden geçirilir ve PR olarak incelenir. Bağımsız review ve insan merge onayı tamamlanmadan main’e veya production’a alınmaz. Dağıtım sonrasında smoke/health ve audit/observability kanıtı saklanır. Araçlar (GPT/Kodex, Claude Code, Copilot, Cursor) bu akışta yardımcıdır; repo izinleri ve PR kuralları yerine geçmez.
 
 ## 2. Faz 1 — 14 günlük çekirdek MVP
 
@@ -126,12 +144,18 @@ Karar kapıları yeni karar kaydıyla kapatılır; taslak varsayılanlar sessizc
 
 Önce ölçüm altyapısı doğru çalıştırılır; başlangıçta ürün performansı için uydurma hedef yüzdeler konmaz.
 
-- Task başarı/tamamlama ve checkpoint’ten devam oranı
-- Retry, duplicate event ve provider hata oranı
-- Task/step/provider başına tahmini ve gerçekleşen maliyet
-- İnsan onayına giden işlerin sayısı ve bekleme süresi
-- RLS negatif testlerinin sonucu ve güvenlik bulgularının kapanma süresi
-- Demo senaryolarının otomatik ve elle kabul durumu
+| Alan | MVP göstergeleri | İlk kullanım |
+|---|---|---|
+| Operasyon | Task tamamlanma/bekleme süresi, retry oranı, checkpoint’ten devam oranı | Worker ve recovery darboğazını görmek |
+| Maliyet | Task/step/provider başına tahmini ve gerçekleşen maliyet, limit aşımı | Bütçe kontrolünü doğrulamak |
+| Kalite | Provider hata oranı, review düzeltme ihtiyacı, tekrar iş oranı | Mock çıktıları ve kabul akışını değerlendirmek |
+| Güvenlik | `BLOCKED` kararları, tenant negatif test sonucu, onay bekleyen L3/L4 adımları | Politika ve erişim sınırlarını doğrulamak |
+| Müşteri/satış | E-posta taslağı ve offer sonucu, onay süresi, taslak başına maliyet | Mock müşteri akışını ölçmek; gerçek satış başarısı iddiasında bulunmamak |
+| SEO | Üretilen rapor/adım durumu ve rapor maliyeti | MVP demo tamamlanmasını ölçmek; organik trafik için canlı entegrasyon gerekmediğini belirtmek |
+
+MVP panosu task/workflow olayları, maliyet ve audit kayıtlarından beslenen temel bir operasyon görünümüyle sınırlıdır. Canlı SEO, satış dönüşümü veya müşteri memnuniyeti ölçümü, gerçek veri kaynağı ve izinli connector gelene kadar “ölçülmüyor” olarak işaretlenir; tahmini mock veriler gerçek iş KPI’ı gibi sunulmaz.
+
+BI geri besleme döngüsü ilk aşamada **ölç → raporla → insan incelemesi için öneri üret** şeklindedir. Model seçimi, maliyet politikası, kapasite veya görev önceliğini değiştiren otomatik kararlar; Faz 1 kapsamı dışındadır ve daha sonraki fazlarda sürümleme, offline değerlendirme, onay ve rollback kapılarıyla ele alınır.
 
 ## 7. Sonraki uygulama sırası
 
