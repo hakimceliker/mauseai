@@ -1,20 +1,16 @@
 // Core domain types - tenant-aware, audit-ready
 
+import { TaskStatus } from './enums';
+
+// Re-export TaskStatus for convenient imports from domain
+export { TaskStatus };
+
 export type TenantId = string & { readonly __brand: 'TenantId' };
 export type TaskId = string & { readonly __brand: 'TaskId' };
 export type WorkflowId = string & { readonly __brand: 'WorkflowId' };
 export type StepId = string & { readonly __brand: 'StepId' };
 export type CheckpointId = string & { readonly __brand: 'CheckpointId' };
 export type AuditEventId = string & { readonly __brand: 'AuditEventId' };
-
-// Task statuses
-export enum TaskStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-}
 
 // Workflow entity
 export interface Workflow {

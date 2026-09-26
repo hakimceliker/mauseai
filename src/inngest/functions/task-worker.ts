@@ -23,9 +23,9 @@ export const taskWorker = inngest.createFunction(
     id: "mouseai-task-worker",
     retries: 3,
     concurrency: { limit: 10 },
-    triggers: [{ event: "mouseai/task.created" }],
   },
-  async ({ event, step }) => {
+  { event: "mouseai/task.created" },
+  async ({ event, step }: { event: any; step: any }) => {
     const { taskId, tenantId, stepId } = event.data as {
       taskId: string;
       tenantId: string;
