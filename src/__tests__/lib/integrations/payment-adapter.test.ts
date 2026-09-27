@@ -8,6 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { createHmac } from 'node:crypto';
 import { createPaymentAdapter, getPaymentAdapter } from '@/src/lib/integrations/payment-adapter';
 
 describe('Payment Adapter', () => {
@@ -48,13 +49,13 @@ describe('Payment Adapter', () => {
     it('should throw error when stripe provider selected without API key', () => {
       process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
       process.env.PAYMENT_API_KEY = '';
-      expect(() => createPaymentAdapter()).toThrow('Stripe provider requires PAYMENT_API_KEY');
+      expect(() => createPaymentAdapter()).toThrow('credential_not_configured:PAYMENT_API_KEY');
     });
 
     it('should throw error when square provider selected without API key', () => {
       process.env.PAYMENT_PROVIDER_TYPE = 'square';
       process.env.PAYMENT_API_KEY = '';
-      expect(() => createPaymentAdapter()).toThrow('Square provider requires PAYMENT_API_KEY');
+      expect(() => createPaymentAdapter()).toThrow('credential_not_configured:PAYMENT_API_KEY');
     });
 
     it('should warn on unknown provider type', () => {
@@ -146,6 +147,33 @@ describe('Payment Adapter', () => {
       process.env.PAYMENT_API_KEY = 'sk_test_valid_key';
       // Should not throw
       expect(() => createPaymentAdapter()).not.toThrow();
+    });
+  });
+
+  describe('Stripe Provider', () => {
+    it('creates intents, refunds, reads balance, and verifies webhooks', async () => {
+      process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
+      process.env.PAYMENT_API_KEY = 'sk_test_key';
+      process.env.PAYMENT_WEBHOOK_SECRET = 'whsec_test';
+      const fetchMock = vi.fn()
+        .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'pi_1', amount: 1200, currency: 'usd', status: 'requires_payment_method', created: 1700000000 }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ id: 're_1', amount: 500, status: 'succeeded' }), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ available: [{ amount: 3000, currency: 'usd' }], pending: [{ amount: 200, currency: 'usd' }] }), { status: 200 }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      const adapter = createPaymentAdapter();
+      const payment = await adapter.processPayment(1200, 'USD', 'cus_1', 'Test', { order: '1' });
+      const refund = await adapter.refund(payment.id, 500);
+      const balance = await adapter.checkBalance();
+      expect(payment.status).toBe('pending');
+      expect(refund.status).toBe('completed');
+      expect(balance.available).toBe(3000);
+
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const body = '{"type":"payment_intent.succeeded"}';
+      const signature = createHmac('sha256', 'whsec_test').update(`${timestamp}.${body}`).digest('hex');
+      expect(adapter.verifyWebhookSignature(`t=${timestamp},v1=${signature}`, body)).toBe(true);
+      vi.unstubAllGlobals();
     });
   });
 
