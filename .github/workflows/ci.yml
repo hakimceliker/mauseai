@@ -28,5 +28,16 @@ jobs:
         run: npm run typecheck
       - name: Tests
         run: npm test -- --run
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker compose validation
+        run: docker compose config --quiet
+      - name: Docker image build
+        if: hashFiles('Dockerfile') != ''
+        run: docker build --no-cache -t mouseai-ci .
       - name: Build
         run: npm run build
