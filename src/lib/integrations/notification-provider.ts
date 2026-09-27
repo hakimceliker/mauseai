@@ -250,12 +250,20 @@ class SlackNotificationProvider implements INotificationProvider {
     throw new Error('Email not available with Slack provider');
   }
 
-  async sendSlack(_message: SlackMessage): Promise<NotificationResult> {
-    // TODO: Implement Slack webhook posting
-    // TODO: Support Block Kit formatting
-    // TODO: Handle rate limiting (Slack allows 1 request/second per webhook)
-    console.log('[Slack Provider] Would send to webhook:', this.webhookUrl);
-    throw new Error('Slack provider not configured. Set SLACK_WEBHOOK_URL');
+  async sendSlack(message: SlackMessage): Promise<NotificationResult> {
+    if (!this.webhookUrl) throw new Error('credential_not_configured:SLACK_WEBHOOK_URL (not configured)');
+    const response = await fetch(this.webhookUrl, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        text: message.text,
+        ...(message.blocks ? { blocks: message.blocks } : {}),
+        ...(message.threadTs ? { thread_ts: message.threadTs } : {}),
+      }),
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error('NOTIFICATION_PROVIDER_ERROR');
+    return { id: `slack_${Date.now()}`, status: 'sent', channel: 'slack', timestamp: new Date() };
   }
 
   async sendSMS(_message: SMSMessage): Promise<NotificationResult> {
@@ -267,8 +275,9 @@ class SlackNotificationProvider implements INotificationProvider {
   }
 
   async isHealthy(): Promise<boolean> {
-    // TODO: Test webhook connectivity
-    return false;
+    // A webhook cannot be health-probed without sending a real notification.
+    // Presence is reported here; delivery errors are surfaced by sendSlack.
+    return Boolean(this.webhookUrl);
   }
 }
 
@@ -306,10 +315,7 @@ export function createNotificationAdapter(): INotificationProvider {
     case 'slack': {
       const slackUrl = process.env.SLACK_WEBHOOK_URL;
       if (!slackUrl) {
-        console.error(
-          'Slack notifications selected but SLACK_WEBHOOK_URL not set. ' +
-          'Add to .env.local (never commit to git)'
-        );
+        console.error('Slack notifications selected but SLACK_WEBHOOK_URL not set');
       }
       return new SlackNotificationProvider(slackUrl || '');
     }
