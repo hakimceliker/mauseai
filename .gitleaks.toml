@@ -1,0 +1,20 @@
+title = "MouseAI secret scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Intentional non-secret fixtures and documentation placeholders"
+paths = [
+  '''(^|/)tests/''',
+  '''(^|/)src/__tests__/''',
+  '''(^|/)docs/available-tools-inventory\.md$''',
+]
+regexes = [
+  '''(?i)your-(anon|service-role)-key''',
+  '''(?i)sk_(dev|test)_\.\.\.''',
+  '''(?i)sk-(x|a|b|test)-''',
+  '''(?i)sk-ant-\.\.\.''',
+  '''eyJhbGc\.\.\.''',
+  '''xoxb-XXXXXXX\.\.\.''',
+]

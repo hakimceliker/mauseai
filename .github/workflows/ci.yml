@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -32,6 +34,8 @@ jobs:
         run: npm audit --audit-level=high
       - name: Secret scan
         uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source . --config .gitleaks.toml --no-banner --redact --exit-code 1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker compose validation
