@@ -64,12 +64,12 @@ BEGIN
   FOREACH t IN ARRAY ARRAY['notification_routes','notification_deliveries','crm_sync_records'] LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_read', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = auth.get_tenant_id())', t || '_tenant_read', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = public.get_tenant_id())', t || '_tenant_read', t);
   END LOOP;
   FOREACH t IN ARRAY ARRAY['notification_routes','crm_sync_records'] LOOP
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_write', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_update', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_write', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = auth.get_tenant_id()) WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_update', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_write', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = public.get_tenant_id()) WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_update', t);
   END LOOP;
 END $$;

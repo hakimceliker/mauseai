@@ -177,7 +177,7 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 -- For Phase 12 auth, these will enforce tenant isolation
 
 -- Function to get current tenant_id from JWT
-CREATE OR REPLACE FUNCTION auth.get_tenant_id()
+CREATE OR REPLACE FUNCTION public.get_tenant_id()
 RETURNS UUID AS $$
 BEGIN
   RETURN (auth.jwt() ->> 'tenant_id')::UUID;
@@ -186,70 +186,70 @@ $$ LANGUAGE plpgsql STABLE;
 
 -- Tenants RLS: only owner can read/write
 CREATE POLICY tenants_own_read ON tenants FOR SELECT
-  USING (id = auth.get_tenant_id());
+  USING (id = public.get_tenant_id());
 
 CREATE POLICY tenants_own_write ON tenants FOR INSERT
-  WITH CHECK (id = auth.get_tenant_id());
+  WITH CHECK (id = public.get_tenant_id());
 
 -- Users RLS: tenant isolation
 CREATE POLICY users_tenant_read ON users FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY users_tenant_write ON users FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- Tasks RLS: tenant isolation
 CREATE POLICY tasks_tenant_read ON tasks FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY tasks_tenant_write ON tasks FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 CREATE POLICY tasks_tenant_update ON tasks FOR UPDATE
-  USING (tenant_id = auth.get_tenant_id())
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id())
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 CREATE POLICY tasks_tenant_delete ON tasks FOR DELETE
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 -- Workflows RLS: tenant isolation
 CREATE POLICY workflows_tenant_read ON workflows FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY workflows_tenant_write ON workflows FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- Checkpoints RLS: tenant isolation via task
 CREATE POLICY checkpoints_tenant_read ON checkpoints FOR SELECT
-  USING (task_id IN (SELECT id FROM tasks WHERE tenant_id = auth.get_tenant_id()));
+  USING (task_id IN (SELECT id FROM tasks WHERE tenant_id = public.get_tenant_id()));
 
 CREATE POLICY checkpoints_tenant_write ON checkpoints FOR INSERT
-  WITH CHECK (task_id IN (SELECT id FROM tasks WHERE tenant_id = auth.get_tenant_id()));
+  WITH CHECK (task_id IN (SELECT id FROM tasks WHERE tenant_id = public.get_tenant_id()));
 
 -- Audit logs RLS: tenant isolation
 CREATE POLICY audit_logs_tenant_read ON audit_logs FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY audit_logs_tenant_write ON audit_logs FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- Offers RLS: tenant isolation
 CREATE POLICY offers_tenant_read ON offers FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY offers_tenant_write ON offers FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- Conversations RLS: tenant isolation
 CREATE POLICY conversations_tenant_read ON conversations FOR SELECT
-  USING (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id());
 
 CREATE POLICY conversations_tenant_write ON conversations FOR INSERT
-  WITH CHECK (tenant_id = auth.get_tenant_id());
+  WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- Messages RLS: via conversation's tenant
 CREATE POLICY messages_tenant_read ON messages FOR SELECT
-  USING (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = auth.get_tenant_id()));
+  USING (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = public.get_tenant_id()));
 
 CREATE POLICY messages_tenant_write ON messages FOR INSERT
-  WITH CHECK (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = auth.get_tenant_id()));
+  WITH CHECK (conversation_id IN (SELECT id FROM conversations WHERE tenant_id = public.get_tenant_id()));

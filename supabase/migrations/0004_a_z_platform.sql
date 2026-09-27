@@ -326,9 +326,9 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_read', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_write', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_update', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = auth.get_tenant_id())', t || '_tenant_read', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_write', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = auth.get_tenant_id()) WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_update', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = public.get_tenant_id())', t || '_tenant_read', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_write', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = public.get_tenant_id()) WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_update', t);
   END LOOP;
 
   -- K: personal items are visible to their creator only; team items to the tenant.
@@ -337,9 +337,9 @@ BEGIN
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_read', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_write', t);
     EXECUTE format('DROP POLICY IF EXISTS %I ON %I', t || '_tenant_update', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = auth.get_tenant_id() AND (visibility = ''team'' OR created_by = auth.uid()))', t || '_tenant_read', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_write', t);
-    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = auth.get_tenant_id() AND (visibility = ''team'' OR created_by = auth.uid())) WITH CHECK (tenant_id = auth.get_tenant_id())', t || '_tenant_update', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR SELECT USING (tenant_id = public.get_tenant_id() AND (visibility = ''team'' OR created_by = auth.uid()))', t || '_tenant_read', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR INSERT WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_write', t);
+    EXECUTE format('CREATE POLICY %I ON %I FOR UPDATE USING (tenant_id = public.get_tenant_id() AND (visibility = ''team'' OR created_by = auth.uid())) WITH CHECK (tenant_id = public.get_tenant_id())', t || '_tenant_update', t);
   END LOOP;
 END $$;
 

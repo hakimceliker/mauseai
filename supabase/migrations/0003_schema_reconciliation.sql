@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 CREATE INDEX IF NOT EXISTS idx_profiles_tenant_id ON profiles(tenant_id);
 
-CREATE OR REPLACE FUNCTION auth.get_tenant_id()
+CREATE OR REPLACE FUNCTION public.get_tenant_id()
 RETURNS UUID
 LANGUAGE plpgsql STABLE SECURITY DEFINER
 SET search_path = public
@@ -34,7 +34,7 @@ $$;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS profiles_tenant_read ON profiles;
 CREATE POLICY profiles_tenant_read ON profiles FOR SELECT
-  USING (user_id = auth.uid() OR tenant_id = auth.get_tenant_id());
+  USING (user_id = auth.uid() OR tenant_id = public.get_tenant_id());
 
 -- tasks: columns used by createTask / cost-service / continue route
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS created_by UUID;
@@ -55,7 +55,7 @@ ALTER TABLE workflows ADD COLUMN IF NOT EXISTS graph JSONB NOT NULL DEFAULT '{}'
 CREATE INDEX IF NOT EXISTS idx_workflows_task_id ON workflows(task_id);
 DROP POLICY IF EXISTS workflows_tenant_update ON workflows;
 CREATE POLICY workflows_tenant_update ON workflows FOR UPDATE
-  USING (tenant_id = auth.get_tenant_id()) WITH CHECK (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id()) WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- steps: execution state written by the API and the worker (RLS was enabled with no policy)
 ALTER TABLE steps ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
@@ -74,10 +74,10 @@ CREATE INDEX IF NOT EXISTS idx_steps_tenant_id ON steps(tenant_id);
 DROP POLICY IF EXISTS steps_tenant_read ON steps;
 DROP POLICY IF EXISTS steps_tenant_write ON steps;
 DROP POLICY IF EXISTS steps_tenant_update ON steps;
-CREATE POLICY steps_tenant_read ON steps FOR SELECT USING (tenant_id = auth.get_tenant_id());
-CREATE POLICY steps_tenant_write ON steps FOR INSERT WITH CHECK (tenant_id = auth.get_tenant_id());
+CREATE POLICY steps_tenant_read ON steps FOR SELECT USING (tenant_id = public.get_tenant_id());
+CREATE POLICY steps_tenant_write ON steps FOR INSERT WITH CHECK (tenant_id = public.get_tenant_id());
 CREATE POLICY steps_tenant_update ON steps FOR UPDATE
-  USING (tenant_id = auth.get_tenant_id()) WITH CHECK (tenant_id = auth.get_tenant_id());
+  USING (tenant_id = public.get_tenant_id()) WITH CHECK (tenant_id = public.get_tenant_id());
 
 -- checkpoints: versioned, idempotent upsert on (task_id, step_id, version)
 ALTER TABLE checkpoints ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS cost_events (
 CREATE INDEX IF NOT EXISTS idx_cost_events_tenant_created ON cost_events(tenant_id, created_at);
 ALTER TABLE cost_events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS cost_events_tenant_read ON cost_events;
-CREATE POLICY cost_events_tenant_read ON cost_events FOR SELECT USING (tenant_id = auth.get_tenant_id());
+CREATE POLICY cost_events_tenant_read ON cost_events FOR SELECT USING (tenant_id = public.get_tenant_id());
 
 -- idempotency_keys: request-level keys (tenant_id, key) used by POST /api/tasks
 ALTER TABLE idempotency_keys ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
@@ -134,5 +134,5 @@ ALTER TABLE idempotency_keys ALTER COLUMN idempotency_key DROP NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS uq_idempotency_keys_tenant_key ON idempotency_keys(tenant_id, key);
 DROP POLICY IF EXISTS idempotency_keys_request_read ON idempotency_keys;
 DROP POLICY IF EXISTS idempotency_keys_request_write ON idempotency_keys;
-CREATE POLICY idempotency_keys_request_read ON idempotency_keys FOR SELECT USING (tenant_id = auth.get_tenant_id());
-CREATE POLICY idempotency_keys_request_write ON idempotency_keys FOR INSERT WITH CHECK (tenant_id = auth.get_tenant_id());
+CREATE POLICY idempotency_keys_request_read ON idempotency_keys FOR SELECT USING (tenant_id = public.get_tenant_id());
+CREATE POLICY idempotency_keys_request_write ON idempotency_keys FOR INSERT WITH CHECK (tenant_id = public.get_tenant_id());
