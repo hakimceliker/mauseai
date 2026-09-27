@@ -131,6 +131,14 @@ export default function OperationsDashboard() {
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
+        <div className="flex items-center gap-3 text-amber-200">
+          <span aria-hidden="true">●</span>
+          <span><strong>Demo görünümü:</strong> Örnek KPI ve görevler gösteriliyor; canlı tenant verisi henüz bağlanmadı.</span>
+        </div>
+        <span className="hidden rounded-full border border-amber-400/30 px-3 py-1 text-xs text-amber-300 sm:inline">MOCK DATA</span>
+      </div>
+
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-4xl font-bold text-white">İşlem Paneli</h1>
