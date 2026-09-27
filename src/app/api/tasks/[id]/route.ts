@@ -8,6 +8,7 @@ import {
   NotFoundError,
 } from '@/src/lib/errors/api-error-handler';
 import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
+import { CheckpointRepository } from '@/src/lib/db/checkpoint-repository';
 
 /**
  * GET /api/tasks/:id
@@ -28,6 +29,10 @@ export async function GET(
       throw new NotFoundError({ resource: 'task', id: params.id });
     }
 
+    const checkpoints = (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock'
+      ? []
+      : await CheckpointRepository.getTaskCheckpoints(task.id);
+
     // Format response
     const response = {
       id: task.id,
@@ -43,6 +48,13 @@ export async function GET(
       created_at: task.created_at.toISOString(),
       started_at: task.started_at?.toISOString(),
       completed_at: task.completed_at?.toISOString(),
+      checkpoints: checkpoints.map((checkpoint) => ({
+        id: checkpoint.id,
+        task_id: checkpoint.task_id,
+        step_id: checkpoint.step_id,
+        state: checkpoint.state,
+        created_at: checkpoint.created_at.toISOString(),
+      })),
     };
 
     const result = NextResponse.json(
