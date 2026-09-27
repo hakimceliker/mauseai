@@ -56,7 +56,8 @@ export const taskWorker = inngest.createFunction(
   {
     id: "mouseai-task-worker",
     retries: 3,
-    concurrency: { limit: 10 },
+    // Keep the worker within the current Inngest production plan limit.
+    concurrency: { limit: 5 },
   },
   { event: "mouseai/task.created" },
   async ({ event, step }: { event: { data: { taskId: string; tenantId: string; stepId: string } }; step: { run: (name: string, fn: () => Promise<unknown>) => Promise<unknown> } }) => {
