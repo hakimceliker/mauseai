@@ -88,6 +88,29 @@ describe('/api/health', () => {
   });
 
   describe('Health Status Determination', () => {
+    it('reports only missing runtime variable names when Supabase is not configured', async () => {
+      const savedUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const savedServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      try {
+        const response = await GET();
+        const data = await response.json();
+
+        expect(response.status).toBe(503);
+        expect(data.database).toEqual({
+          status: 'not_configured',
+          code: 'credential_not_configured',
+          missing: ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'],
+        });
+        expect(JSON.stringify(data)).not.toContain('test-service-role-key');
+      } finally {
+        process.env.NEXT_PUBLIC_SUPABASE_URL = savedUrl;
+        process.env.SUPABASE_SERVICE_ROLE_KEY = savedServiceRoleKey;
+      }
+    });
+
     it('should return healthy when all integrations ok', async () => {
       const response = await GET();
       const data = await response.json();

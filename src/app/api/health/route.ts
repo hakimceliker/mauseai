@@ -11,13 +11,22 @@ interface HealthStatus {
   timestamp: string;
   version: string;
   uptime: number;
-  database?: { status: string; latency?: number; code?: string };
+  database?: { status: string; latency?: number; code?: string; missing?: string[] };
   integrations?: {
     payment?: { status: string; provider?: string };
     notifications?: { status: string; type?: string };
     analytics?: { status: string; type?: string };
     realtime?: { status: string; connected?: boolean };
   };
+}
+
+const REQUIRED_DATABASE_ENV = [
+  'NEXT_PUBLIC_SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+] as const;
+
+function missingRuntimeEnv(names: readonly string[]) {
+  return names.filter((name) => !process.env[name]);
 }
 
 /**
@@ -34,8 +43,14 @@ export async function GET() {
   const integrations: HealthStatus['integrations'] = {};
   let database: NonNullable<HealthStatus['database']> = { status: 'error' };
 
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    database = { status: 'not_configured', code: 'credential_not_configured' };
+  const missingDatabaseEnv = missingRuntimeEnv(REQUIRED_DATABASE_ENV);
+  if (missingDatabaseEnv.length > 0) {
+    database = {
+      status: 'not_configured',
+      code: 'credential_not_configured',
+      // Names are safe diagnostic metadata; values are never exposed.
+      missing: missingDatabaseEnv,
+    };
   } else try {
     const startedAt = performance.now();
     const { error } = await getSupabaseAdminClient()
@@ -118,6 +133,9 @@ export async function GET() {
     overallStatus = 'degraded';
   }
   if (database.status === 'error') overallStatus = 'unhealthy';
+  if (database.status === 'not_configured' && overallStatus === 'healthy') {
+    overallStatus = 'degraded';
+  }
 
   const healthStatus: HealthStatus = {
     status: overallStatus,
