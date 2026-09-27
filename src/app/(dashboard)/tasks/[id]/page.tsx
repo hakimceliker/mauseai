@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { ExecutionTimeline } from '@/src/components/ExecutionTimeline';
 import { getBrowserAuthHeaders } from '@/src/lib/auth/browser-session';
 
-type Task = { id: string; status: string; workflow_id: string; input: Record<string, unknown>; output?: Record<string, unknown>; error?: string; created_at: string; started_at?: string; completed_at?: string; cost_actual?: number };
 type Checkpoint = { id: string; step_id: string; state: Record<string, unknown>; created_at: string };
+type Task = { id: string; status: string; workflow_id: string; input: Record<string, unknown>; output?: Record<string, unknown>; error?: string; created_at: string; started_at?: string; completed_at?: string; cost_actual?: number; checkpoints?: Checkpoint[] };
 
 const label = (status: string) => status.split('_').join(' ');
 
@@ -21,14 +21,10 @@ export default function TaskWorkflowPage({ params }: { params: { id: string } })
     async function load() {
       try {
         const headers = await getBrowserAuthHeaders();
-        const [taskResponse, timelineResponse] = await Promise.all([
-          fetch(`/api/tasks/${params.id}`, { headers, cache: 'no-store' }),
-          fetch(`/api/tasks/${params.id}/timeline`, { headers, cache: 'no-store' }),
-        ]);
+        const taskResponse = await fetch(`/api/tasks/${params.id}`, { headers, cache: 'no-store' });
         const taskPayload = await taskResponse.json();
-        const timelinePayload = await timelineResponse.json();
         if (!taskResponse.ok) throw new Error(taskPayload.error?.code === 'AUTH_ERROR' ? 'Oturum açmanız gerekiyor.' : 'Görev bulunamadı.');
-        if (mounted) { setTask(taskPayload.data); setCheckpoints(timelinePayload.data ?? []); }
+        if (mounted) { setTask(taskPayload.data); setCheckpoints(taskPayload.data.checkpoints ?? []); }
       } catch (cause) {
         if (mounted) setError(cause instanceof Error ? cause.message : 'Görev yüklenemedi.');
       } finally {
