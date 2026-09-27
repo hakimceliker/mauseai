@@ -4,14 +4,14 @@ import { getPaymentAdapter } from '@/src/lib/integrations';
 import { getNotificationAdapter } from '@/src/lib/integrations';
 import { getAnalyticsAdapter } from '@/src/lib/integrations';
 import { getRealtimeProvider } from '@/src/lib/integrations';
-import { getSupabaseAdmin } from '@/src/lib/db/supabase';
+import { getSupabaseAdminClient } from '@/src/lib/supabase/admin';
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
   timestamp: string;
   version: string;
   uptime: number;
-  database?: { status: string; latency?: number };
+  database?: { status: string; latency?: number; code?: string };
   integrations?: {
     payment?: { status: string; provider?: string };
     notifications?: { status: string; type?: string };
@@ -34,17 +34,20 @@ export async function GET() {
   const integrations: HealthStatus['integrations'] = {};
   let database: NonNullable<HealthStatus['database']> = { status: 'error' };
 
-  try {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    database = { status: 'not_configured', code: 'credential_not_configured' };
+  } else try {
     const startedAt = performance.now();
-    const { error } = await getSupabaseAdmin()
+    const { error } = await getSupabaseAdminClient()
       .from('tenants')
       .select('id', { head: true, count: 'exact' });
     database = {
       status: error ? 'error' : 'ready',
+      ...(error ? { code: error.code || 'query_failed' } : {}),
       ...(error ? {} : { latency: Math.round(performance.now() - startedAt) }),
     };
   } catch {
-    database = { status: 'error' };
+    database = { status: 'error', code: 'query_failed' };
   }
 
   try {
@@ -140,7 +143,10 @@ export async function GET() {
  */
 export async function HEAD() {
   try {
-    const { error } = await getSupabaseAdmin()
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('credential_not_configured');
+    }
+    const { error } = await getSupabaseAdminClient()
       .from('tenants')
       .select('id', { head: true, count: 'exact' });
     if (error) throw error;
