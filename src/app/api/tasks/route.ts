@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import { TaskService } from '@/src/lib/services/task-service';
 import { CreateTaskRequestSchema } from '@/src/lib/schemas/api-requests';
 import * as Domain from '@/src/types/domain';
@@ -17,7 +17,7 @@ import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 export async function POST(request: NextRequest) {
   try {
     // Verify authentication
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     // Parse request body
     const body = await request.json();
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     // Get all tasks for tenant
     const tasks = TaskService.getTenantTasks(auth.tenantId);

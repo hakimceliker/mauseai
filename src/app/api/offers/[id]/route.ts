@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import { OfferRepository } from '@/src/lib/db/offer-repository';
 import { z } from 'zod';
 import {
@@ -23,7 +23,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const offer = await OfferRepository.getOffer(params.id, auth.tenantId);
 
@@ -74,7 +74,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const body = await request.json();
     const validation = UpdateStatusSchema.safeParse(body);

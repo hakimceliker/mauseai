@@ -1,17 +1,9 @@
-/**
- * Supabase Auth integration (Phase 12+)
- * Currently stubbed for future integration with real Supabase Auth
- *
- * In Phase 12+, this will:
- * - Verify JWT tokens from Supabase Auth
- * - Support magic link authentication
- * - Manage user sessions
- * - Enforce RLS policies via auth claims
- */
+/** Server-side Supabase Auth verification. Never logs or returns credentials. */
+import { getSupabaseAdminClient } from '@/src/lib/supabase/admin';
 
 export interface AuthUser {
   id: string;
-  email: string;
+  email?: string;
   tenant_id: string;
 }
 
@@ -21,24 +13,41 @@ export interface AuthSession {
   refreshToken?: string;
 }
 
-/**
- * Mock implementation for Phase 12 (will be replaced with real Supabase Auth)
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class SupabaseAuth {
   /**
    * Verify a JWT token and extract claims
    * In real implementation, this would verify the Supabase JWT
    */
   static async verifyToken(token: string): Promise<AuthUser | null> {
-    // Stub for Phase 12
-    // In real implementation:
-    // 1. Verify JWT signature with Supabase public key
-    // 2. Decode claims
-    // 3. Return user context with tenant_id
-    void token; // Stub parameter
-    console.warn('SupabaseAuth.verifyToken is stubbed - using mock auth');
-    return null;
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !anonKey || !token) return null;
+
+    const response = await fetch(`${url}/auth/v1/user`, {
+      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    const user = (await response.json()) as {
+      id?: string;
+      email?: string;
+      app_metadata?: { tenant_id?: string };
+      user_metadata?: { tenant_id?: string };
+    };
+    if (!user.id) return null;
+
+    const claimTenant = user.app_metadata?.tenant_id ?? user.user_metadata?.tenant_id;
+    if (claimTenant) return { id: user.id, email: user.email, tenant_id: claimTenant };
+
+    // Tenant membership is authoritative in the server-side users table.
+    const admin = getSupabaseAdminClient();
+    const { data: profile, error } = await admin
+      .from('users')
+      .select('tenant_id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+    if (error || !profile?.tenant_id) return null;
+    return { id: user.id, email: user.email, tenant_id: profile.tenant_id };
   }
 
   /**

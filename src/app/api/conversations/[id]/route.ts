@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import {
   ConversationRepository,
   ConversationState,
@@ -26,7 +26,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const conversation = await ConversationRepository.getConversation(
       params.id,
@@ -86,7 +86,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const body = await request.json();
     const validation = TransitionStateSchema.safeParse(body);
