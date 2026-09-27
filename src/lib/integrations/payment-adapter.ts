@@ -4,6 +4,14 @@ import {
   RefundResult,
   BalanceInfo,
 } from './payment-provider';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
+class CredentialNotConfiguredError extends Error {
+  constructor(variable: string) {
+    super(`credential_not_configured:${variable}`);
+    this.name = 'CredentialNotConfiguredError';
+  }
+}
 
 /**
  * Mock payment provider for development
@@ -66,11 +74,7 @@ class MockPaymentProvider implements IPaymentProvider {
   }
 }
 
-/**
- * Stripe payment provider
- * TODO: Implement full Stripe integration
- * Requires: PAYMENT_API_KEY with Stripe secret key
- */
+/** Stripe PaymentIntent adapter. It never receives or logs card data. */
 class StripePaymentProvider implements IPaymentProvider {
   private apiKey: string;
   private webhookSecret: string;
@@ -81,35 +85,91 @@ class StripePaymentProvider implements IPaymentProvider {
   }
 
   async processPayment(
-    _amount: number,
-    _currency: string,
-    _customerId: string,
-    _description?: string,
-    _metadata?: Record<string, unknown>
+    amount: number,
+    currency: string,
+    customerId: string,
+    description?: string,
+    metadata?: Record<string, unknown>
   ): Promise<PaymentTransaction> {
-    // TODO: Implement Stripe charge creation
-    // TODO: Handle Stripe errors and convert to standard format
-    // TODO: Return Stripe transaction ID
-    throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
+    const form = new URLSearchParams({
+      amount: String(Math.round(amount)),
+      currency: currency.toLowerCase(),
+      confirm: 'false',
+      'automatic_payment_methods[enabled]': 'true',
+    });
+    if (customerId) form.set('customer', customerId);
+    if (description) form.set('description', description);
+    for (const [key, value] of Object.entries(metadata ?? {})) form.set(`metadata[${key}]`, String(value));
+    const response = await this.request('/payment_intents', { method: 'POST', body: form });
+    return {
+      id: String(response.id),
+      amount: Number(response.amount ?? amount),
+      currency: String(response.currency ?? currency),
+      status: this.mapStatus(String(response.status)),
+      customerId,
+      description,
+      metadata,
+      createdAt: new Date(Number(response.created ?? Math.floor(Date.now() / 1000)) * 1000),
+    };
   }
 
-  async refund(_transactionId: string, _amount?: number): Promise<RefundResult> {
-    // TODO: Implement Stripe refund
-    // TODO: Handle full and partial refunds
-    // TODO: Return refund details
-    throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
+  async refund(transactionId: string, amount?: number): Promise<RefundResult> {
+    const form = new URLSearchParams({ payment_intent: transactionId });
+    if (amount !== undefined) form.set('amount', String(Math.round(amount)));
+    const response = await this.request('/refunds', { method: 'POST', body: form });
+    return {
+      refundId: String(response.id),
+      amount: Number(response.amount ?? amount ?? 0),
+      status: response.status === 'succeeded' ? 'completed' : response.status === 'failed' ? 'failed' : 'pending',
+      originalTransactionId: transactionId,
+    };
   }
 
   async checkBalance(): Promise<BalanceInfo> {
-    // TODO: Implement Stripe balance check
-    // TODO: Use Stripe Balance API
-    throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
+    const response = await this.request('/balance', { method: 'GET' });
+    const available = Array.isArray(response.available) ? response.available[0] : undefined;
+    const pending = Array.isArray(response.pending) ? response.pending[0] : undefined;
+    return {
+      available: Number(available?.amount ?? 0),
+      pending: Number(pending?.amount ?? 0),
+      currency: String(available?.currency ?? 'usd'),
+    };
   }
 
-  verifyWebhookSignature(_signature: string, _body: string): boolean {
-    // TODO: Implement Stripe webhook signature verification
-    // TODO: Use Stripe's hmac-sha256 verification
-    throw new Error('Stripe payment provider not configured. Set PAYMENT_API_KEY');
+  verifyWebhookSignature(signature: string, body: string): boolean {
+    if (!this.webhookSecret || !signature) return false;
+    const parts = signature.split(',');
+    const timestamp = parts.find((part) => part.startsWith('t='))?.slice(2);
+    const signatures = parts.filter((part) => part.startsWith('v1=')).map((part) => part.slice(3));
+    if (!timestamp || !signatures.length || Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
+    const expected = createHmac('sha256', this.webhookSecret).update(`${timestamp}.${body}`).digest('hex');
+    return signatures.some((candidate) => {
+      try {
+        return timingSafeEqual(Buffer.from(candidate, 'utf8'), Buffer.from(expected, 'utf8'));
+      } catch {
+        return false;
+      }
+    });
+  }
+
+  private async request(path: string, init: { method: 'GET' | 'POST'; body?: URLSearchParams }) {
+    const response = await fetch(`https://api.stripe.com/v1${path}`, {
+      method: init.method,
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        ...(init.body ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
+      },
+      body: init.body,
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error('PAYMENT_PROVIDER_ERROR');
+    return (await response.json()) as Record<string, unknown>;
+  }
+
+  private mapStatus(status: string): PaymentTransaction['status'] {
+    if (status === 'succeeded') return 'completed';
+    if (status === 'canceled') return 'failed';
+    return 'pending';
   }
 }
 
@@ -183,21 +243,13 @@ export function createPaymentAdapter(): IPaymentProvider {
   switch (providerType) {
     case 'stripe':
       if (!apiKey) {
-        console.error(
-          'Stripe payment provider selected but PAYMENT_API_KEY not set. ' +
-          'Add to .env.local (never commit to git)'
-        );
-        throw new Error('Stripe provider requires PAYMENT_API_KEY environment variable');
+        throw new CredentialNotConfiguredError('PAYMENT_API_KEY');
       }
       return new StripePaymentProvider(apiKey, webhookSecret);
 
     case 'square':
       if (!apiKey) {
-        console.error(
-          'Square payment provider selected but PAYMENT_API_KEY not set. ' +
-          'Add to .env.local (never commit to git)'
-        );
-        throw new Error('Square provider requires PAYMENT_API_KEY environment variable');
+        throw new CredentialNotConfiguredError('PAYMENT_API_KEY');
       }
       return new SquarePaymentProvider(apiKey, webhookSecret);
 
