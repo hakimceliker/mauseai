@@ -4,6 +4,7 @@ import { getPaymentAdapter } from '@/src/lib/integrations';
 import { getNotificationAdapter } from '@/src/lib/integrations';
 import { getAnalyticsAdapter } from '@/src/lib/integrations';
 import { getRealtimeProvider } from '@/src/lib/integrations';
+import { getSupabaseAdmin } from '@/src/lib/db/supabase';
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -31,6 +32,20 @@ export async function GET() {
 
   // Gather integration health status
   const integrations: HealthStatus['integrations'] = {};
+  let database: NonNullable<HealthStatus['database']> = { status: 'error' };
+
+  try {
+    const startedAt = performance.now();
+    const { error } = await getSupabaseAdmin()
+      .from('tenants')
+      .select('id', { head: true, count: 'exact' });
+    database = {
+      status: error ? 'error' : 'ready',
+      ...(error ? {} : { latency: Math.round(performance.now() - startedAt) }),
+    };
+  } catch {
+    database = { status: 'error' };
+  }
 
   try {
     getPaymentAdapter();
@@ -93,18 +108,16 @@ export async function GET() {
   } else if (integrationStatuses.includes('degraded')) {
     overallStatus = 'degraded';
   }
+  if (database.status === 'error') overallStatus = 'unhealthy';
 
   const healthStatus: HealthStatus = {
     status: overallStatus,
     timestamp,
     version,
     uptime,
+    database,
     integrations,
   };
-
-  // TODO: Add database connectivity check
-  // TODO: Add check for critical vs optional integrations
-  // TODO: Add detailed error messages for troubleshooting
 
   const result = NextResponse.json(healthStatus, {
     status: overallStatus === 'healthy' ? 200 : overallStatus === 'degraded' ? 503 : 503,
@@ -120,9 +133,17 @@ export async function GET() {
  * Used by orchestration systems (Kubernetes, etc.) to determine if service can receive traffic
  */
 export async function HEAD() {
-  // For readiness checks, we use a simpler check
-  // Returns 200 if service is ready to handle requests
-  // TODO: Implement critical system checks
+  try {
+    const { error } = await getSupabaseAdmin()
+      .from('tenants')
+      .select('id', { head: true, count: 'exact' });
+    if (error) throw error;
+  } catch {
+    const result = NextResponse.json({ ready: false }, { status: 503 });
+    addSecurityHeaders(result);
+    return result;
+  }
+
   const result = NextResponse.json(
     { ready: true },
     { status: 200 }
