@@ -23,23 +23,26 @@
 11. `14-gunluk-master-backlog.md` — 14 günün tam görev backlog’u
 12. `task-registry.md` — görev sahipliği ve teslim kayıtları
 13. `change-control.md` — gelen önerilerin değerlendirme ve onay süreci
+14. `design-system-law.md` — arayüz ve görsel kabul standardı
+15. `completion-status.md` — doğrulanabilir tamamlanma durumu ve açıklar
+16. `github-central-phase-orchestration.md` — GitHub merkezli faz ve AI görev akışı
 
 ## C. AI, araç ve kod görevleri
 
-14. `ai-tool-role-matrix.md` — AI/uygulama görev dağılımı
-15. `gpt-claude-separation.md` — GPT ve Claude ayrımı
-16. `coding-tool-policy.md` — Cursor, Claude Code, Copilot ve diğer kod araçları
-17. `available-tools-inventory.md` — çalışma ortamında görünen 1.478 aracın tam listesi
-18. `claude-tools-inventory.md` — Claude bağlantısı için bekleyen gerçek envanter
-19. `tool-catalog-and-routing.md` — araç yetenekleri ve yönlendirme sistemi
+17. `ai-tool-role-matrix.md` — AI/uygulama görev dağılımı
+18. `gpt-claude-separation.md` — GPT ve Claude ayrımı
+19. `coding-tool-policy.md` — Cursor, Claude Code, Copilot ve diğer kod araçları
+20. `available-tools-inventory.md` — çalışma ortamında görünen 1.478 aracın tam listesi
+21. `claude-tools-inventory.md` — Claude bağlantısı için bekleyen gerçek envanter
+22. `tool-catalog-and-routing.md` — araç yetenekleri ve yönlendirme sistemi
 
 ## D. Yetki, güvenlik ve uyum
 
-20. `mouseai-ai-gorev-yetki-arac-kanunu.md` — bağlayıcı AI görev/yetki kanunu
-21. `security-approval-record.md` — proje güvenlik onay kaydı
-22. `security-acceptance-report.md` — Gün 12 güvenlik kabul raporu
-23. `security/rls-performance-and-edge-functions.md` — RLS performans ve Edge standardı
-24. `security/secret-management-and-inngest-scheduling.md` — secret/Vault ve zamanlama standardı
+23. `mouseai-ai-gorev-yetki-arac-kanunu.md` — bağlayıcı AI görev/yetki kanunu
+24. `security-approval-record.md` — proje güvenlik onay kaydı
+25. `security-acceptance-report.md` — Gün 12 güvenlik kabul raporu
+26. `security/rls-performance-and-edge-functions.md` — RLS performans ve Edge standardı
+27. `security/secret-management-and-inngest-scheduling.md` — secret/Vault ve zamanlama standardı
 
 ## E. Orkestrasyon ve dayanıklı iş akışı
 
