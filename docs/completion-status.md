@@ -19,9 +19,13 @@ Bir iş yalnızca şu koşullarla tamamlanmış sayılır:
 
 Eksik credential veya gerçek dış servis varsa durum `requires_credentials` / `not_configured` olarak kalır; mock geçişi production-ready kanıtı değildir.
 
-## Faz durumu
+## Adlandırma standardı
 
-| Faz | Kapsam | Durum |
+Bu proje için tek bağlayıcı sınıflandırma **Faz 0–8**'dir. Eski 14 günlük uygulama planı arşiv niteliğindedir ve tamamlanma raporlarında ayrı bir faz olarak gösterilmez. “Gün” numarası yeni görev kimliği olarak kullanılamaz.
+
+## Aşama durumu
+
+| Aşama | Kapsam | Durum |
 |---|---|---|
 | 0 | Kanunlar, repo stratejisi, risk ve görev modeli | büyük ölçüde tamamlandı |
 | 1 | 14 günlük çekirdek MVP | çekirdek mevcut; ürün ekranları ve bazı canlı doğrulamalar eksik |

@@ -19,6 +19,12 @@ Kullanıcı tarafından gönderilen her metin, öneri veya kod parçası önce t
 - Local ve remote farklıysa dosya ezilmez; diff, test ve bilinçli merge/rebase kararı gerekir.
 - Secret merkezi GitHub'a yazılmaz; onaylı env/secret kaynağından runtime'da okunur.
 
+## Terminoloji ve branch kararı
+
+- Büyük ürün yol haritası yalnızca **Faz 0–8** olarak adlandırılır. “Faz 2” platformun ikinci büyük teslimatını ifade eder.
+- Eski 14 günlük plan yalnızca tarihsel uygulama notudur; bundan sonra bağlayıcı sınıflandırma yalnızca **Faz 0–8** olacaktır.
+- PR #7, PR #6'nın kodunu yanlışlıkla kapsamına almaması için PR #6'nın branch'ini base olarak kullanır. PR #6 main'e merge edildikten sonra PR #7'nin base'i main'e alınır ve kapsam yeniden doğrulanır.
+
 ## Uygulama sırası
 
 1. Mevcut dosya ve sözleşme kontrol edilir.

@@ -4,13 +4,19 @@
 
 GitHub; kod, branch, issue, PR, Actions kanıtı ve release kaydının merkezi kaynağıdır. Local ve Docker yalnızca geliştirme/doğrulama ortamıdır. Credential'lar GitHub'a yazılmaz.
 
+## Adlandırma standardı
+
+- Büyük ürün teslimatları yalnızca **Faz 0–8** olarak anılır.
+- Eski 14 günlük plan yeni görev sınıflandırması değildir; ilgili işler Faz 1 çekirdek teslimatı altında gruplanır.
+- Bir görev kartı Faz kimliğini ve açık kapsamını yazmadan yürürlüğe alınmaz.
+
 ## Zorunlu iş akışı
 
-`main SHA → görev paketi → ayrı AI branch'i → PR → GitHub Actions → Docker doğrulaması → Claude/QA review → insan onayı → merge → main CI → sonraki faz`
+`main SHA → görev paketi → ayrı AI branch'i → PR → GitHub Actions → Docker doğrulaması → Claude/QA review → insan onayı → merge → main CI → sonraki Aşama`
 
 Her AI aynı klasöre paralel yazamaz. Main'e doğrudan push, başka projeye erişim ve kanıt olmadan merge yasaktır.
 
-## Dokuz faz
+## Dokuz Faz
 
 | Faz | Amaç | Çıkış kanıtı |
 |---|---|---|
