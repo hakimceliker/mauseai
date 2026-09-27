@@ -16,7 +16,24 @@
 body {
   margin: 0;
   padding: 0;
+  background: #ffffff;
+  color: #0f172a;
 }
+
+.mouseai-light .text-white { color: #0f172a !important; }
+.mouseai-light .text-slate-200 { color: #1e293b !important; }
+.mouseai-light .text-slate-300 { color: #334155 !important; }
+.mouseai-light .text-slate-400 { color: #64748b !important; }
+.mouseai-light .text-slate-500 { color: #64748b !important; }
+.mouseai-light .bg-slate-950\/50,
+.mouseai-light .bg-slate-900\/50,
+.mouseai-light .bg-slate-800\/50,
+.mouseai-light .bg-slate-900\/30 { background: rgba(248, 250, 252, 0.88) !important; }
+.mouseai-light .border-slate-700\/50,
+.mouseai-light .border-slate-700\/30 { border-color: #e2e8f0 !important; }
+.mouseai-light .hover\:bg-slate-800\/50:hover,
+.mouseai-light .hover\:bg-slate-800\/40:hover { background: #f8fafc !important; }
+.mouseai-light .ring-offset-slate-950 { --tw-ring-offset-color: #ffffff !important; }
 
 .shell {
   max-width: 1100px;
