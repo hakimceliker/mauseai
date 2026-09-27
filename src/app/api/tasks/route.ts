@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
-import { TaskService } from '@/src/lib/services/task-service';
+import { LiveTaskService } from '@/src/lib/services/live-task-service';
+import { inngest } from '@/src/inngest/client';
 import { CreateTaskRequestSchema } from '@/src/lib/schemas/api-requests';
 import * as Domain from '@/src/types/domain';
 import {
@@ -28,12 +29,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Create task
-    const task = TaskService.createTask(
+    const task = await LiveTaskService.createTask(
       auth.tenantId,
       auth.userId,
       validation.data.workflow_id as Domain.WorkflowId,
       validation.data.input || {}
     );
+
+    if ((process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() !== 'mock') {
+      await inngest.send({
+        name: 'task.execute',
+        data: {
+          taskId: task.id,
+          tenantId: auth.tenantId,
+          workflowId: task.workflow_id,
+        },
+      });
+    }
 
     // Format response
     const response = {
@@ -87,7 +99,7 @@ export async function GET(request: NextRequest) {
     const auth = await requireAuthAsync(request);
 
     // Get all tasks for tenant
-    const tasks = TaskService.getTenantTasks(auth.tenantId);
+    const tasks = await LiveTaskService.getTenantTasks(auth.tenantId);
 
     // Format responses
     const response = tasks.map(task => ({
