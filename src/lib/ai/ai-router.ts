@@ -1,6 +1,8 @@
 import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
 import { MockClaudeProvider } from './providers/mock-claude';
+import { OpenAIProvider } from './providers/openai';
+import { AnthropicProvider } from './providers/anthropic';
 
 /**
  * AI Router - selects appropriate provider based on environment configuration
@@ -16,8 +18,14 @@ export class AIRouter {
       case 'gpt':
         this.provider = new MockGPTProvider();
         break;
+      case 'openai':
+        this.provider = new OpenAIProvider();
+        break;
       case 'claude':
         this.provider = new MockClaudeProvider();
+        break;
+      case 'anthropic':
+        this.provider = new AnthropicProvider();
         break;
       case 'mock':
       default:
