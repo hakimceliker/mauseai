@@ -2,8 +2,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://mock.supabase.co';
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'mock-anon-key';
+// Next.js inlines missing public env vars as empty strings during the build.
+// Use a safe mock client for prerendering until production env is configured.
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key';
 const browserSupabase = createClient(url, key);
 
 export async function getBrowserAuthHeaders(): Promise<Record<string, string>> {
