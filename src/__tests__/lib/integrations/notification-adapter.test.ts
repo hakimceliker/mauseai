@@ -54,9 +54,9 @@ describe('Notification Adapter', () => {
       const consoleSpy = vi.spyOn(console, 'error');
       const adapter = createNotificationAdapter();
       expect(adapter).toBeDefined();
-      // Should warn about missing EMAIL_PROVIDER_KEY
+      // Should report the approved email credential names without values.
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('EMAIL_PROVIDER_KEY not set')
+        expect.stringContaining('RESEND_API_KEY or EMAIL_FROM')
       );
       consoleSpy.mockRestore();
     });
@@ -227,6 +227,44 @@ describe('Notification Adapter', () => {
       } catch (error) {
         expect((error as Error).message).toContain('not configured');
       }
+    });
+
+    it('sends through Resend without exposing the API key', async () => {
+      process.env.NOTIFICATION_TYPE = 'email';
+      process.env.RESEND_API_KEY = 'test-resend-key';
+      process.env.EMAIL_FROM = 'MouseAI <no-reply@example.com>';
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ id: 'email_123' }), { status: 200 }),
+      );
+
+      const result = await createNotificationAdapter().sendEmail({
+        to: 'test@example.com',
+        subject: 'Test',
+        body: 'Test body',
+      });
+
+      expect(result).toMatchObject({ id: 'email_123', status: 'sent', channel: 'email' });
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.resend.com/emails',
+        expect.objectContaining({
+          headers: expect.objectContaining({ authorization: 'Bearer test-resend-key' }),
+        }),
+      );
+      fetchMock.mockRestore();
+    });
+
+    it('fails safely when the sender is missing', async () => {
+      process.env.NOTIFICATION_TYPE = 'email';
+      process.env.RESEND_API_KEY = 'test-resend-key';
+      process.env.EMAIL_FROM = '';
+
+      await expect(
+        createNotificationAdapter().sendEmail({
+          to: 'test@example.com',
+          subject: 'Test',
+          body: 'Test',
+        }),
+      ).rejects.toThrow('credential_not_configured');
     });
   });
 
