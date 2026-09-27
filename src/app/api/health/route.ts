@@ -90,8 +90,14 @@ export async function GET() {
 
   try {
     const realtimeProvider = getRealtimeProvider();
+    const realtimeConfigured = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
     integrations.realtime = {
-      status: realtimeProvider.isConnected() ? 'connected' : 'disconnected',
+      // Realtime is established by browser clients, not by this stateless
+      // health request. Report configuration readiness here and keep the
+      // actual socket state in the client-side connection monitor.
+      status: realtimeProvider.isConnected() || realtimeConfigured ? 'ready' : 'degraded',
       connected: realtimeProvider.isConnected(),
     };
   } catch (_error) {
