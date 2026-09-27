@@ -10,7 +10,8 @@ type Task = { id: string; status: string; workflow_id: string; input: Record<str
 
 const label = (status: string) => status.split('_').join(' ');
 
-export default function TaskWorkflowPage({ params }: { params: { id: string } }) {
+export default function TaskWorkflowPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = React.use(params);
   const [task, setTask] = useState<Task | null>(null);
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ export default function TaskWorkflowPage({ params }: { params: { id: string } })
     async function load() {
       try {
         const headers = await getBrowserAuthHeaders();
-        const taskResponse = await fetch(`/api/tasks/${params.id}`, { headers, cache: 'no-store' });
+        const taskResponse = await fetch(`/api/tasks/${id}`, { headers, cache: 'no-store' });
         const taskPayload = await taskResponse.json();
         if (!taskResponse.ok) throw new Error(taskPayload.error?.code === 'AUTH_ERROR' ? 'Oturum açmanız gerekiyor.' : 'Görev bulunamadı.');
         if (mounted) { setTask(taskPayload.data); setCheckpoints(taskPayload.data.checkpoints ?? []); }
@@ -33,7 +34,7 @@ export default function TaskWorkflowPage({ params }: { params: { id: string } })
     }
     void load();
     return () => { mounted = false; };
-  }, [params.id]);
+  }, [id]);
 
   const timeline = checkpoints.map((checkpoint, index) => {
     const status = String(checkpoint.state.status ?? 'completed');

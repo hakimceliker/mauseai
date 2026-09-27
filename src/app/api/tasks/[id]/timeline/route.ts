@@ -6,11 +6,12 @@ import { ApiErrorHandler, NotFoundError } from '@/src/lib/errors/api-error-handl
 import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
 import * as Domain from '@/src/types/domain';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
-    const task = await LiveTaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
-    if (!task) throw new NotFoundError({ resource: 'task', id: params.id });
+    const task = await LiveTaskService.getTask(id as Domain.TaskId, auth.tenantId);
+    if (!task) throw new NotFoundError({ resource: 'task', id });
 
     const checkpoints = (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock'
       ? []

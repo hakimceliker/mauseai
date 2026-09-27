@@ -16,17 +16,18 @@ import { CheckpointRepository } from '@/src/lib/db/checkpoint-repository';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Verify authentication
     const auth = await requireAuthAsync(request);
 
     // Get task
-    const task = await LiveTaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
+    const task = await LiveTaskService.getTask(id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
-      throw new NotFoundError({ resource: 'task', id: params.id });
+      throw new NotFoundError({ resource: 'task', id });
     }
 
     const checkpoints = (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock'
@@ -88,17 +89,18 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Verify authentication
     const auth = await requireAuthAsync(request);
 
     // Cancel task
-    const task = await LiveTaskService.cancelTask(params.id as Domain.TaskId, auth.tenantId);
+    const task = await LiveTaskService.cancelTask(id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
-      throw new NotFoundError({ resource: 'task', id: params.id });
+      throw new NotFoundError({ resource: 'task', id });
     }
 
     // Format response
