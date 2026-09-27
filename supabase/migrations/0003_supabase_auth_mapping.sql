@@ -5,15 +5,5 @@ ALTER TABLE public.users
 CREATE INDEX IF NOT EXISTS idx_users_auth_user_id
   ON public.users(auth_user_id);
 
--- Resolve tenant membership from the authenticated Supabase user instead of
--- requiring an untrusted custom JWT tenant claim.
-CREATE OR REPLACE FUNCTION auth.get_tenant_id()
-RETURNS UUID AS $$
-  SELECT tenant_id
-  FROM public.users
-  WHERE auth_user_id = auth.uid()
-  LIMIT 1;
-$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, auth;
-
-REVOKE ALL ON FUNCTION auth.get_tenant_id() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION auth.get_tenant_id() TO authenticated, service_role;
+-- Tenant resolution is finalized in 0004 using public.get_tenant_id().
+-- Managed Supabase migration roles cannot replace functions in the auth schema.
