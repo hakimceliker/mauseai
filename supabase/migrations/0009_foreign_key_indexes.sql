@@ -1,0 +1,14 @@
+-- Cover foreign keys reported by Supabase performance advisor.
+CREATE INDEX IF NOT EXISTS idx_blueprints_blueprints_tenant_id ON public.blueprints (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_checkpoints_checkpoints_tenant_id ON public.checkpoints (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_cost_events_cost_events_task_id ON public.cost_events (task_id);
+CREATE INDEX IF NOT EXISTS idx_decision_records_decision_records_supersedes ON public.decision_records (supersedes);
+CREATE INDEX IF NOT EXISTS idx_decision_records_decision_records_tenant_id ON public.decision_records (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_deletion_requests_deletion_requests_tenant_id ON public.deletion_requests (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_eval_runs_eval_runs_baseline_run_id ON public.eval_runs (baseline_run_id);
+CREATE INDEX IF NOT EXISTS idx_eval_runs_eval_runs_tenant_id ON public.eval_runs (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_ingestion_sources_ingestion_sources_tenant_id ON public.ingestion_sources (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_sources_knowledge_sources_tenant_id ON public.knowledge_sources (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_notification_deliveries_notification_deliveries_route_id ON public.notification_deliveries (route_id);
+CREATE INDEX IF NOT EXISTS idx_notification_deliveries_notification_deliveries_tenant_id ON public.notification_deliveries (tenant_id);
+CREATE INDEX IF NOT EXISTS idx_risk_incidents_risk_incidents_tenant_id ON public.risk_incidents (tenant_id);
