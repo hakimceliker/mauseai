@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "smoke:production": "node scripts/production-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
