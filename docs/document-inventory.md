@@ -46,13 +46,13 @@
 
 ## E. Orkestrasyon ve dayanıklı iş akışı
 
-25. `decision-record-001.md` — bağımsız çekirdek ve provider-neutral yönlendirme
-26. `decision-record-002-temporal-vs-inngest.md` — Inngest/Temporal kararı
-27. `inngest-retry-and-edge-functions.md` — retry ve Edge uygulama standardı
-28. `inngest-step-functions-and-edge-boundary.md` — Step Functions/Edge sınırı
-29. `inngest-step-idempotency.md` — deterministik step ve idempotency kararı
-30. `idempotency-and-final-rls-decision.md` — idempotency ve final RLS kararı
-31. `temporal-determinism-rules.md` — yalnızca gelecekteki Temporal referansı
+28. `decision-record-001.md` — bağımsız çekirdek ve provider-neutral yönlendirme
+29. `decision-record-002-temporal-vs-inngest.md` — Inngest/Temporal kararı
+30. `inngest-retry-and-edge-functions.md` — retry ve Edge uygulama standardı
+31. `inngest-step-functions-and-edge-boundary.md` — Step Functions/Edge sınırı
+32. `inngest-step-idempotency.md` — deterministik step ve idempotency kararı
+33. `idempotency-and-final-rls-decision.md` — idempotency ve final RLS kararı
+34. `temporal-determinism-rules.md` — yalnızca gelecekteki Temporal referansı
 
 ## F. Teknik repo dosyaları
 
