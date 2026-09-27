@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
 import * as Domain from '@/src/types/domain';
+import { AuthError } from '@/src/lib/errors/api-error-handler';
+import { SupabaseAuth } from './supabase-auth';
 
 export interface AuthContext {
   tenantId: Domain.TenantId;
@@ -37,4 +39,19 @@ export function requireAuth(request: NextRequest): AuthContext {
     throw new Error('Unauthorized: missing auth headers');
   }
   return auth;
+}
+
+/**
+ * Production-aware auth boundary. Mock headers remain available only when
+ * AUTH_PROVIDER=mock, preserving local tests without weakening production.
+ */
+export async function requireAuthAsync(request: NextRequest): Promise<AuthContext> {
+  if ((process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock') {
+    return requireAuth(request);
+  }
+  const authorization = request.headers.get('authorization');
+  const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : undefined;
+  const user = token ? await SupabaseAuth.verifyToken(token) : null;
+  if (!user) throw new AuthError();
+  return { tenantId: user.tenant_id as Domain.TenantId, userId: user.id };
 }

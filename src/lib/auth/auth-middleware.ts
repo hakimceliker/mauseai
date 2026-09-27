@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthContext, AuthContext } from './mock-auth';
+import { extractAuthContext, AuthContext, requireAuthAsync } from './mock-auth';
 
 /**
  * Auth middleware for verifying tenant and user context
@@ -16,7 +16,7 @@ export interface MiddlewareContext {
 export function authMiddleware(handler: (req: NextRequest, ctx: MiddlewareContext) => Promise<NextResponse>) {
   return async (request: NextRequest) => {
     try {
-      const auth = extractAuthContext(request);
+      const auth = await requireAuthAsync(request).catch(() => null);
 
       if (!auth) {
         return NextResponse.json(

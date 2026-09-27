@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import { OfferRepository } from '@/src/lib/db/offer-repository';
 import { PolicyEngine } from '@/src/lib/policy/policy-engine';
 import { z } from 'zod';
@@ -23,7 +23,7 @@ const CreateOfferSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const body = await request.json();
     const validation = CreateOfferSchema.safeParse(body);
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
     const status = request.nextUrl.searchParams.get('status');
 
     const offers = await OfferRepository.getTenantOffers(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import { ConversationRepository } from '@/src/lib/db/conversation-repository';
 import {
   ApiErrorHandler,
@@ -13,7 +13,7 @@ import { addSecurityHeaders } from '@/src/lib/middleware/security-headers';
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const conversation = await ConversationRepository.createConversation(
       auth.tenantId,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     const conversations = await ConversationRepository.getTenantConversations(auth.tenantId);
 

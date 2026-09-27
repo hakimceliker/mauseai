@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
 import { TaskService } from '@/src/lib/services/task-service';
 import * as Domain from '@/src/types/domain';
 import {
@@ -19,7 +19,7 @@ export async function GET(
 ) {
   try {
     // Verify authentication
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     // Get task
     const task = TaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
@@ -80,7 +80,7 @@ export async function DELETE(
 ) {
   try {
     // Verify authentication
-    const auth = requireAuth(request);
+    const auth = await requireAuthAsync(request);
 
     // Cancel task
     const task = TaskService.cancelTask(params.id as Domain.TaskId, auth.tenantId);
