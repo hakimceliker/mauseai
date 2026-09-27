@@ -9,7 +9,7 @@ Bu belge, MouseAI Core’un GitHub, GPT/Kodex, Claude, diğer yapay zekâ sağla
 - Kodun gerçek kaynağı: GitHub deposu.
 - Görev ve kararların gerçek kaynağı: GitHub Issues, Pull Request ve `docs/` klasörü.
 - Çalışan ürün kaynağı: `main` dalındaki onaylanmış kod.
-- Kullanıcı dosya teslim klasörü: `C:\Users\Administrator\Downloads\MAUSEAİ\MouseAI-Core`.
+- Kullanıcı dosya teslim klasörü: `C:\Users\Administrator\Downloads\MAUSEAİ`.
 - Sırlar ve anahtarlar: yalnızca yerel ortam değişkeni, Supabase Vault veya deployment secret store. GitHub’a veya sohbet mesajına yazılmaz.
 - Değişiklikler bu belge, `change-control.md` ve güvenlik kurallarına aykırı olamaz.
 
