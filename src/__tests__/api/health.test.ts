@@ -9,6 +9,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import { GET, HEAD } from '@/src/app/api/health/route';
 
+vi.mock('@/src/lib/db/supabase', () => ({
+  getSupabaseAdmin: vi.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn().mockResolvedValue({ error: null, count: 0 }),
+    })),
+  })),
+}));
+
 // Mock the integrations module
 vi.mock('@/src/lib/integrations', () => ({
   getPaymentAdapter: vi.fn(() => ({
@@ -37,6 +45,7 @@ describe('/api/health', () => {
       expect(data.timestamp).toBeDefined();
       expect(data.version).toBe('0.1.0');
       expect(data.uptime).toBeGreaterThan(0);
+      expect(data.database.status).toBe('ready');
     });
 
     it('should include integration status', async () => {
