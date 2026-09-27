@@ -5,6 +5,7 @@ import { IdempotencyRepository } from '@/src/lib/db/idempotency-repository';
 import { CostTracker } from '@/src/lib/cost/cost-tracker';
 import { AuditService } from '@/src/lib/audit/audit-service';
 import { AIRouter } from '@/src/lib/ai/ai-router';
+import { WorkflowRepository } from '@/src/lib/db/workflow-repository';
 import * as Domain from '@/src/types/domain';
 
 /**
@@ -20,7 +21,7 @@ export const executeTask = inngest.createFunction(
   },
   { event: 'task.execute' },
   async ({ event, step }) => {
-    const { taskId, tenantId } = event.data;
+    const { taskId, tenantId, workflowId } = event.data;
 
     try {
       // Update task status to running
@@ -32,24 +33,14 @@ export const executeTask = inngest.createFunction(
         );
       });
 
-      // Mock workflow steps
-      const workflowSteps = [
-        {
-          id: 'step-1' as Domain.StepId,
-          name: 'Step 1: Process Input',
-          order: 1,
-        },
-        {
-          id: 'step-2' as Domain.StepId,
-          name: 'Step 2: Transform Data',
-          order: 2,
-        },
-        {
-          id: 'step-3' as Domain.StepId,
-          name: 'Step 3: Final Result',
-          order: 3,
-        },
-      ];
+      const workflowSteps = await step.run('load-workflow-steps', async () => {
+        const steps = await WorkflowRepository.getSteps(
+          workflowId as Domain.WorkflowId,
+          tenantId as Domain.TenantId
+        );
+        if (!steps.length) throw new Error('WORKFLOW_NOT_CONFIGURED');
+        return steps;
+      });
 
       // Execute each step
       const results: Record<string, unknown> = {};
