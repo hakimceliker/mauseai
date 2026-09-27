@@ -20,15 +20,16 @@ const UpdateStatusSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
-    const offer = await OfferRepository.getOffer(params.id, auth.tenantId);
+    const offer = await OfferRepository.getOffer(id, auth.tenantId);
 
     if (!offer) {
-      throw new NotFoundError({ resource: 'offer', id: params.id });
+      throw new NotFoundError({ resource: 'offer', id });
     }
 
     const result = NextResponse.json(
@@ -71,9 +72,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
     const body = await request.json();
@@ -83,10 +85,10 @@ export async function PUT(
       throw new ValidationError(validation.error.flatten());
     }
 
-    const offer = await OfferRepository.updateOfferStatus(params.id, auth.tenantId, validation.data.status);
+    const offer = await OfferRepository.updateOfferStatus(id, auth.tenantId, validation.data.status);
 
     if (!offer) {
-      throw new NotFoundError({ resource: 'offer', id: params.id });
+      throw new NotFoundError({ resource: 'offer', id });
     }
 
     const result = NextResponse.json(

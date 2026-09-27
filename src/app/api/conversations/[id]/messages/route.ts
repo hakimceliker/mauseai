@@ -21,16 +21,17 @@ const AddMessageSchema = z.object({
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
     // Verify conversation exists and belongs to tenant
-    const conversation = await ConversationRepository.getConversation(params.id, auth.tenantId);
+    const conversation = await ConversationRepository.getConversation(id, auth.tenantId);
 
     if (!conversation) {
-      throw new NotFoundError({ resource: 'conversation', id: params.id });
+      throw new NotFoundError({ resource: 'conversation', id });
     }
 
     const body = await request.json();
@@ -41,7 +42,7 @@ export async function POST(
     }
 
     const message = await ConversationRepository.addMessage(
-      params.id,
+      id,
       validation.data.role,
       validation.data.content
     );
@@ -83,19 +84,20 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
     // Verify conversation exists and belongs to tenant
-    const conversation = await ConversationRepository.getConversation(params.id, auth.tenantId);
+    const conversation = await ConversationRepository.getConversation(id, auth.tenantId);
 
     if (!conversation) {
-      throw new NotFoundError({ resource: 'conversation', id: params.id });
+      throw new NotFoundError({ resource: 'conversation', id });
     }
 
-    const messages = await ConversationRepository.getMessages(params.id);
+    const messages = await ConversationRepository.getMessages(id);
 
     const result = NextResponse.json(
       {

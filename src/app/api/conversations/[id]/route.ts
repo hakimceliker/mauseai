@@ -23,21 +23,22 @@ const TransitionStateSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
     const conversation = await ConversationRepository.getConversation(
-      params.id,
+      id,
       auth.tenantId
     );
 
     if (!conversation) {
-      throw new NotFoundError({ resource: 'conversation', id: params.id });
+      throw new NotFoundError({ resource: 'conversation', id });
     }
 
-    const messages = await ConversationRepository.getMessages(params.id);
+    const messages = await ConversationRepository.getMessages(id);
 
     const result = NextResponse.json(
       {
@@ -83,9 +84,10 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const auth = await requireAuthAsync(request);
 
     const body = await request.json();
@@ -96,13 +98,13 @@ export async function PUT(
     }
 
     const conversation = await ConversationRepository.transitionState(
-      params.id,
+      id,
       auth.tenantId,
       validation.data.state as ConversationState
     );
 
     if (!conversation) {
-      throw new NotFoundError({ resource: 'conversation', id: params.id });
+      throw new NotFoundError({ resource: 'conversation', id });
     }
 
     const result = NextResponse.json(
