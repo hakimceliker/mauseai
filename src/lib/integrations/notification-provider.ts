@@ -5,7 +5,8 @@
  *
  * Configuration:
  * - NOTIFICATION_TYPE: Type of notification (console, email, slack, multi)
- * - EMAIL_PROVIDER_KEY: API key for email provider
+ * - EMAIL_PROVIDER_KEY / RESEND_API_KEY: API key for email provider
+ * - EMAIL_FROM: verified sender address for the email provider
  * - SLACK_WEBHOOK_URL: Slack incoming webhook URL
  * - SMS_API_KEY: SMS provider API key
  *
@@ -61,10 +62,8 @@ export interface NotificationResult {
  * Single provider handles all notification channels
  * or route to channel-specific implementations
  *
- * TODO: Implement batching for better performance
- * TODO: Implement retry logic with exponential backoff
- * TODO: Implement delivery tracking and bounce handling
- * TODO: Add email templates and Slack templates
+ * Delivery retries and tracking belong in the durable notification workflow;
+ * this adapter is intentionally one request per call and never logs secrets.
  */
 export interface INotificationProvider {
   /**
@@ -72,11 +71,6 @@ export interface INotificationProvider {
    * @param message Email message details
    * @returns Notification result with ID and status
    *
-   * TODO: Implement email sending
-   * TODO: Validate email addresses
-   * TODO: Handle bounce/failure responses
-   * TODO: Support HTML and plain text
-   * TODO: Track delivery for analytics
    */
   sendEmail(message: EmailMessage): Promise<NotificationResult>;
 
@@ -85,10 +79,6 @@ export interface INotificationProvider {
    * @param message Slack message details
    * @returns Notification result with ID and status
    *
-   * TODO: Implement Slack webhook integration
-   * TODO: Support rich formatting with Block Kit
-   * TODO: Handle Slack rate limiting
-   * TODO: Log message for audit trail
    */
   sendSlack(message: SlackMessage): Promise<NotificationResult>;
 
@@ -200,21 +190,50 @@ class ConsoleNotificationProvider implements INotificationProvider {
 }
 
 /**
- * Email provider implementation
- * TODO: Implement with SendGrid, AWS SES, or similar
+ * Email provider implementation using the Resend HTTP API.
+ * The key and sender are server-only environment variables.
  */
 class EmailNotificationProvider implements INotificationProvider {
   private apiKey: string;
+  private from: string;
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, from: string) {
     this.apiKey = apiKey;
+    this.from = from;
   }
 
-  async sendEmail(_message: EmailMessage): Promise<NotificationResult> {
-    // TODO: Implement email sending with provider
-    // TODO: Validate email addresses
-    // TODO: Handle HTML and plain text
-    throw new Error('Email provider not configured. Set EMAIL_PROVIDER_KEY');
+  async sendEmail(message: EmailMessage): Promise<NotificationResult> {
+    if (!this.apiKey || !this.from) {
+      throw new Error('credential_not_configured:RESEND_API_KEY/EMAIL_FROM (not configured)');
+    }
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${this.apiKey}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: this.from,
+        to: message.to,
+        subject: message.subject,
+        text: message.body,
+        ...(message.html ? { html: message.html } : {}),
+        ...(message.cc ? { cc: message.cc } : {}),
+        ...(message.bcc ? { bcc: message.bcc } : {}),
+        ...(message.replyTo ? { reply_to: message.replyTo } : {}),
+      }),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) throw new Error('NOTIFICATION_PROVIDER_ERROR');
+    const result = (await response.json()) as { id?: string };
+    return {
+      id: result.id ?? `email_${Date.now()}`,
+      status: 'sent',
+      channel: 'email',
+      timestamp: new Date(),
+    };
   }
 
   async sendSlack(_message: SlackMessage): Promise<NotificationResult> {
@@ -230,8 +249,7 @@ class EmailNotificationProvider implements INotificationProvider {
   }
 
   async isHealthy(): Promise<boolean> {
-    // TODO: Validate provider credentials
-    return false;
+    return Boolean(this.apiKey && this.from);
   }
 }
 
@@ -286,7 +304,8 @@ class SlackNotificationProvider implements INotificationProvider {
  *
  * Configuration:
  * - NOTIFICATION_TYPE: Type (console, email, slack, multi)
- * - EMAIL_PROVIDER_KEY: Email API key (required for email)
+ * - RESEND_API_KEY: Resend API key (required for email)
+ * - EMAIL_FROM: verified sender address (required for email)
  * - SLACK_WEBHOOK_URL: Slack webhook (required for slack)
  *
  * Environment Variable Safety:
@@ -302,14 +321,15 @@ export function createNotificationAdapter(): INotificationProvider {
 
   switch (notificationType) {
     case 'email': {
-      const emailKey = process.env.EMAIL_PROVIDER_KEY;
-      if (!emailKey) {
+      const emailKey = process.env.RESEND_API_KEY || process.env.EMAIL_PROVIDER_KEY;
+      const emailFrom = process.env.EMAIL_FROM || '';
+      if (!emailKey || !emailFrom) {
         console.error(
-          'Email notifications selected but EMAIL_PROVIDER_KEY not set. ' +
-          'Add to .env.local (never commit to git)'
+          'Email notifications selected but RESEND_API_KEY or EMAIL_FROM is not set. ' +
+          'Configure the approved secret store (never commit credentials)'
         );
       }
-      return new EmailNotificationProvider(emailKey || '');
+      return new EmailNotificationProvider(emailKey || '', emailFrom);
     }
 
     case 'slack': {
