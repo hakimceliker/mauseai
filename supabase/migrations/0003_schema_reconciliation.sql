@@ -6,8 +6,8 @@
 -- Everything here is additive: columns are added, NOT NULL constraints the code
 -- cannot satisfy are relaxed, and no row or column is dropped.
 
--- Tenant resolution: JWT claim first, then the caller's profile. SECURITY DEFINER so the
--- lookup is not itself filtered by the profiles RLS policy (no recursion).
+-- Tenant resolution: JWT claim first, then the caller's own profile. This remains
+-- SECURITY INVOKER so it cannot be used as a privilege-escalation RPC.
 CREATE TABLE IF NOT EXISTS profiles (
   user_id UUID PRIMARY KEY,
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -18,7 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_tenant_id ON profiles(tenant_id);
 
 CREATE OR REPLACE FUNCTION public.get_tenant_id()
 RETURNS UUID
-LANGUAGE plpgsql STABLE SECURITY DEFINER
+LANGUAGE plpgsql STABLE SECURITY INVOKER
 SET search_path = public
 AS $$
 DECLARE
@@ -34,7 +34,7 @@ $$;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS profiles_tenant_read ON profiles;
 CREATE POLICY profiles_tenant_read ON profiles FOR SELECT
-  USING (user_id = auth.uid() OR tenant_id = public.get_tenant_id());
+  USING (user_id = auth.uid());
 
 -- tasks: columns used by createTask / cost-service / continue route
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS created_by UUID;
