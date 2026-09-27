@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
-import { TaskService } from '@/src/lib/services/task-service';
+import { LiveTaskService } from '@/src/lib/services/live-task-service';
 import * as Domain from '@/src/types/domain';
 import {
   ApiErrorHandler,
@@ -22,7 +22,7 @@ export async function GET(
     const auth = await requireAuthAsync(request);
 
     // Get task
-    const task = TaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
+    const task = await LiveTaskService.getTask(params.id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
       throw new NotFoundError({ resource: 'task', id: params.id });
@@ -83,7 +83,7 @@ export async function DELETE(
     const auth = await requireAuthAsync(request);
 
     // Cancel task
-    const task = TaskService.cancelTask(params.id as Domain.TaskId, auth.tenantId);
+    const task = await LiveTaskService.cancelTask(params.id as Domain.TaskId, auth.tenantId);
 
     if (!task) {
       throw new NotFoundError({ resource: 'task', id: params.id });
