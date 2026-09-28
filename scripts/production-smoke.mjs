@@ -29,35 +29,31 @@ if (!health.response.ok) process.exitCode = 1;
 
 if (!bearer) {
   console.log('auth_tasks: skipped (SMOKE_BEARER_TOKEN not configured)');
-  process.exit(process.exitCode || 0);
-}
+} else {
+  const tasks = await request('/api/tasks');
+  console.log(`tasks_read: ${tasks.response.status}`);
+  if (!tasks.response.ok) process.exitCode = 1;
 
-const tasks = await request('/api/tasks');
-console.log(`tasks_read: ${tasks.response.status}`);
-if (!tasks.response.ok) process.exitCode = 1;
-
-if (!createTask) {
-  console.log('task_write: skipped (set SMOKE_CREATE_TASK=1 for an explicit test task)');
-  process.exit(process.exitCode || 0);
-}
-
-if (!workflowId) {
-  console.error('configuration_missing:SMOKE_WORKFLOW_ID');
-  process.exit(2);
-}
-
-const created = await request('/api/tasks', {
-  method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({
-    workflow_id: workflowId,
-    input: { smoke_test: true, requested_at: new Date().toISOString() },
-  }),
-});
-console.log(`task_create: ${created.response.status}`);
-if (!created.response.ok) process.exitCode = 1;
-if (created.response.ok) {
-  const taskId = created.body?.data?.id;
-  console.log(`task_id: ${taskId ? 'created' : 'missing'}`);
-  if (!taskId) process.exitCode = 1;
+  if (!createTask) {
+    console.log('task_write: skipped (set SMOKE_CREATE_TASK=1 for an explicit test task)');
+  } else if (!workflowId) {
+    console.error('configuration_missing:SMOKE_WORKFLOW_ID');
+    process.exitCode = 2;
+  } else {
+    const created = await request('/api/tasks', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        workflow_id: workflowId,
+        input: { smoke_test: true, requested_at: new Date().toISOString() },
+      }),
+    });
+    console.log(`task_create: ${created.response.status}`);
+    if (!created.response.ok) process.exitCode = 1;
+    if (created.response.ok) {
+      const taskId = created.body?.data?.id;
+      console.log(`task_id: ${taskId ? 'created' : 'missing'}`);
+      if (!taskId) process.exitCode = 1;
+    }
+  }
 }
