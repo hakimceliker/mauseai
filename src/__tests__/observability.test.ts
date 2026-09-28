@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { LangfuseAdapter, Observability, SentryAdapter, redactTelemetry } from '@/src/lib/observability';
+import { AIRouter } from '@/src/lib/ai/ai-router';
+import { ErrorLogger } from '@/src/lib/logging/error-logger';
+import { LangfuseAdapter, Observability, SentryAdapter, observability, redactTelemetry } from '@/src/lib/observability';
 
 afterEach(() => { vi.restoreAllMocks(); delete process.env.SENTRY_DSN; delete process.env.LANGFUSE_PUBLIC_KEY; delete process.env.LANGFUSE_SECRET_KEY; });
 
@@ -22,5 +24,16 @@ describe('observability adapters', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const result = await new Observability().reportException(new Error('test'), { password: 'never-send' });
     expect(result[0]).toMatchObject({ provider: 'sentry', status: 'error', reason: 'network_error' });
+  });
+
+  it('hooks AI completions and errors without blocking the caller', async () => {
+    const traceSpy = vi.spyOn(observability, 'reportTrace').mockResolvedValue([]);
+    const errorSpy = vi.spyOn(observability, 'reportException').mockResolvedValue([]);
+    process.env.AI_PROVIDER = 'mock';
+    await new AIRouter().call([{ role: 'user', content: 'hello' }]);
+    ErrorLogger.logError(new Error('expected'), { errorId: 'err-1', requestPath: '/api/tasks' });
+    expect(traceSpy).toHaveBeenCalledOnce();
+    expect(errorSpy).toHaveBeenCalledOnce();
+    delete process.env.AI_PROVIDER;
   });
 });
