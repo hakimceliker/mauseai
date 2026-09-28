@@ -52,30 +52,22 @@ describe('AI Providers', () => {
   });
 
   describe('AIRouter', () => {
-    it('should use GPT provider when AI_PROVIDER=gpt', async () => {
+    it('should route GPT alias to the real OpenAI provider', () => {
       const originalEnv = process.env.AI_PROVIDER;
       process.env.AI_PROVIDER = 'gpt';
 
       const router = new AIRouter();
-      expect(router.getProviderName()).toBe('mock-gpt');
-
-      const messages: AIMessage[] = [{ role: 'user', content: 'test' }];
-      const response = await router.call(messages);
-      expect(response.provider).toBe('mock-gpt');
+      expect(router.getProviderName()).toBe('openai');
 
       process.env.AI_PROVIDER = originalEnv;
     });
 
-    it('should use Claude provider when AI_PROVIDER=claude', async () => {
+    it('should route Claude alias to the real Anthropic provider', () => {
       const originalEnv = process.env.AI_PROVIDER;
       process.env.AI_PROVIDER = 'claude';
 
       const router = new AIRouter();
-      expect(router.getProviderName()).toBe('mock-claude');
-
-      const messages: AIMessage[] = [{ role: 'user', content: 'test' }];
-      const response = await router.call(messages);
-      expect(response.provider).toBe('mock-claude');
+      expect(router.getProviderName()).toBe('anthropic');
 
       process.env.AI_PROVIDER = originalEnv;
     });

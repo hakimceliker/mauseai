@@ -174,9 +174,8 @@ curl https://api.inngest.com/e/prod \
 ### Option 1: Deploy to Vercel (Recommended)
 
 #### 1. Prepare Repository
-```bash
-git push origin main
-```
+Use the repository policy: work on a branch, open a pull request, wait for all
+CI gates, then merge through GitHub. Never push directly to `main`.
 
 #### 2. Connect to Vercel
 1. Go to [vercel.com](https://vercel.com)

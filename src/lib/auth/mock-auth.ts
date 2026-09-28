@@ -46,7 +46,9 @@ export function requireAuth(request: NextRequest): AuthContext {
  * AUTH_PROVIDER=mock, preserving local tests without weakening production.
  */
 export async function requireAuthAsync(request: NextRequest): Promise<AuthContext> {
-  if ((process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock') {
+  const configuredProvider = (process.env.AUTH_PROVIDER ?? '').toLowerCase();
+  const authProvider = configuredProvider || (process.env.NODE_ENV === 'production' ? 'supabase' : 'mock');
+  if (authProvider === 'mock') {
     return requireAuth(request);
   }
   const authorization = request.headers.get('authorization');
