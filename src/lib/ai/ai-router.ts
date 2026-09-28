@@ -1,29 +1,26 @@
 import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
-import { MockClaudeProvider } from './providers/mock-claude';
 import { OpenAIProvider } from './providers/openai';
 import { AnthropicProvider } from './providers/anthropic';
 
 /**
  * AI Router - selects appropriate provider based on environment configuration
- * Supports: gpt, claude, mock (default)
+ * Supports: openai/gpt, anthropic/claude, mock.
+ * Production deployments must select a real provider explicitly; mock is
+ * retained for local development and deterministic tests.
  */
 export class AIRouter {
   private provider: AIProvider;
 
   constructor() {
-    const aiProvider = process.env.AI_PROVIDER || 'mock';
+    const aiProvider = (process.env.AI_PROVIDER || 'mock').toLowerCase();
 
     switch (aiProvider) {
       case 'gpt':
-        this.provider = new MockGPTProvider();
-        break;
       case 'openai':
         this.provider = new OpenAIProvider();
         break;
       case 'claude':
-        this.provider = new MockClaudeProvider();
-        break;
       case 'anthropic':
         this.provider = new AnthropicProvider();
         break;
