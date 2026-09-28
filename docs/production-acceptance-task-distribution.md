@@ -111,6 +111,20 @@ Credential yoksa:
 
 ## Şu anki eksikler
 
+### Otomatik doğrulama aracı
+
+Canlı credential değerleri sohbete veya repoya yazılmadan acceptance runner çalıştırılabilir:
+
+```text
+SMOKE_BASE_URL=https://mauseai.vercel.app \\
+SMOKE_USER_A_TOKEN=<runtime secret> \\
+SMOKE_USER_B_TOKEN=<runtime secret> \\
+SMOKE_WORKFLOW_ID=<test workflow id> \\
+npm run acceptance:production
+```
+
+Runner kimliksiz erişimi, yanlış tokenı, iki tenant görünümünü, çapraz tenant task erişimini, task tetiklemeyi ve terminal worker durumunu kontrol eder. Credential yoksa `credential_not_configured` üretir; PASS üretmez ve secret değerini yazdırmaz.
+
 ### Production kabulünü engelleyenler
 
 1. Gerçek Auth test hesabı/tokenı.
