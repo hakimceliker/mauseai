@@ -5,6 +5,7 @@ import { getNotificationAdapter } from '@/src/lib/integrations';
 import { getAnalyticsAdapter } from '@/src/lib/integrations';
 import { getRealtimeProvider } from '@/src/lib/integrations';
 import { getSupabaseAdminClient } from '@/src/lib/supabase/admin';
+import { missingSupabaseRuntimeEnv, getSupabaseAnonKey, getSupabaseUrl } from '@/src/lib/supabase/env';
 
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
@@ -18,15 +19,6 @@ interface HealthStatus {
     analytics?: { status: string; type?: string };
     realtime?: { status: string; connected?: boolean };
   };
-}
-
-const REQUIRED_DATABASE_ENV = [
-  'NEXT_PUBLIC_SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
-] as const;
-
-function missingRuntimeEnv(names: readonly string[]) {
-  return names.filter((name) => !process.env[name]);
 }
 
 /**
@@ -43,7 +35,7 @@ export async function GET() {
   const integrations: HealthStatus['integrations'] = {};
   let database: NonNullable<HealthStatus['database']> = { status: 'error' };
 
-  const missingDatabaseEnv = missingRuntimeEnv(REQUIRED_DATABASE_ENV);
+  const missingDatabaseEnv = missingSupabaseRuntimeEnv();
   if (missingDatabaseEnv.length > 0) {
     database = {
       status: 'not_configured',
@@ -109,7 +101,7 @@ export async function GET() {
   try {
     const realtimeProvider = getRealtimeProvider();
     const realtimeConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      getSupabaseUrl() && getSupabaseAnonKey(),
     );
     integrations.realtime = {
       // Realtime is established by browser clients, not by this stateless
@@ -161,7 +153,7 @@ export async function GET() {
  */
 export async function HEAD() {
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (missingSupabaseRuntimeEnv().length > 0) {
       throw new Error('credential_not_configured');
     }
     const { error } = await getSupabaseAdminClient()
