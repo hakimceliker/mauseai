@@ -121,6 +121,8 @@ export interface IAnalyticsProvider {
   isHealthy(): Promise<boolean>;
 }
 
+import { PostHogAnalyticsProvider } from './posthog-provider';
+
 /**
  * Console analytics provider (development)
  * Logs all events to console instead of sending to analytics
@@ -300,6 +302,8 @@ export function createAnalyticsAdapter(): IAnalyticsProvider {
   const apiKey = process.env.ANALYTICS_API_KEY || '';
 
   switch (analyticsType) {
+    case 'posthog':
+      return new PostHogAnalyticsProvider(process.env.POSTHOG_KEY || '');
     case 'mixpanel':
       if (!apiKey) {
         console.warn(
