@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-002-arch-review-standard` |
 | Sahip / Reviewer | claude / hakimceliker |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Her PR için Claude mimari/güvenlik inceleme standardı: bulgu seviyeleri, tenant/RLS, secret, idempotency, hata yönetimi, test ve rollback kontrol listesi; merge kararı formatı.
@@ -25,7 +25,8 @@ Yok (bağımsız).
 - [ ] Belge envanterine ve görev defterine işlenmiş
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `docs/review/architecture-review-standard.md` bulgu seviyelerini, güvenlik/tenant/idempotency/observability kontrollerini ve merge şablonunu tanımlar.
+- Belge, her PR için uygulanabilir kanıt listesi ve rollback alanı içerir.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -38,4 +39,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert; yalnızca belge.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — inceleme standardı doküman olarak tamamlandı.
