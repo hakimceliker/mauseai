@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-008-stripe-sandbox` |
 | Sahip / Reviewer | stripe / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Stripe adapter'ı yalnızca test modunda çalışsın: `sk_live_`/`rk_live_` anahtarları ve livemode=true webhook olayları reddedilir (`live_mode_not_approved`); sandbox testleri.
@@ -26,7 +26,9 @@ Yok; STRIPE_SECRET_KEY yoksa credential_not_configured. Canlı mod kullanıcı k
 - [ ] Test anahtarı ile mevcut akış bozulmaz
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `sk_live_` ve `rk_live_` credential'ları provider oluşturulmadan reddediliyor.
+- `livemode=true` webhook olayları wallet yazımı öncesinde 403 ile durduruluyor.
+- Sandbox koruması için anahtar türü ve provider oluşturma testleri eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -39,4 +41,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — canlı Stripe credential'ı veya gerçek ödeme kullanılmadı.

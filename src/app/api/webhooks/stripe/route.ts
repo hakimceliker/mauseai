@@ -24,8 +24,12 @@ export async function POST(request: Request) {
     const event = JSON.parse(body) as {
       id?: string;
       type?: string;
+      livemode?: boolean;
       data?: { object?: { amount_received?: number; amount?: number; metadata?: Record<string, string>; currency?: string } };
     };
+    if (event.livemode === true) {
+      return NextResponse.json({ error: 'live_mode_not_approved' }, { status: 403 });
+    }
     const object = event.data?.object;
     const tenantId = object?.metadata?.tenant_id;
     const amountCents = Number(object?.amount_received ?? object?.amount ?? 0);

@@ -13,6 +13,14 @@ class CredentialNotConfiguredError extends Error {
   }
 }
 
+export function isLiveStripeCredential(value: string): boolean {
+  return /^(sk|rk)_live_/i.test(value.trim());
+}
+
+class LiveModeNotApprovedError extends Error {
+  constructor() { super('live_mode_not_approved'); this.name = 'LiveModeNotApprovedError'; }
+}
+
 /**
  * Mock payment provider for development
  * Simulates payment processing without connecting to real payment systems
@@ -80,6 +88,7 @@ class StripePaymentProvider implements IPaymentProvider {
   private webhookSecret: string;
 
   constructor(apiKey: string, webhookSecret: string) {
+    if (isLiveStripeCredential(apiKey)) throw new LiveModeNotApprovedError();
     this.apiKey = apiKey;
     this.webhookSecret = webhookSecret;
   }
@@ -245,6 +254,7 @@ export function createPaymentAdapter(): IPaymentProvider {
       if (!apiKey) {
         throw new CredentialNotConfiguredError('PAYMENT_API_KEY');
       }
+      if (isLiveStripeCredential(apiKey)) throw new LiveModeNotApprovedError();
       return new StripePaymentProvider(apiKey, webhookSecret);
 
     case 'square':
