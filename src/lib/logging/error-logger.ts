@@ -6,6 +6,7 @@
 
 import { StructuredLogger, type LogContext } from './structured-logger';
 import { randomUUID } from 'crypto';
+import { observability } from '@/src/lib/observability';
 
 interface ErrorLogContext {
   errorId: string;
@@ -66,6 +67,14 @@ export class ErrorLogger {
       logContext,
       error instanceof Error ? error : new Error(errorMessage)
     );
+
+    // Telemetry is best-effort and never blocks or fails the request.
+    void observability.reportException(error, {
+      errorId: context.errorId,
+      requestPath: context.requestPath,
+      method: context.method,
+      errorType,
+    }).catch(() => undefined);
 
     // Also log details in development
     if (process.env.NODE_ENV === 'development') {

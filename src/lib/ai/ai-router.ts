@@ -2,6 +2,7 @@ import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
 import { OpenAIProvider } from './providers/openai';
 import { AnthropicProvider } from './providers/anthropic';
+import { observability } from '@/src/lib/observability';
 
 /**
  * AI Router - selects appropriate provider based on environment configuration
@@ -51,7 +52,22 @@ export class AIRouter {
    * Call the AI provider
    */
   async call(messages: AIMessage[]): Promise<AIResponse> {
-    return this.provider.call(messages);
+    const startedAt = new Date().toISOString();
+    try {
+      const response = await this.provider.call(messages);
+      void observability.reportTrace({
+        name: `${this.provider.name}.completion`,
+        input: messages,
+        output: response.content,
+        metadata: { provider: this.provider.name, tokens_used: response.tokens_used },
+        startedAt,
+        endedAt: new Date().toISOString(),
+      }).catch(() => undefined);
+      return response;
+    } catch (error) {
+      void observability.reportException(error, { provider: this.provider.name }).catch(() => undefined);
+      throw error;
+    }
   }
 
   /**

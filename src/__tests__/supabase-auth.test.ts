@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach } from 'vitest';
+import { describe, expect, it, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { AuthError } from '@/src/lib/errors/api-error-handler';
 import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
@@ -11,6 +11,7 @@ describe('Supabase production auth boundary', () => {
 
   afterEach(() => {
     process.env.AUTH_PROVIDER = originalProvider;
+    vi.unstubAllEnvs();
     process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = originalAnon;
   });
@@ -26,6 +27,15 @@ describe('Supabase production auth boundary', () => {
   it('rejects production mode without a bearer token', async () => {
     process.env.AUTH_PROVIDER = 'supabase';
     const request = new NextRequest('http://localhost/api/tasks');
+    await expect(requireAuthAsync(request)).rejects.toBeInstanceOf(AuthError);
+  });
+
+  it('rejects mock auth when production is explicitly configured', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    process.env.AUTH_PROVIDER = 'mock';
+    const request = new NextRequest('http://localhost/api/tasks', {
+      headers: { 'x-tenant-id': 'tenant-1', 'x-user-id': 'user-1' },
+    });
     await expect(requireAuthAsync(request)).rejects.toBeInstanceOf(AuthError);
   });
 

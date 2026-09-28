@@ -48,6 +48,9 @@ export function requireAuth(request: NextRequest): AuthContext {
 export async function requireAuthAsync(request: NextRequest): Promise<AuthContext> {
   const configuredProvider = (process.env.AUTH_PROVIDER ?? '').toLowerCase();
   const authProvider = configuredProvider || (process.env.NODE_ENV === 'production' ? 'supabase' : 'mock');
+  if (process.env.NODE_ENV === 'production' && authProvider === 'mock') {
+    throw new AuthError();
+  }
   if (authProvider === 'mock') {
     return requireAuth(request);
   }
