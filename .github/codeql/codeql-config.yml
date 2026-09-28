@@ -1,0 +1,11 @@
+name: MouseAI CodeQL configuration
+
+# Keep security-extended as the baseline in the workflow. This file controls
+# only the paths that are not application source and should not be analyzed.
+paths-ignore:
+  - .next
+  - coverage
+  - dist
+  - node_modules
+  - docs
+  - tests
