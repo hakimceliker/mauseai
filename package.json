@@ -20,6 +20,7 @@
     "smoke:production": "node scripts/production-smoke.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.38.0",
     "inngest": "^3.12.0",

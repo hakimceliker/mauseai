@@ -31,8 +31,9 @@ describe('real AI providers', () => {
   it('normalizes an Anthropic response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
       content: [{ type: 'text', text: 'done' }],
+      stop_reason: 'end_turn',
       usage: { input_tokens: 4, output_tokens: 6 },
-    }), { status: 200 })));
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
     const result = await new AnthropicProvider('test-key').call(messages);
     expect(result.provider).toBe('anthropic');
     expect(result.content).toBe('done');
