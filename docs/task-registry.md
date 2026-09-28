@@ -5,7 +5,7 @@
 | CORE-001 | Repo ve kalite kapıları | Platform | COMPLETE | README, env, ignore, CI |
 | CORE-002 | Task/Workflow sözleşmeleri | Contracts | COMPLETE | TypeScript + Zod sözleşmeleri |
 | CORE-003 | Task API | API | COMPLETE | create/get/cancel/list |
-| CORE-004 | Worker checkpoint | Worker | CODE_COMPLETE_LIVE_TEST_PENDING | retry/resume kodu; canlı Inngest kanıtı bekliyor |
+| CORE-004 | Worker checkpoint | Worker | CODE_COMPLETE_LIVE_TEST_PENDING | `task.execute` retry/resume kodu; acceptance runner hazır, canlı Inngest kanıtı bekliyor |
 | CORE-005 | AI provider router | AI Gateway | CODE_COMPLETE_CREDENTIAL_PENDING | mock + OpenAI/Anthropic adapter; gerçek credential doğrulaması bekliyor |
 | CORE-006 | E-posta müşteri asistanı | Customer Ops | MVP_MOCK | conversation/offer mock akışı; gerçek e-posta sağlayıcısı sonraki kapsam |
 | CORE-007 | Audit ve maliyet | Platform | CODE_COMPLETE_LIVE_TEST_PENDING | event ledger; canlı workflow kanıtı bekliyor |

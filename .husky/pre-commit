@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
 
 # Run lint on staged TypeScript/TSX files
 eslint . --ext .ts,.tsx --max-warnings 0 2>/dev/null || true
