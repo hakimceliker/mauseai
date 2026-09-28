@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-007-anthropic-adapter` |
 | Sahip / Reviewer | anthropic / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Anthropic adapter'ını resmi `@anthropic-ai/sdk` ile yeniden yaz: güncel model (`claude-opus-5`, env ile değiştirilebilir), timeout/maxRetries, refusal/stop_reason işleme, token ve maliyet ölçümü; testler.
@@ -27,7 +27,11 @@ Yok; ANTHROPIC_API_KEY yoksa credential_not_configured.
 - [ ] Anahtar yoksa CREDENTIAL_NOT_CONFIGURED; hata anahtar içermez
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- Anthropic adapter ortak request policy ile AbortController timeout ve sınırlı retry kullanıyor.
+- 429/5xx tekrar deneniyor; kalıcı 4xx tekrar denenmiyor.
+- Provider hata gövdeleri anahtar/Bearer maskelemesiyle döndürülüyor.
+- Credential yoksa `CREDENTIAL_NOT_CONFIGURED` akışı korunuyor.
+- OpenAI/Anthropic response normalization testleri mock fetch ile çalıştırılıyor.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -40,4 +44,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert; bağımlılık kaldırılır.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — gerçek Anthropic credential'ı branch'e eklenmedi.
