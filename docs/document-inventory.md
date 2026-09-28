@@ -2,6 +2,8 @@
 
 **Tarama tarihi:** 26.09.2026  
 **Çekirdek docs sayısı:** 24  
+**Orkestrasyon ve dayanıklı iş akışı docs sayısı:** 7
+**Toplam numaralı doküman:** 31
 **Ana çıktı sayısı:** 7  
 **Downloads kök dosya sayısı:** 25  
 
