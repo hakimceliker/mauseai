@@ -2,9 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * MouseAI design tokens. Source of truth: src/styles/tokens.ts
+ * Keep in sync (enforced by src/__tests__/design-tokens.test.ts).
+ * Docs: docs/design/design-system.md
+ */
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --mouse-color-bg: #ffffff;
+  --mouse-color-surface: #f8fafc;
+  --mouse-color-surface-glass: rgba(248, 250, 252, 0.88);
+  --mouse-color-border: #e2e8f0;
+  --mouse-color-text-primary: #0f172a;
+  --mouse-color-text-strong: #1e293b;
+  --mouse-color-text-secondary: #334155;
+  --mouse-color-text-muted: #64748b;
+  --mouse-color-accent: #0e7490;
+  --mouse-color-on-accent: #ffffff;
+  --mouse-color-success: #047857;
+  --mouse-color-on-success: #ffffff;
+  --mouse-color-warning: #b45309;
+  --mouse-color-on-warning: #ffffff;
+  --mouse-color-danger: #b91c1c;
+  --mouse-color-on-danger: #ffffff;
+  --mouse-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --mouse-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  --mouse-text-xs: 0.75rem;
+  --mouse-text-sm: 0.875rem;
+  --mouse-text-base: 1rem;
+  --mouse-text-lg: 1.125rem;
+  --mouse-text-xl: 1.25rem;
+  --mouse-text-2xl: 1.5rem;
+  --mouse-text-3xl: 1.875rem;
+  --mouse-leading-tight: 1.25;
+  --mouse-leading-normal: 1.5;
+  --mouse-leading-relaxed: 1.625;
+  --mouse-font-weight-regular: 400;
+  --mouse-font-weight-medium: 500;
+  --mouse-font-weight-semibold: 600;
+  --mouse-font-weight-bold: 700;
+  --mouse-space-0: 0;
+  --mouse-space-1: 0.25rem;
+  --mouse-space-2: 0.5rem;
+  --mouse-space-3: 0.75rem;
+  --mouse-space-4: 1rem;
+  --mouse-space-6: 1.5rem;
+  --mouse-space-8: 2rem;
+  --mouse-space-12: 3rem;
+  --mouse-radius-sm: 0.25rem;
+  --mouse-radius-md: 0.5rem;
+  --mouse-radius-lg: 0.75rem;
+  --mouse-radius-xl: 1rem;
+  --mouse-radius-full: 9999px;
+  --mouse-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --mouse-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+  --mouse-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+  --mouse-blur-sm: 4px;
+  --mouse-blur-md: 12px;
+
+  font-family: var(--mouse-font-sans);
 }
 
 * { box-sizing: border-box; }
@@ -13,21 +68,21 @@ html, body { min-height: 100%; }
 
 body {
   margin: 0;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--mouse-color-bg);
+  color: var(--mouse-color-text-primary);
 }
 
-.mouseai-light .text-white { color: #0f172a !important; }
-.mouseai-light .text-slate-200 { color: #1e293b !important; }
-.mouseai-light .text-slate-300 { color: #334155 !important; }
+.mouseai-light .text-white { color: var(--mouse-color-text-primary) !important; }
+.mouseai-light .text-slate-200 { color: var(--mouse-color-text-strong) !important; }
+.mouseai-light .text-slate-300 { color: var(--mouse-color-text-secondary) !important; }
 .mouseai-light .text-slate-400,
-.mouseai-light .text-slate-500 { color: #64748b !important; }
+.mouseai-light .text-slate-500 { color: var(--mouse-color-text-muted) !important; }
 .mouseai-light .bg-slate-950\/50,
 .mouseai-light .bg-slate-900\/50,
 .mouseai-light .bg-slate-800\/50,
-.mouseai-light .bg-slate-900\/30 { background: rgba(248, 250, 252, 0.88) !important; }
+.mouseai-light .bg-slate-900\/30 { background: var(--mouse-color-surface-glass) !important; }
 .mouseai-light .border-slate-700\/50,
-.mouseai-light .border-slate-700\/30 { border-color: #e2e8f0 !important; }
+.mouseai-light .border-slate-700\/30 { border-color: var(--mouse-color-border) !important; }
 .mouseai-light .hover\:bg-slate-800\/50:hover,
-.mouseai-light .hover\:bg-slate-800\/40:hover { background: #f8fafc !important; }
-.mouseai-light .ring-offset-slate-950 { --tw-ring-offset-color: #ffffff !important; }
+.mouseai-light .hover\:bg-slate-800\/40:hover { background: var(--mouse-color-surface) !important; }
+.mouseai-light .ring-offset-slate-950 { --tw-ring-offset-color: var(--mouse-color-bg) !important; }
