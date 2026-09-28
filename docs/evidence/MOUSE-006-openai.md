@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-006-openai-adapter` |
 | Sahip / Reviewer | openai / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 OpenAI adapter'ına zaman aşımı, 429/5xx için sınırlı yeniden deneme, hata gövdesinden sır sızmasını önleme, env ile fiyat/model; testler (mock fetch).
@@ -27,7 +27,11 @@ Yok; OPENAI_API_KEY yoksa credential_not_configured.
 - [ ] Anahtar yoksa CREDENTIAL_NOT_CONFIGURED
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- Ortak request policy ile AbortController timeout ve sınırlı retry eklendi.
+- 429/5xx tekrar deneniyor; kalıcı 4xx tekrar denenmiyor.
+- Provider hata gövdeleri anahtar/Bearer maskelemesiyle döndürülüyor.
+- Credential yoksa mevcut `CREDENTIAL_NOT_CONFIGURED` akışı korunuyor.
+- Mock fetch ile transient/permanent hata testi eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -40,4 +44,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — gerçek OpenAI credential'ı branch'e eklenmedi.
