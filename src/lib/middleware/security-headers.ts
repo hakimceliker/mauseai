@@ -9,7 +9,7 @@ export const SECURITY_HEADERS = {
 
   // Content-Security-Policy: Prevent XSS and injection attacks
   'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
 
   // Prevent MIME type sniffing
   'X-Content-Type-Options': 'nosniff',

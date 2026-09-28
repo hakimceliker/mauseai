@@ -1,9 +1,14 @@
 import type { EventData, IAnalyticsProvider, PageData, UserProperties } from './analytics-provider';
 
-const PRIVATE_KEYS = new Set(['email', 'name', 'full_name', 'first_name', 'last_name']);
+const ALLOWED_KEYS = new Set([
+  'path', 'title', 'referrer', 'role', 'conversion', 'value', 'timestamp',
+  'screen', 'action', 'status', 'provider', 'error_code',
+]);
 
 function publicProperties(properties: Record<string, unknown> = {}): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(properties).filter(([key]) => !PRIVATE_KEYS.has(key.toLowerCase())));
+  return Object.fromEntries(
+    Object.entries(properties).filter(([key]) => ALLOWED_KEYS.has(key.toLowerCase())),
+  );
 }
 
 export class PostHogAnalyticsProvider implements IAnalyticsProvider {
@@ -37,7 +42,7 @@ export class PostHogAnalyticsProvider implements IAnalyticsProvider {
   }
 
   async trackUser(properties: UserProperties): Promise<void> {
-    await this.capture('$set', properties.userId, { role: properties.role, tenantId: properties.tenantId });
+    await this.capture('$set', properties.userId, { role: properties.role });
   }
 
   async trackConversion(name: string, value?: number, properties?: Record<string, unknown>): Promise<void> {

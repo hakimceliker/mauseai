@@ -12,14 +12,15 @@ describe('PostHogAnalyticsProvider', () => {
     expect(await provider.isHealthy()).toBe(false);
   });
 
-  it('removes direct PII from captured properties', async () => {
+  it('allowlists analytics properties and removes tenant and direct PII', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 200 }));
     const provider = new PostHogAnalyticsProvider('test-key', 'https://posthog.test');
     await provider.trackEvent({ name: 'task.created', userId: 'user-1', properties: { email: 'private@example.com', name: 'Private', tenantId: 'tenant-1', kind: 'task' } });
     const body = JSON.parse(String(fetchSpy.mock.calls[0]?.[1]?.body));
     expect(body.properties).not.toHaveProperty('email');
     expect(body.properties).not.toHaveProperty('name');
-    expect(body.properties).toMatchObject({ tenantId: 'tenant-1', kind: 'task' });
+    expect(body.properties).not.toHaveProperty('tenantId');
+    expect(body.properties).not.toHaveProperty('kind');
   });
 
   it('swallows transport failures', async () => {
