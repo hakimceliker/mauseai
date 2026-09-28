@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-004-vercel-deployment` |
 | Sahip / Reviewer | vercel / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 `vercel.json` (Inngest ve AI rotaları için maxDuration, bölge), preview/production env sözleşmesi ve deployment kontrol listesi; konfig testi.
@@ -26,7 +26,9 @@ Yok; gerçek deploy/domain kullanıcı onayı ister.
 - [ ] Rollback prosedürü yazılı
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `vercel.json` ile Next.js framework, `fra1` bölgesi ve Inngest/task function süre sınırları tanımlandı.
+- Production env sözleşmesi ve rollback prosedürü `docs/deploy/vercel-deployment.md` içine yazıldı.
+- Config ve secret-value kapısı `tests/unit/vercel-config.test.ts` ile doğrulanıyor.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -39,4 +41,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 vercel.json silinir/revert; Vercel varsayılanlarına döner.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — Vercel dashboard credential/deployment işlemleri bu branch'ten otomatik yapılmadı.
