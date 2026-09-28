@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-003-supabase-migration` |
 | Sahip / Reviewer | supabase / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Migration'lar için statik RLS kapısı: her `create table` için RLS etkin ve en az bir policy var, tenant_id taşıyan tablolarda tenant filtresi var; 0007 numara boşluğunun belgelenmesi; migration kontrol testleri CI'da.
@@ -25,7 +25,9 @@ Yok; gerçek Supabase projesine uygulama kullanıcı onayı ister (credential_no
 - [ ] Canlı DB'ye hiçbir şey uygulanmaz
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `tests/security/migration-rls.test.ts` tüm migration dosyalarını tarayan statik RLS/yeniden kullanım/credential kapısı olarak eklendi.
+- `supabase/migrations/README.md` uygulama sırası ve kasıtlı `0007` boşluğunu belgeledi.
+- Canlı veritabanına bu branch'ten otomatik yazım yapılmadı.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -38,4 +40,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert; şema değişmez (yalnızca test/belge).
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — production Supabase uygulaması credential ve kullanıcı onayı gerektirir.
