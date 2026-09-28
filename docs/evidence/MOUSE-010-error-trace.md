@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-010-error-trace` |
 | Sahip / Reviewer | observability / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Hata raporlama (Sentry envelope API) ve AI trace (Langfuse ingestion API) adapter'ları; DSN/anahtar yoksa credential_not_configured ve no-op; hassas veri maskeleme; AI router'a trace kancası.
@@ -25,7 +25,11 @@ Yok; SENTRY_DSN, LANGFUSE_* yoksa credential_not_configured.
 - [ ] Rapor hatası uygulamayı düşürmez
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `src/lib/observability/index.ts` ile Sentry envelope ve Langfuse ingestion adapter'ları eklendi.
+- Credential yoksa ağ çağrısı yapılmıyor ve `credential_not_configured` dönüyor.
+- Telemetri payload'ı dışarı çıkmadan önce anahtar, token, bearer ve e-posta maskeleniyor.
+- Sağlayıcı/ağ hataları iş akışını düşürmüyor; güvenli durum sonucu dönüyor.
+- `src/__tests__/observability.test.ts` ile no-op, maskeleme ve hata davranışı doğrulanıyor.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -38,4 +42,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — gerçek provider credential'ları bu branch'e eklenmedi.
