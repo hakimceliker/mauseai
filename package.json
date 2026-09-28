@@ -18,7 +18,8 @@
     "test": "vitest",
     "verify": "npm run lint && npm run typecheck && npm run test -- --run && npm run build",
     "test:ui": "vitest --ui",
-    "smoke:production": "node scripts/production-smoke.mjs"
+    "smoke:production": "node scripts/production-smoke.mjs",
+    "acceptance:production": "node scripts/production-acceptance.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
