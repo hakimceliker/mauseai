@@ -27,8 +27,18 @@ const health = await request('/api/health');
 console.log(`health: ${health.response.status}`);
 if (!health.response.ok) process.exitCode = 1;
 
+const readiness = await request('/api/health/ready');
+console.log(`readiness: ${readiness.response.status}`);
+if (!readiness.response.ok) process.exitCode = 1;
+
+// GET is intentionally used only as an availability check. It does not send
+// an event and therefore cannot mutate production data.
+const inngest = await request('/api/inngest');
+console.log(`inngest_endpoint: ${inngest.response.status}`);
+if (![200, 401, 405].includes(inngest.response.status)) process.exitCode = 1;
+
 if (!bearer) {
-  console.log('auth_tasks: skipped (SMOKE_BEARER_TOKEN not configured)');
+  console.log('auth_tasks: credential_not_configured (SMOKE_BEARER_TOKEN not configured)');
 } else {
   const tasks = await request('/api/tasks');
   console.log(`tasks_read: ${tasks.response.status}`);
