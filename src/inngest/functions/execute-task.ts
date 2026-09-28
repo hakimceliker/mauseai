@@ -18,6 +18,8 @@ export const executeTask = inngest.createFunction(
   {
     id: 'execute-task',
     name: 'Execute Task',
+    retries: 3,
+    concurrency: { limit: 5, key: 'event.data.tenantId' },
   },
   { event: 'task.execute' },
   async ({ event, step }) => {
