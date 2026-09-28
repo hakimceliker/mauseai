@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-011-posthog-analytics` |
 | Sahip / Reviewer | observability / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Analitik sağlayıcısına PostHog uygulaması (capture API), POSTHOG_KEY yoksa credential_not_configured, PII (e-posta, ad) gönderilmez, tenant grubu.
@@ -26,7 +26,11 @@ Yok; POSTHOG_KEY yoksa credential_not_configured.
 - [ ] Anahtar yoksa ağ çağrısı yok
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `PostHogAnalyticsProvider` capture API ile eklendi ve `ANALYTICS_TYPE=posthog` seçeneği bağlandı.
+- `POSTHOG_KEY` yoksa ağ çağrısı yapılmıyor; provider sağlıklı değil olarak raporlanıyor.
+- E-posta ve ad gibi doğrudan PII alanları capture özelliklerinden çıkarılıyor.
+- Ağ/analitik hataları ürün isteğini düşürmüyor.
+- Provider davranışı için üç test eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -39,4 +43,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — gerçek PostHog anahtarı branch'e eklenmedi.
