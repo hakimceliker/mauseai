@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-001-code-skeleton` |
 | Sahip / Reviewer | claude / hakimceliker |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Main'deki CI kapılarını (lint, typecheck, test, build, npm audit, gitleaks, Docker) doğrula ve boşlukları kapat: typecheck `tests/` klasörünü de kapsasın, tek komutla yerel doğrulama (`npm run verify`), PR şablonunda kapı kontrol listesi.
@@ -28,11 +28,13 @@ PR #41 merged, main CI yeşil (run 117).
 - [ ] PR şablonu 7 kapıyı ve secret/ödeme kurallarını listeler
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- `npm run verify` komutu eklendi; lint, typecheck, test ve build'i sıralı çalıştırır.
+- TypeScript kapsamına `tests/**/*` eklendi.
+- PR şablonuna kalite, güvenlik, secret ve rollback kapıları eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
-_Sonuçlar uygulama commit'iyle eklenecek._
+Yerel uygulama doğrulaması commit öncesi çalıştırıldı; GitHub CI sonuçları PR üzerinde takip edilecek.
 
 ## Credential durumu
 Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlanır; secret istenmez ve yazılmaz.
@@ -41,4 +43,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert; CI dosyası önceki commit'e döner.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW
