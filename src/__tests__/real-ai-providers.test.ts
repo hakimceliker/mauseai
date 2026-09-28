@@ -38,4 +38,15 @@ describe('real AI providers', () => {
     expect(result.content).toBe('done');
     expect(result.tokens_used).toBe(10);
   });
+
+  it('retries OpenAI transient responses but not permanent 4xx responses', async () => {
+    process.env.AI_MAX_RETRIES = '2';
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response('busy', { status: 503 }))
+      .mockResolvedValueOnce(new Response('bad request', { status: 400 }));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(new OpenAIProvider('test-key').call(messages)).rejects.toThrow('HTTP 400');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    delete process.env.AI_MAX_RETRIES;
+  });
 });

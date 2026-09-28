@@ -1,4 +1,5 @@
 import { AIMessage, AIProvider, AIResponse, AIProviderError, CredentialNotConfiguredError } from './base-provider';
+import { requestWithPolicy, safeProviderDetail } from './request-policy';
 
 const endpoint = 'https://api.openai.com/v1/chat/completions';
 
@@ -13,14 +14,19 @@ export class OpenAIProvider implements AIProvider {
   async call(messages: AIMessage[]): Promise<AIResponse> {
     if (!this.apiKey) throw new CredentialNotConfiguredError(this.name, 'OPENAI_API_KEY');
 
-    const response = await fetch(endpoint, {
+    let response: Response;
+    try {
+      response = await requestWithPolicy(endpoint, {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: process.env.OPENAI_MODEL ?? 'gpt-4o-mini', messages, temperature: 0.2 }),
-    });
+      });
+    } catch {
+      throw new AIProviderError(this.name, 'request_timeout_or_network_error');
+    }
     if (!response.ok) {
       const detail = await response.text().catch(() => 'unknown error');
-      throw new AIProviderError(this.name, `HTTP ${response.status}: ${detail.slice(0, 200)}`);
+      throw new AIProviderError(this.name, `HTTP ${response.status}: ${safeProviderDetail(detail)}`);
     }
     const payload = (await response.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
