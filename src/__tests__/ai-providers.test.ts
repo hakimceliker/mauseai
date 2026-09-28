@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MockGPTProvider } from '@/src/lib/ai/providers/mock-gpt';
 import { MockClaudeProvider } from '@/src/lib/ai/providers/mock-claude';
 import { AIRouter } from '@/src/lib/ai/ai-router';
@@ -80,6 +80,21 @@ describe('AI Providers', () => {
       expect(router.getProviderName()).toBe('mock-gpt');
 
       process.env.AI_PROVIDER = originalEnv;
+    });
+
+    it('should default to a configured real provider in production', () => {
+      const originalProvider = process.env.AI_PROVIDER;
+      const originalOpenAIKey = process.env.OPENAI_API_KEY;
+      vi.stubEnv('NODE_ENV', 'production');
+      delete process.env.AI_PROVIDER;
+      process.env.OPENAI_API_KEY = 'test-only-placeholder';
+
+      const router = new AIRouter();
+      expect(router.getProviderName()).toBe('openai');
+
+      process.env.AI_PROVIDER = originalProvider;
+      vi.unstubAllEnvs();
+      process.env.OPENAI_API_KEY = originalOpenAIKey;
     });
 
     it('should support static execute method', async () => {
