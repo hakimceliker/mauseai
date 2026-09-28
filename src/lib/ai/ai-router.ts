@@ -13,7 +13,15 @@ export class AIRouter {
   private provider: AIProvider;
 
   constructor() {
-    const aiProvider = (process.env.AI_PROVIDER || 'mock').toLowerCase();
+    const configuredProvider = process.env.AI_PROVIDER?.trim().toLowerCase();
+    const aiProvider = configuredProvider ||
+      (process.env.NODE_ENV === 'production'
+        ? process.env.OPENAI_API_KEY
+          ? 'openai'
+          : process.env.ANTHROPIC_API_KEY
+            ? 'anthropic'
+            : 'openai'
+        : 'mock');
 
     switch (aiProvider) {
       case 'gpt':
