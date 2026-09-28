@@ -63,7 +63,7 @@ export async function GET() {
       status: 'ready',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
     };
-  } catch (_error) {
+  } catch {
     integrations.payment = {
       status: 'error',
       provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
@@ -77,7 +77,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.NOTIFICATION_TYPE || 'console',
     };
-  } catch (_error) {
+  } catch {
     integrations.notifications = {
       status: 'error',
       type: process.env.NOTIFICATION_TYPE || 'console',
@@ -91,7 +91,7 @@ export async function GET() {
       status: isHealthy ? 'ready' : 'degraded',
       type: process.env.ANALYTICS_TYPE || 'console',
     };
-  } catch (_error) {
+  } catch {
     integrations.analytics = {
       status: 'error',
       type: process.env.ANALYTICS_TYPE || 'console',
@@ -110,7 +110,7 @@ export async function GET() {
       status: realtimeProvider.isConnected() || realtimeConfigured ? 'ready' : 'degraded',
       connected: realtimeProvider.isConnected(),
     };
-  } catch (_error) {
+  } catch {
     integrations.realtime = {
       status: 'error',
     };
