@@ -6,7 +6,7 @@
 | Branch | `feat/MOUSE-009-ui-design-system` |
 | Sahip / Reviewer | design / claude |
 | Aşama | Aşama 1 (bağımsız paket) |
-| Durum | IN_PROGRESS |
+| Durum | READY_FOR_REVIEW |
 
 ## Kapsam
 Design token'ları (renk, yüzey/şeffaflık, tipografi, boşluk, radius, gölge) tek kaynakta; CSS değişkenleri ve Tailwind eşlemesi; WCAG AA kontrast testi; tasarım sistemi belgesi.
@@ -27,7 +27,9 @@ Yok.
 - [ ] Mevcut sayfalar görsel olarak bozulmaz (build)
 
 ## Yapılan işlem
-_Uygulama commit'leriyle doldurulacak._
+- Beyaz zemin/şeffaf yüzey yaklaşımı `src/styles/tokens.ts` ve CSS değişkenleriyle tek kaynağa alındı.
+- Tipografi, yüzey, sınır, semantic renk, radius ve gölge token'ları tanımlandı.
+- WCAG AA kontrast testi ve tasarım sistemi belgesi eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
@@ -40,4 +42,4 @@ Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlan�
 PR revert.
 
 ## Sonuç
-IN_PROGRESS
+READY_FOR_REVIEW — görsel kabul için Vercel preview ve manuel ekran kontrolü gereklidir.
