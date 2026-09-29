@@ -16,7 +16,9 @@ Kullanıcı tarafından gönderilen her metin, öneri veya kod parçası önce t
 ## Bu turda düzeltilen örnekler
 
 - Pasted checkpoint metnindeki `step_id text` yerine mevcut `steps.id uuid` korundu.
-- `task/run` yerine mevcut `mouseai/task.created` event sözleşmesi korundu.
+- Production task execution uses the registered `task.execute` event. The older
+  `mouseai/task.created` worker contract is retained only as unregistered legacy
+  code and must not be used for production triggers.
 - `profiles.id` yerine mevcut `profiles.user_id` kullanıldı.
 - API tenant bilgisi JWT metadata’dan varsayılmadı; RLS korumalı `profiles` kaydından alındı.
 - Service role ve RLS sınırları gevşetilmedi.

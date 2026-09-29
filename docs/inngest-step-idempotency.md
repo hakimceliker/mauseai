@@ -2,7 +2,8 @@
 
 ## Uygulanan karar
 
-- Inngest event adı mevcut akışta `mouseai/task.created` olarak korunur.
+- Inngest event adı mevcut production akışında `task.execute` olarak kullanılır.
+- `mouseai/task.created` eski, kayıt dışı worker sözleşmesidir; yeni production trigger’larında kullanılmaz.
 - MVP worker’daki gerçek step kimliği UUID `steps.id`’dir.
 - Deterministik Inngest step ID formatı: `step-{taskId}:{stepId}:{attempt}`.
 - MVP’de tek yürütme adımı için `attempt = 1`; bilinçli yeniden deneme yeni attempt ile açılır.

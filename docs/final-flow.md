@@ -6,7 +6,7 @@ Kullanıcı hedefi API üzerinden alınır. Sistem tenant, kullanıcı rolü, ri
 
 ## 2. Dayanıklı yürütme
 
-Task olayı `mouseai/task.created` olarak Inngest’e gönderilir. Worker görevi alır, checkpoint’i okur ve kaldığı adımdan devam eder. Her adım deterministik kimlik, unique kayıt ve idempotency kontrolüyle çalışır.
+Task olayı production’da `task.execute` olarak Inngest’e gönderilir. Registered worker görevi alır, checkpoint’i okur ve kaldığı adımdan devam eder. Her adım deterministik kimlik, unique kayıt ve idempotency kontrolüyle çalışır. `mouseai/task.created` eski worker sözleşmesidir ve production route tarafından kayıtlı değildir.
 
 ## 3. AI yönlendirme
 
