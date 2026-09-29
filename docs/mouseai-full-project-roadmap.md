@@ -1,7 +1,7 @@
 # MouseAI - A'dan Z'ye Proje Yol Haritasi
 
-**Repo:** `hakimceliker/mauseai`  
-**UI referansi:** Beyaz/şeffaf MouseAI çalışma alanı ekranı  
+**Repo:** `hakimceliker/mauseai`
+**UI referansi:** Beyaz/şeffaf MouseAI çalışma alanı ekranı
 **Kural:** Main'e doğrudan push yok; her değişiklik branch -> PR -> CI -> review -> merge sırasındadır.
 
 ## 1. Hedef ürün
@@ -52,23 +52,27 @@ flowchart LR
 
 ## 3. Durum özeti
 
-| Alan | Durum | Sonraki kanıt |
-|---|---|---|
-| Next.js / TypeScript / CI | Tamam | Main CI |
-| Supabase migration / RLS kodu | Kod tamam | Gerçek tenant negatif testi |
-| Vercel health/readiness | Tamam | Redeploy sonrası tekrar kontrol |
-| Inngest worker | Kod tamam | Canlı task.execute run |
-| AI adapter'ları | Kod tamam | Gerçek provider çağrısı |
-| UI design system | Temel tamam | Ekranların referansa göre uygulanması |
-| Audit / cost | Kod tamam | Canlı workflow kayıtları |
-| Production kabulü | Bekliyor | Auth + tenant + Inngest dört kapısı |
+| Alan                          | Durum       | Sonraki kanıt                         |
+| ----------------------------- | ----------- | ------------------------------------- |
+| Next.js / TypeScript / CI     | Tamam       | Main CI                               |
+| Supabase migration / RLS kodu | Kod tamam   | Gerçek tenant negatif testi           |
+| Vercel health/readiness       | Tamam       | Redeploy sonrası tekrar kontrol       |
+| Inngest worker                | Kod tamam   | Canlı task.execute run                |
+| AI adapter'ları               | Kod tamam   | Gerçek provider çağrısı               |
+| UI design system              | Temel tamam | Ekranların referansa göre uygulanması |
+| Audit / cost                  | Kod tamam   | Canlı workflow kayıtları              |
+| Production kabulü             | Bekliyor    | Auth + tenant + Inngest dört kapısı   |
 
 ## 4. Aşamalar ve görev sahipleri
 
+### Dış entegrasyon kapısı
+
+Üçüncü taraf bağlantılarının mevcut olması MouseAI’ye bağlı veya üretime hazır oldukları anlamına gelmez. Durum, proje ayrılığı ve credential kanunlarıyla birlikte [external-integration-readiness.md](external-integration-readiness.md) içinde tutulur. Özellikle başka bir projeye ait Windsor.ai bağlantısı MouseAI kapsamında kullanılamaz.
+
 ### Aşama 0 - Yönetim ve kaynak doğrulama
 
-**Sahip:** Codex/GPT  
-**Denetçi:** Claude  
+**Sahip:** Codex/GPT
+**Denetçi:** Claude
 **Çıktı:** Merkezi yol haritası, doküman envanteri, branch/PR kanunu.
 
 - `docs/mouseai-full-project-roadmap.md`
@@ -80,7 +84,7 @@ flowchart LR
 
 ### Aşama 1 - Kod iskeleti ve kalite kapıları
 
-**Görev:** MOUSE-001  
+**Görev:** MOUSE-001
 **Ana dosyalar:** `package.json`, `tsconfig.json`, `.github/workflows/`, `.env.example`
 
 - TypeScript strict.
@@ -104,7 +108,7 @@ flowchart LR
 
 ### Aşama 2 - Mimari inceleme standardı
 
-**Görev:** MOUSE-002  
+**Görev:** MOUSE-002
 **Ana dosyalar:** `docs/review/architecture-review-standard.md`, `.github/pull_request_template.md`
 
 - Scope dışı değişiklik reddedilir.
@@ -115,7 +119,7 @@ flowchart LR
 
 ### Aşama 3 - Supabase migration, Auth ve RLS
 
-**Görev:** MOUSE-003  
+**Görev:** MOUSE-003
 **Ana dosyalar:** `supabase/migrations/*.sql`, `src/lib/db/supabase.ts`, `src/lib/auth/`, `tests/security/`
 
 ```sql
@@ -133,7 +137,7 @@ for select using (tenant_id in (
 
 ### Aşama 4 - Vercel deployment
 
-**Görev:** MOUSE-004  
+**Görev:** MOUSE-004
 **Ana dosyalar:** `vercel.json`, `docs/deploy/vercel-deployment.md`, `src/app/api/health/`
 
 - Production ve Preview environment ayrılır.
@@ -148,7 +152,7 @@ GET /api/health/ready -> 200, {"ready":true}
 
 ### Aşama 5 - Inngest durable workflow
 
-**Görev:** MOUSE-005  
+**Görev:** MOUSE-005
 **Ana dosyalar:** `src/inngest/functions/execute-task.ts`, `src/inngest/functions/task-worker.ts`, `src/app/api/inngest/`
 
 ```ts
@@ -158,7 +162,7 @@ export const executeTask = inngest.createFunction(
   async ({ event, step }) => {
     const plan = await step.run('plan', () => createPlan(event.data));
     return step.run('execute', () => executePlan(plan));
-  },
+  }
 );
 ```
 
@@ -169,7 +173,7 @@ export const executeTask = inngest.createFunction(
 
 ### Aşama 6 - AI router ve provider'lar
 
-**Görevler:** MOUSE-006 OpenAI, MOUSE-007 Anthropic  
+**Görevler:** MOUSE-006 OpenAI, MOUSE-007 Anthropic
 **Ana dosyalar:** `src/lib/ai/ai-router.ts`, `src/lib/ai/providers/openai.ts`, `src/lib/ai/providers/anthropic.ts`
 
 ```ts
@@ -188,7 +192,7 @@ export function requireCredential(name: string): string {
 
 ### Aşama 7 - Stripe sandbox
 
-**Görev:** MOUSE-008  
+**Görev:** MOUSE-008
 **Ana dosyalar:** `src/lib/integrations/payment-adapter.ts`, `src/app/api/webhooks/stripe/route.ts`
 
 - Sadece test mode.
@@ -198,7 +202,7 @@ export function requireCredential(name: string): string {
 
 ### Aşama 8 - Beyaz/şeffaf UI design system
 
-**Görev:** MOUSE-009  
+**Görev:** MOUSE-009
 **Ana dosyalar:** `src/styles/tokens.ts`, `src/app/globals.css`, `docs/design/design-system.md`
 
 Tasarım yönü:
@@ -239,7 +243,7 @@ Ekranlar:
 
 ### Aşama 9 - Observability
 
-**Görev:** MOUSE-010  
+**Görev:** MOUSE-010
 **Ana dosyalar:** `src/lib/observability/index.ts`, `src/lib/logging/error-logger.ts`, `src/lib/ai/ai-router.ts`
 
 - Sentry hata event’i.
@@ -250,7 +254,7 @@ Ekranlar:
 
 ### Aşama 10 - Product analytics
 
-**Görev:** MOUSE-011  
+**Görev:** MOUSE-011
 **Ana dosyalar:** `src/lib/integrations/posthog-provider.ts`, `src/lib/integrations/analytics-provider.ts`
 
 - `task_created`.
@@ -263,8 +267,8 @@ Ekranlar:
 
 ### Aşama 11 - Production acceptance
 
-**Sahip:** Codex/GPT  
-**İnsan kapısı:** Kullanıcı  
+**Sahip:** Codex/GPT
+**İnsan kapısı:** Kullanıcı
 **Denetçi:** Claude
 
 ```text
@@ -279,17 +283,17 @@ Bu dört PASS olmadan production kabulü verilmez.
 
 ## 5. Dosya sahipliği
 
-| Alan | Sorumlu | Ana klasör |
-|---|---|---|
-| API ve domain | Codex | `src/app/api/`, `src/lib/domain/` |
-| Auth/RLS | Codex + Supabase | `supabase/`, `src/lib/auth/` |
-| Worker | Codex + Inngest | `src/inngest/` |
-| AI | Codex + OpenAI/Anthropic | `src/lib/ai/` |
-| UI | Codex + tasarım referansı | `src/app/`, `src/styles/` |
-| Gözlemleme | Codex + Sentry/Langfuse | `src/lib/observability/` |
-| Analytics | Codex + PostHog | `src/lib/integrations/` |
-| Denetim | Claude | PR diff ve `docs/review/` |
-| Secret/hesap/onay | Kullanıcı | Vercel, Supabase, Inngest panelleri |
+| Alan              | Sorumlu                   | Ana klasör                          |
+| ----------------- | ------------------------- | ----------------------------------- |
+| API ve domain     | Codex                     | `src/app/api/`, `src/lib/domain/`   |
+| Auth/RLS          | Codex + Supabase          | `supabase/`, `src/lib/auth/`        |
+| Worker            | Codex + Inngest           | `src/inngest/`                      |
+| AI                | Codex + OpenAI/Anthropic  | `src/lib/ai/`                       |
+| UI                | Codex + tasarım referansı | `src/app/`, `src/styles/`           |
+| Gözlemleme        | Codex + Sentry/Langfuse   | `src/lib/observability/`            |
+| Analytics         | Codex + PostHog           | `src/lib/integrations/`             |
+| Denetim           | Claude                    | PR diff ve `docs/review/`           |
+| Secret/hesap/onay | Kullanıcı                 | Vercel, Supabase, Inngest panelleri |
 
 ## 6. Her PR için teslim şablonu
 
@@ -337,7 +341,3 @@ PR bağlantısı: <GitHub URL>
 - Eski MOUSE draft PR’larının duplicate olarak kapatılması.
 
 **Nihai kural:** Credential veya canlı kanıt yoksa durum `credential_not_configured` / `NOT_RUN` olarak kalır; sistem sahte PASS üretmez.
-
-
-
-
