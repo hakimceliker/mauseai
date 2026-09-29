@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { addSecurityHeaders, handleCors } from '@/src/lib/middleware/security-headers';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   // Add security headers to all responses
@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-// Apply middleware to all routes
+// Apply proxy to all routes
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
