@@ -55,6 +55,8 @@
 
 ## F. Teknik repo dosyaları
 
+- `storage-and-repository-registry.md` — Git çalışma alanı, Supabase Storage bucket/path, tenant izolasyonu ve dosya kabul standardı
+
 - `supabase/migrations/0001_core.sql` — tablolar, index, RLS, helper ve idempotency
 - `src/types/` — domain tipleri
 - `src/lib/schemas/` — Zod şemaları
