@@ -22,6 +22,7 @@ Bu belge, `MAUSEAI_Master_Kanun_ve_Sartname_v1.0.docx`, `MAUSEAI_Eksikler_ve_Kab
 | UI | Beyaz/şeffaf referans ve diyagram atlası var | Ana ekranların kullanıcı testi beklenir |
 | İş modeli/finans | Şartname kapsamı var; bütçe, fiyat ve baz ölçüm atanmadı | Karar bekliyor |
 | Dış entegrasyonlar | Her connector için kapsam ve ayrı hesap gerekir | MVP’ye otomatik dahil edilmez |
+| Depo ve Storage yönetimi | `docs/storage-and-repository-registry.md` kanonik kanun; aktif Storage akışı yok | PLAN-004B tamamlanana kadar Storage `NOT_RUN` |
 
 ## 3. Kabul kapısı
 
@@ -49,6 +50,7 @@ ST3.6 paketi repo’ya `docs/governance/st36/` altında alınmıştır. Envanter
 | PLAN-002 | Hedef müşteri ve mevcut süreç baz ölçümü | Ürün/satış | Görüşme, süre, maliyet ve problem kanıtı | PLAN-001 |
 | PLAN-003 | Branch, commit, PR, CI ve ortam envanteri | Codex | Tarihli envanter | Repo erişimi |
 | PLAN-004 | Auth, iki tenant ve çapraz tenant negatif testleri | Codex + Supabase | PASS/FAIL kanıtı | Test hesabı, tenant A/B |
+| PLAN-004B | Repo, ortam, bucket/path ve Storage tenant izolasyonu | Codex + Supabase | Kanun, RLS/policy ve redacted test kanıtı | Storage özelliği/kararı |
 | PLAN-005 | Inngest trigger, worker, checkpoint, retry ve duplicate event testi | Codex + Inngest | Run ve DB kanıtı | Production sync, test workflow |
 | PLAN-006 | OpenAI/Anthropic gerçek çağrısı, maliyet ve hata davranışı | Codex + kullanıcı | Redacted provider kanıtı | Secret store |
 | PLAN-007 | Audit ve maliyet ledger uzlaştırması | Codex + finans | Task maliyeti = ledger kanıtı | PLAN-005/006 |

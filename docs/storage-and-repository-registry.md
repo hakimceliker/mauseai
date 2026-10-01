@@ -1,10 +1,12 @@
-# MouseAI Depo ve Storage Kayıt Standardı
+# MouseAI Depo ve Storage Yönetim Kanunu
 
+**Kanun sürümü:** 1.0  
+**Bağlayıcılık:** Zorunlu  
 **Kanonik repo:** `https://github.com/hakimceliker/mauseai`  
 **Kanonik çalışma klasörü:** `C:\Users\Administrator\Documents\Codex\2026-09-26\ya\mouseai-core`  
 **Kapsam:** Git deposu, çalışma branch'leri, Supabase Storage ve dosya kanıtları
 
-Bu belge, depolarla ilgili dağınık tanımları tek kaynağa bağlar. Başka proje, repo, bucket veya çalışma klasörü bu projeye otomatik olarak dahil değildir.
+Bu belge, depolarla ilgili dağınık tanımları tek kaynağa bağlayan bağlayıcı kanundur. Başka proje, repo, bucket veya çalışma klasörü bu projeye otomatik olarak dahil değildir. Bu kanun ihlal edilirse ilgili değişiklik merge edilmez ve production kabulü verilmez.
 
 ## 1. Kaynak-of-truth kuralları
 
