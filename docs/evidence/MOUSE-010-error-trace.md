@@ -29,12 +29,13 @@ Yok; SENTRY_DSN, LANGFUSE_* yoksa credential_not_configured.
 - Credential yoksa ağ çağrısı yapılmıyor ve `credential_not_configured` dönüyor.
 - Telemetri payload'ı dışarı çıkmadan önce anahtar, token, bearer ve e-posta maskeleniyor.
 - Sağlayıcı/ağ hataları iş akışını düşürmüyor; güvenli durum sonucu dönüyor.
+- Sentry/Langfuse çağrıları `OBSERVABILITY_TIMEOUT_MS` ile sınırlı; varsayılan 3 saniye, izin verilen aralık 250 ms–30 saniye.
 - AI Router completion/error akışları ve `ErrorLogger` best-effort telemetry hook'larına bağlandı.
 - `src/__tests__/observability.test.ts` ile no-op, maskeleme ve hata davranışı doğrulanıyor.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
-_Sonuçlar uygulama commit'iyle eklenecek._
+Sonuçlar: odak testleri 6 geçti; lint, typecheck ve build geçti. Gerçek provider kanıtı credential_not_configured olarak beklemede.
 
 ## Credential durumu
 Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlanır; secret istenmez ve yazılmaz.

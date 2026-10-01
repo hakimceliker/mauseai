@@ -30,11 +30,12 @@ Yok; POSTHOG_KEY yoksa credential_not_configured.
 - `POSTHOG_KEY` yoksa ağ çağrısı yapılmıyor; provider sağlıklı değil olarak raporlanıyor.
 - E-posta ve ad gibi doğrudan PII alanları capture özelliklerinden çıkarılıyor.
 - Ağ/analitik hataları ürün isteğini düşürmüyor.
+- PostHog capture çağrısı `POSTHOG_TIMEOUT_MS` ile sınırlı; varsayılan 3 saniye, izin verilen aralık 250 ms–30 saniye.
 - Provider davranışı için üç test eklendi.
 
 ## Testler ve sonuçlar
 Zorunlu kapılar: lint, typecheck, test, build, npm audit, gitleaks secret scan, Docker build.
-_Sonuçlar uygulama commit'iyle eklenecek._
+Sonuçlar: PostHog odak testleri 3 geçti; lint, typecheck ve build geçti. Gerçek event kanıtı credential_not_configured olarak beklemede.
 
 ## Credential durumu
 Gerçek anahtar gerektiren noktalar `credential_not_configured` olarak raporlanır; secret istenmez ve yazılmaz.

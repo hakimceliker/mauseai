@@ -5,6 +5,11 @@ const ALLOWED_KEYS = new Set([
   'screen', 'action', 'status', 'provider', 'error_code',
 ]);
 
+function configuredTimeoutMs(): number {
+  const parsed = Number.parseInt(process.env.POSTHOG_TIMEOUT_MS || '3000', 10);
+  return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 250), 30_000) : 3000;
+}
+
 function publicProperties(properties: Record<string, unknown> = {}): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(properties).filter(([key]) => ALLOWED_KEYS.has(key.toLowerCase())),
@@ -22,14 +27,19 @@ export class PostHogAnalyticsProvider implements IAnalyticsProvider {
 
   private async capture(event: string, distinctId: string, properties: Record<string, unknown> = {}): Promise<void> {
     if (!this.apiKey) return;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), configuredTimeoutMs());
     try {
       await fetch(`${this.host}/capture/`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({ api_key: this.apiKey, event, distinct_id: distinctId || 'anonymous', properties: publicProperties(properties) }),
       });
     } catch {
       // Analytics must never break the product request.
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
