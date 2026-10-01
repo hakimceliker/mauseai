@@ -1,7 +1,7 @@
 # MouseAI Depo ve Storage Yönetim Kanunu
 
-**Kanun sürümü:** 1.0  
-**Bağlayıcılık:** Zorunlu  
+**Kanun sürümü:** 1.0
+**Bağlayıcılık:** Zorunlu
 **Kanonik repo:** `https://github.com/hakimceliker/mauseai`  
 **Kanonik çalışma klasörü:** `C:\Users\Administrator\Documents\Codex\2026-09-26\ya\mouseai-core`  
 **Kapsam:** Git deposu, çalışma branch'leri, Supabase Storage ve dosya kanıtları
