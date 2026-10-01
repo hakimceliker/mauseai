@@ -1,0 +1,202 @@
+[
+  {
+    "file": "MAUSEAI_13_Haftalik_Nakit_Girdi_Sablonu.csv",
+    "bytes": 628,
+    "sha256": "3ec8daf7346b72cff11d798ed1b732256fd663962b20f4dee3183e4b349663f2"
+  },
+  {
+    "file": "MAUSEAI_Ana_Kayit.json",
+    "bytes": 549846,
+    "sha256": "832a8dd3c1dfc27ff7f54cfbccd7777ab13e0d08f79b8f46d773ba33d0aba8b0"
+  },
+  {
+    "file": "MAUSEAI_Diyagram_Atlasi_v1.0.html",
+    "bytes": 1134186,
+    "sha256": "73787e1b269e124c986ed3187e38d53efa5929ca709f2179b488b5187ea7f1c4"
+  },
+  {
+    "file": "MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv",
+    "bytes": 20739,
+    "sha256": "2822779b9d07815166edf28007e5949c6f753af1101e66ae8ab04056d58c2fd9"
+  },
+  {
+    "file": "MAUSEAI_KPI_Kartlari.json",
+    "bytes": 22455,
+    "sha256": "e414d751519df0e95681bb0e8e063635b4a2579ca506296cd1e3a6c1e5c5dbb6"
+  },
+  {
+    "file": "MAUSEAI_Kanun_Uygulanabilirlik_Matrisi.csv",
+    "bytes": 301793,
+    "sha256": "8c27c40d1832f8a6215f8f85af8fc26b3f43b593c1ce290a06907667093f72e3"
+  },
+  {
+    "file": "MAUSEAI_Master_Kanun_ve_Sartname_v1.0.docx",
+    "bytes": 1560563,
+    "sha256": "62b479d25b69a1ec965bdebc63fd83c000e577b636e644f282bf5a447a93540a"
+  },
+  {
+    "file": "MAUSEAI_Master_Kanun_ve_Sartname_v1.0.html",
+    "bytes": 2626106,
+    "sha256": "671bb66b74e402145755f6e20288118c613a671f9c0d014ac202bc386a40012f"
+  },
+  {
+    "file": "MAUSEAI_Master_Kanun_ve_Sartname_v1.0.md",
+    "bytes": 399343,
+    "sha256": "c09b1bd485c16a0fd343f3cf64a76177e3b95462e6c93bd440f991e60f85d333"
+  },
+  {
+    "file": "MAUSEAI_Master_Kanun_ve_Sartname_v1.0.pdf",
+    "bytes": 3538359,
+    "sha256": "58791cf450f299db97dd96e7299c7892bf5d8f2492f42c1bd2de2fc94ce6fe54"
+  },
+  {
+    "file": "MAUSEAI_Teslim_Dogrulama.json",
+    "bytes": 521,
+    "sha256": "e6e9aa04b3b3522a44df12f22f41b75cb4d50b2795b7a0232935219884244946"
+  },
+  {
+    "file": "ONCE_OKUYUN.txt",
+    "bytes": 1265,
+    "sha256": "cddb710d79ad05fd4c37aecd2d8527ffcb9a6ea31301fe94bd2e7fe95ca49ffb"
+  },
+  {
+    "file": "gorseller/FIG1.png",
+    "bytes": 81492,
+    "sha256": "d087adcd5200f6ea456c4e01886ed239afc60b7cb87770ca0e468b0b2383a39a"
+  },
+  {
+    "file": "gorseller/FIG2.png",
+    "bytes": 97100,
+    "sha256": "2f34f2605b51dd752a1d380c95b7a87a5908607c6bbdf47aaf8818df09ad711e"
+  },
+  {
+    "file": "gorseller/FIG3.png",
+    "bytes": 93211,
+    "sha256": "e27169e6ef62310673113503d57456acd61cfdc7b0803a36ff0458cc08919607"
+  },
+  {
+    "file": "gorseller/FIG4.png",
+    "bytes": 82805,
+    "sha256": "43df010ce1a6872c262e00f41922f1c470a2436ec0cfaeda4ae39078258f0d56"
+  },
+  {
+    "file": "gorseller/FIG5.png",
+    "bytes": 102615,
+    "sha256": "26cd33d18bf5532a2e98ac68160653676194fb15dc53f512a4b6e09f4584a2b6"
+  },
+  {
+    "file": "gorseller/source-01.png",
+    "bytes": 64044,
+    "sha256": "be68cb7c64d8491da187211026818c58591d5d7f54508265d7a798b33b8d9439"
+  },
+  {
+    "file": "gorseller/source-02.png",
+    "bytes": 50850,
+    "sha256": "424f4a854884e691d2365a7821b298744a9b252860fb521932f57ad0a6c5e432"
+  },
+  {
+    "file": "gorseller/source-03.png",
+    "bytes": 66070,
+    "sha256": "e276ea829156812ee08898c789f8311c1bfb11acb0f5f198b6ae954181f1bfea"
+  },
+  {
+    "file": "gorseller/source-04.png",
+    "bytes": 54002,
+    "sha256": "8a6236e01918fd7dd4588265501aec57fb33d486cb562ca3c6befb67a1720996"
+  },
+  {
+    "file": "gorseller/source-05.png",
+    "bytes": 74226,
+    "sha256": "5c2a86785bfb27e7827d3499b695921fe2cc2f14ec177889bcf6fc65e8a69dea"
+  },
+  {
+    "file": "gorseller/source-06.png",
+    "bytes": 64286,
+    "sha256": "70bc8ee79b4022b3767b0ea931d772b269b958121fb2456021057b5db637fc4b"
+  },
+  {
+    "file": "gorseller/source-07.png",
+    "bytes": 60344,
+    "sha256": "1a90f4fcac61a2c4540d7df05bd5f4df68dd221c109b980cbb48eaf70aa2375a"
+  },
+  {
+    "file": "gorseller/source-08.png",
+    "bytes": 58023,
+    "sha256": "ae116fbbfd12568c5e664e8126b4fbdfb83d0ee02d4559388b119b9c2dfd363f"
+  },
+  {
+    "file": "gorseller/source-09.png",
+    "bytes": 62725,
+    "sha256": "5c98ffa8c6621b40db4c5e89d8fd418e755b6c5326261c44b09be4a5fc071189"
+  },
+  {
+    "file": "gorseller/source-10.png",
+    "bytes": 64273,
+    "sha256": "acd5bba1ae484803add25412f79005cacba45cb5216d60d6bada13e1ac28fdcb"
+  },
+  {
+    "file": "gorseller/source-11.png",
+    "bytes": 66258,
+    "sha256": "079be941f7023a66a0d70ea175b07f7298ca3b3d30803d51b7be4cd2e3b3d97b"
+  },
+  {
+    "file": "gorseller/source-12.png",
+    "bytes": 66300,
+    "sha256": "9ebf4a748896a09c0c9ca0cbe91ddf953712fc784358a8587aa54f6dca80eed9"
+  },
+  {
+    "file": "gorseller/source-13.png",
+    "bytes": 66982,
+    "sha256": "cc90eea7b73f6dd5ffcba0542284f869e03f596ce88eb2dc49aac33310363676"
+  },
+  {
+    "file": "gorseller/source-14.png",
+    "bytes": 68170,
+    "sha256": "9f3cf50164289e1cd469e98b9d90c4e8fcc1fbc76b51500c7f2617eb5b7c7bbb"
+  },
+  {
+    "file": "gorseller/source-15.png",
+    "bytes": 67162,
+    "sha256": "5a6a27232209cb2e1b32d3680917239616bbbeb9ce43615386b33a0b34caca27"
+  },
+  {
+    "file": "gorseller/source-16.png",
+    "bytes": 51385,
+    "sha256": "fcc9b9754503f0c398fe2c4f8460cf1ba5e7ac290fd513212d9c2149efc8872a"
+  },
+  {
+    "file": "gorseller/source-17.png",
+    "bytes": 52331,
+    "sha256": "4d7ad687496b5e93a991a61a52fd24e33d28a97f5e37162e679573961b6a38e7"
+  },
+  {
+    "file": "gorseller/source-18.png",
+    "bytes": 58170,
+    "sha256": "e8fb4c998da1d83b4d5f440011e4e7209a990c84c38b57ad98ac647dcd3b47e6"
+  },
+  {
+    "file": "gorseller/source-19.png",
+    "bytes": 67140,
+    "sha256": "f029a877dc22b8b49c753252cf59cb29312ed914c2f3be8913a095ce21d9b2b2"
+  },
+  {
+    "file": "kaynaklar/01-MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv",
+    "bytes": 5580,
+    "sha256": "6b906af6d6d747c8714c1ce38bc5d79cb3d59db4c648e3e92e7e6d4677fe495b"
+  },
+  {
+    "file": "kaynaklar/01-ST_Ana_Kanun_v3.6.pdf",
+    "bytes": 4175048,
+    "sha256": "d769915bb442b024e20644c1096e11c0a5b468f663848046114bce710105e073"
+  },
+  {
+    "file": "kaynaklar/02-MAUSEAI_Diyagram_Atlasi_v1.0.html",
+    "bytes": 523569,
+    "sha256": "435388c1b24465db1aebed2dc658e175d7b5fb1d01123f4b35c065872f3b852b"
+  },
+  {
+    "file": "kaynaklar/03-MAUSEAI_Master_Kanun_ve_Sartname_v1.0.docx",
+    "bytes": 1080392,
+    "sha256": "1b20a1ff7f23091f811a50fa88eebcc1a72a7b08473d04f97436fe96a1ea763b"
+  }
+]

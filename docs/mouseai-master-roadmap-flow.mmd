@@ -1,0 +1,33 @@
+flowchart TB
+  S[Strateji ve ihtiyaç] --> B[İş modeli ve finans]
+  B --> C[Kapsam ve kabul ölçütü]
+  C --> A[Mimari ve tasarım]
+  A --> D[Geliştirme]
+  D --> T[Test ve güvenlik]
+  T --> P[Pilot]
+  P --> R[Yayın ve satış]
+  R --> O[İşletme ve BI]
+  O --> S
+
+  D --> AUTH[Supabase Auth/RLS]
+  D --> ING[Inngest worker/checkpoint]
+  D --> AI[OpenAI/Anthropic adapter]
+  D --> UI[White/transparent UI]
+  T --> V[Independent verifier]
+  T --> REC[Retry/idempotency/rollback]
+  P --> RUN[Computer runner]
+  O --> FIN[Cost/audit/finance ledger]
+  O --> KPI[KPI catalog and decision log]
+
+  G0{G0: project card and baseline} --> S
+  G1{G1: Auth and tenant PASS} --> ING
+  G2{G2: live task and audit PASS} --> AI
+  G3{G3: pilot benefit measured} --> R
+  G4{G4: legal/ops/support ready} --> R
+  AUTH --> G1
+  ING --> G2
+  AI --> G2
+  V --> G2
+  REC --> G2
+  FIN --> G3
+  KPI --> G3

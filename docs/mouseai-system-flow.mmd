@@ -1,0 +1,27 @@
+flowchart LR
+  U["Kullanıcı"] --> UI["Next.js<br/>Beyaz/Şeffaf UI"]
+  UI --> API["Task + Conversation API"]
+  API --> AUTH["Supabase Auth"]
+  API --> RLS["Tenant + RLS"]
+  API --> EVT["Inngest task.execute"]
+  EVT --> W["Durable Worker"]
+  W --> PLAN["Plan / Policy"]
+  PLAN --> AI["AI Router"]
+  AI --> OAI["OpenAI"]
+  AI --> ANT["Anthropic"]
+  W --> CP["Checkpoint"]
+  W --> AUD["Audit"]
+  W --> COST["Cost"]
+  W --> AP["Human Approval"]
+  W --> OBS["Sentry / Langfuse"]
+  UI --> PH["PostHog"]
+  CP --> DB[("Supabase Postgres")]
+  AUD --> DB
+  COST --> DB
+  V["Vercel"] --> UI
+  SEC["Secret Store"] -. server-only .-> API
+  SEC -. server-only .-> W
+
+
+
+

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="MouseAI güvenli görev, workflow, model, onay ve audit sistemi akış diyagramı" />
+  <title>MouseAI · Sistem Akışı</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07111f; --panel:#0d1b2e; --panel-2:#10243b; --text:#e8f0fb; --muted:#91a6bd; --line:#29415e; --blue:#59a7ff; --green:#43d7a1; --amber:#ffbd67; --red:#ff7777; --shadow:0 24px 70px rgb(0 0 0 / 28%); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; background:radial-gradient(circle at 15% 0%,#17365b 0,transparent 36%),var(--bg); color:var(--text); font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif; }
+    main { width:min(1440px,100%); margin:0 auto; padding:clamp(22px,4vw,52px); }
+    .hero { display:flex; justify-content:space-between; gap:28px; align-items:end; margin-bottom:26px; }
+    h1 { margin:0 0 8px; font-size:clamp(28px,4vw,48px); letter-spacing:-.04em; line-height:1.05; }
+    .eyebrow { margin:0 0 10px; color:var(--blue); font-size:12px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; }
+    .intro { max-width:760px; margin:0; color:var(--muted); font-size:16px; }
+    .status { display:inline-flex; align-items:center; gap:9px; padding:10px 14px; border:1px solid rgb(67 215 161 / 35%); border-radius:999px; color:#b8ffe7; background:rgb(67 215 161 / 10%); white-space:nowrap; font-size:13px; font-weight:700; }
+    .status::before { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 14px var(--green); content:""; }
+    .toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:22px 0 14px; }
+    button { border:1px solid var(--line); border-radius:10px; padding:9px 13px; color:var(--text); background:var(--panel); cursor:pointer; font:inherit; }
+    button:hover,button:focus-visible { border-color:var(--blue); outline:0; background:var(--panel-2); }
+    button.active { border-color:var(--blue); color:#dceeff; background:rgb(89 167 255 / 16%); }
+    .hint { margin-left:auto; color:var(--muted); font-size:13px; }
+    .canvas { overflow:auto; padding:1px; border:1px solid rgb(89 167 255 / 22%); border-radius:22px; background:linear-gradient(145deg,rgb(19 43 70 / 90%),rgb(8 19 34 / 96%)); box-shadow:var(--shadow); }
+    svg { display:block; width:100%; min-width:980px; height:auto; min-height:680px; }
+    .edge { stroke:#66829f; stroke-width:2.2; fill:none; marker-end:url(#arrow); opacity:.86; }
+    .edge.security { stroke:var(--amber); stroke-dasharray:8 7; }
+    .edge.hidden,.node.hidden { opacity:.12; }
+    .node { cursor:pointer; transition:opacity .2s,filter .2s; }
+    .node:hover,.node.selected { filter:drop-shadow(0 0 12px rgb(89 167 255 / 45%)); }
+    .node rect { fill:#11263d; stroke:#4e6b8b; stroke-width:2; }
+    .node.core rect { fill:#102d4c; stroke:var(--blue); }
+    .node.store rect { fill:#10372f; stroke:var(--green); }
+    .node.external rect { fill:#3a2a18; stroke:var(--amber); }
+    .node.approval rect { fill:#3d2028; stroke:var(--red); }
+    .node text { fill:var(--text); font-size:15px; font-weight:800; text-anchor:middle; dominant-baseline:middle; pointer-events:none; }
+    .node .sub { fill:var(--muted); font-size:12px; font-weight:500; }
+    .section-label { fill:#7892ae; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px 24px; margin-top:15px; color:var(--muted); font-size:13px; }
+    .legend span { display:inline-flex; align-items:center; gap:7px; }
+    .dot { width:11px; height:11px; border-radius:4px; border:1px solid; }
+    .dot.core { border-color:var(--blue); background:#102d4c; } .dot.store { border-color:var(--green); background:#10372f; } .dot.external { border-color:var(--amber); background:#3a2a18; } .dot.approval { border-color:var(--red); background:#3d2028; }
+    .notes { display:grid; grid-template-columns:repeat(3,1fr); gap:13px; margin-top:20px; }
+    .note { padding:16px; border:1px solid var(--line); border-radius:15px; background:rgb(13 27 46 / 78%); }
+    .note strong { display:block; margin-bottom:4px; } .note span { color:var(--muted); font-size:13px; }
+    footer { margin-top:22px; color:#7089a5; font-size:12px; }
+    @media (max-width:760px) { .hero{display:block}.status{margin-top:18px}.hint{width:100%;margin-left:0}.notes{grid-template-columns:1fr} }
+    @media print { :root{color-scheme:light} body{background:white;color:#102a43}.toolbar{display:none}.canvas{box-shadow:none} }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero"><div><p class="eyebrow">MouseAI · architecture map</p><h1>Ortak sistem akışı</h1><p class="intro">Kullanıcı isteğinden güvenli tenant sınırına, durable workflow’dan model/insan onayına ve denetlenebilir çıktıya uzanan uçtan uca akış.</p></div><div class="status">Paper / approval-first</div></header>
+    <div class="toolbar" aria-label="Diyagram kontrolleri"><button class="filter active" data-filter="all">Tüm akış</button><button class="filter" data-filter="core">Uygulama çekirdeği</button><button class="filter" data-filter="store">Kayıt katmanı</button><button class="filter" data-filter="external">Dış servisler</button><span class="hint">Bir düğüme tıklayarak ilgili katmanı vurgulayın · Mobilde yatay kaydırın</span></div>
+    <section class="canvas" aria-label="MouseAI sistem akış diyagramı">
+      <svg viewBox="0 0 1180 720" role="img" aria-labelledby="diagram-title diagram-desc">
+        <title id="diagram-title">MouseAI sistem akışı</title><desc id="diagram-desc">Kullanıcı, Next.js, Task API, Inngest, durable worker, model sağlayıcıları, insan onayı, Supabase, audit, checkpoint ve tenant maliyet kayıtları arasındaki akış.</desc>
+        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3Z" fill="#66829f" /></marker></defs>
+        <text class="section-label" x="40" y="34">İSTEK VE ORKESTRASYON</text><text class="section-label" x="680" y="34">POLİCY / EXECUTION</text><text class="section-label" x="40" y="490">KALICI KAYIT VE İZLENEBİLİRLİK</text>
+        <g class="edge-group"><path class="edge" d="M150 105H250"/><path class="edge" d="M360 105H460"/><path class="edge" d="M570 105H680"/><path class="edge" d="M735 155V245"/><path class="edge" d="M790 295H940"/><path class="edge" d="M790 345H940"/><path class="edge" d="M790 395H940"/><path class="edge" d="M735 445V540H535"/><path class="edge" d="M735 445V540H740"/><path class="edge" d="M735 445V540H945"/><path class="edge security" d="M1030 155V245H790"/><path class="edge security" d="M305 155V540H190"/></g>
+        <g class="node external" data-kind="external" data-name="Kullanıcı"><rect x="40" y="75" width="110" height="60" rx="14"/><text x="95" y="105">Kullanıcı</text></g>
+        <g class="node core" data-kind="core" data-name="Next.js UI"><rect x="250" y="75" width="110" height="60" rx="14"/><text x="305" y="97">Next.js</text><text class="sub" x="305" y="119">UI</text></g>
+        <g class="node core" data-kind="core" data-name="Task API"><rect x="460" y="75" width="110" height="60" rx="14"/><text x="515" y="97">Task API</text><text class="sub" x="515" y="119">Conversation</text></g>
+        <g class="node core" data-kind="core" data-name="Inngest"><rect x="680" y="75" width="110" height="60" rx="14"/><text x="735" y="97">Inngest</text><text class="sub" x="735" y="119">task.execute</text></g>
+        <g class="node core" data-kind="core" data-name="Durable Worker"><rect x="680" y="245" width="110" height="100" rx="14"/><text x="735" y="275">Durable</text><text x="735" y="297">Worker</text><text class="sub" x="735" y="321">retry / policy</text></g>
+        <g class="node external" data-kind="external" data-name="OpenAI"><rect x="940" y="265" width="160" height="52" rx="14"/><text x="1020" y="291">OpenAI</text></g>
+        <g class="node external" data-kind="external" data-name="Anthropic"><rect x="940" y="330" width="160" height="52" rx="14"/><text x="1020" y="356">Anthropic</text></g>
+        <g class="node approval" data-kind="external" data-name="Human Approval"><rect x="940" y="395" width="160" height="52" rx="14"/><text x="1020" y="421">Human Approval</text></g>
+        <g class="node store" data-kind="store" data-name="Supabase"><rect x="40" y="525" width="150" height="62" rx="14"/><text x="115" y="550">Supabase</text><text class="sub" x="115" y="572">Auth + RLS + DB</text></g>
+        <g class="node store" data-kind="store" data-name="Checkpoint"><rect x="470" y="525" width="130" height="62" rx="14"/><text x="535" y="550">Checkpoint</text><text class="sub" x="535" y="572">resume</text></g>
+        <g class="node store" data-kind="store" data-name="Audit ledger"><rect x="675" y="525" width="130" height="62" rx="14"/><text x="740" y="550">Audit</text><text class="sub" x="740" y="572">ledger</text></g>
+        <g class="node store" data-kind="store" data-name="Tenant budget"><rect x="880" y="525" width="130" height="62" rx="14"/><text x="945" y="550">Cost</text><text class="sub" x="945" y="572">tenant budget</text></g>
+        <g class="node external" data-kind="external" data-name="Secret Store"><rect x="970" y="75" width="150" height="60" rx="14"/><text x="1045" y="97">Secret Store</text><text class="sub" x="1045" y="119">server-only</text></g>
+        <text x="40" y="665" fill="#91a6bd" font-size="12">Kesikli çizgi: güvenlik sınırı / server-only erişim · Canlı işlem: kapalı, insan onayı: zorunlu</text>
+      </svg>
+    </section>
+    <div class="legend"><span><i class="dot core"></i>Uygulama çekirdeği</span><span><i class="dot store"></i>Kalıcı kayıt</span><span><i class="dot external"></i>Dış servis</span><span><i class="dot approval"></i>İnsan onayı</span></div>
+    <section class="notes" aria-label="Güvenlik ilkeleri"><div class="note"><strong>Tenant izolasyonu</strong><span>Kimlik, RLS ve audit sınırları Supabase katmanında korunur.</span></div><div class="note"><strong>Dayanıklı yürütme</strong><span>Retry, checkpoint ve policy kontrolleri workflow içinde uygulanır.</span></div><div class="note"><strong>Kontrollü çıktı</strong><span>Model çağrıları server-only; riskli adımlar insan onayı olmadan ilerlemez.</span></div></section>
+    <footer>MouseAI sistem akışı · Sürüm 2 · Güvenli, denetlenebilir ve approval-first tasarım</footer>
+  </main>
+  <script>
+    const filters = document.querySelectorAll('.filter');
+    const nodes = document.querySelectorAll('.node');
+    filters.forEach((button) => button.addEventListener('click', () => {
+      filters.forEach((item) => item.classList.toggle('active', item === button));
+      const filter = button.dataset.filter;
+      nodes.forEach((node) => node.classList.toggle('hidden', filter !== 'all' && node.dataset.kind !== filter));
+      document.querySelectorAll('.edge').forEach((edge) => edge.classList.toggle('hidden', filter !== 'all'));
+    }));
+    nodes.forEach((node) => node.addEventListener('click', () => {
+      nodes.forEach((item) => item.classList.remove('selected'));
+      node.classList.add('selected');
+      node.setAttribute('aria-label', `${node.dataset.name} seçildi`);
+    }));
+  </script>
+</body>
+</html>
+
+
