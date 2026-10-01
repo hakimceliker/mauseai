@@ -9,6 +9,13 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 **Hesap/secret/ödeme sahibi:** Kullanıcı  
 **Kabul dili:** `PLANNED`, `IN_PROGRESS`, `CODE_COMPLETE_LIVE_TEST_PENDING`, `COMPLETE`, `BLOCKED`.
 
+## Güncel yürütme durumu — 2026-10-01
+
+- [x] Faz 0: PR #83 merge edildi; merge commit `3521c24`; main CI yeşil.
+- [x] Faz 1: Kod kalite kapıları ve production smoke kontrolleri başarılı.
+- [~] Faz 2: Test kullanıcıları Tenant A/B’ye bağlandı; canlı Auth/RLS negatif testleri bekliyor.
+- [ ] Sonraki kapı: Auth/RLS kanıtı olmadan Faz 4 canlı Inngest kabulüne geçilmez.
+
 ## Faz 0 — Kanun, kapsam ve tek kayıt
 
 **Amaç:** Proje sınırını ve kaynak gerçeğini sabitlemek.  
@@ -19,7 +26,7 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 - [x] `docs/document-inventory.md` ve `docs/storage-and-repository-registry.md` kanonik kaynak yapıldı.
 - [x] ST3.6 kontrol envanteri ve G0–G12 kapıları repo’ya alındı.
 - [x] Görev sahipleri, rollback ve PR teslim şablonu belgelendi.
-- [ ] PR #83 review/CI sonucu ile main birleşmesi tamamlandı.
+- [x] PR #83 review/CI sonucu ile main birleşmesi tamamlandı; merge commit `3521c24`.
 
 **Dosyalar:** `docs/governance/`, `docs/document-inventory.md`, `docs/task-registry.md`, `docs/governance/st36/`.  
 **Kabul:** Envanter, sahiplik, branch ve rollback bilgisi tek yerde; scope dışı dosya yok.
@@ -34,7 +41,7 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 - [x] GitHub CI: lint, typecheck, test, build, dependency audit, secret scan, Docker.
 - [x] `.env.example` placeholder; gerçek secret yok.
 - [x] Local doğrulama: lint, typecheck, 266 test, build, audit başarılı.
-- [ ] Güncel PR CI kanıtı ve main CI kanıtı eklenir.
+- [x] Güncel PR CI ve main CI kanıtı: Analyze, Docker, quality, dependency-audit ve secret-scan başarılı.
 
 **Dosyalar:** `package.json`, `tsconfig.json`, `.github/workflows/`, `.env.example`, `src/`.  
 **Kabul:** Tüm kalite işleri yeşil; secret veya müşteri verisi commit edilmemiş.
