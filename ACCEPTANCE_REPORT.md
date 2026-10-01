@@ -1,8 +1,20 @@
-# Mause AI v0.1.0 - Acceptance Report
+# Mause AI v0.1.0 - Acceptance Report (Historical / Reconciled)
+
+> **Current status (2026-10-01): NOT PRODUCTION-READY.** This document describes
+> local implementation evidence and is not a live production acceptance. The
+> canonical current status is [`PROJECT_STATUS.md`](PROJECT_STATUS.md); the
+> evidence/ownership matrix is [`docs/repository-control-matrix.md`](docs/repository-control-matrix.md).
+> Any phase marked complete below means “implementation exists and local tests
+> passed”; it does not mean live integration, pilot, customer benefit, finance,
+> or operating acceptance is complete.
 
 ## Executive Summary
 
-Mause AI v0.1.0 successfully delivers a complete multi-tenant AI workflow orchestration platform with comprehensive features including tenant isolation, cost tracking, fault tolerance, and audit logging. All 12 implementation phases (3-14) are complete and tested.
+Mause AI v0.1.0 contains a tested multi-tenant workflow foundation with cost
+tracking, fault-tolerance, and audit components. The implementation phases below
+are historical/local evidence only. Live Auth/RLS isolation, real provider
+calls, Inngest production execution, pilot evidence, financial acceptance, and
+operational acceptance remain open.
 
 ## Phase-by-Phase Completion
 
@@ -184,8 +196,8 @@ Evidence:
 - src/app/api/offers/[id]/route.ts
 - src/__tests__/policy-engine.test.ts
 
-### Phase 12: Auth, RLS, Tenant Isolation ✅
-**Status**: Complete
+### Phase 12: Auth, RLS, Tenant Isolation 🟡
+**Status**: Implementation/scaffolding complete; live acceptance pending
 
 Features:
 - AuthMiddleware for auth context enforcement
@@ -206,8 +218,8 @@ Evidence:
 - ARCHITECTURE.md
 - Updated .env.example
 
-### Phase 13: E2E & Error Tests ✅
-**Status**: Complete
+### Phase 13: E2E & Error Tests 🟡
+**Status**: Local/mock coverage exists; production behavior pending
 
 Test Coverage:
 
@@ -250,8 +262,8 @@ Evidence:
 - src/__tests__/e2e.test.ts (282 lines of comprehensive tests)
 - All tests pass with tenant isolation enforced
 
-### Phase 14: Demo UI, README, Runbook, v0.1.0 ✅
-**Status**: Complete
+### Phase 14: Demo UI, README, Runbook, v0.1.0 🟡
+**Status**: Documentation/demo implementation exists; release acceptance pending
 
 Deliverables:
 
@@ -357,9 +369,9 @@ npm run lint       # 0 errors
 ### Worker
 - POST /api/inngest (Inngest webhook)
 
-## Deployment Status - UPDATED 2026-09-26
+## Deployment Status - RECONCILED 2026-10-01
 
-**⚠️ NOT YET READY - CI Pipeline Broken**
+**⚠️ NOT PRODUCTION-READY - live acceptance gates remain open**
 
 ### What's Ready
 - ✅ Production-grade code quality (verified locally)
@@ -371,26 +383,31 @@ npm run lint       # 0 errors
 - ✅ Troubleshooting guide
 
 ### What's Blocking Production Deployment
-- ❌ CI/CD pipeline is failing (all 14 runs)
-- ❌ Missing npm scripts: `format:check`, `lint:check`
-- ⚠️ 12 npm vulnerabilities detected (2 moderate, 8 high, 2 critical)
-- ⚠️ ACCEPTANCE_REPORT claims overstate readiness (test count was 14→7, CI not mentioned)
+- ✅ Main CI, CodeQL, secret scan, Docker and dependency audit are currently green
+- ✅ Production health/readiness endpoints are available
+- ⚠️ Live Auth/RLS tenant isolation and Inngest workflow evidence are missing
+- ⚠️ Real provider, pilot, customer benefit, financial, KPI and operating evidence are missing
+- ⚠️ This report is historical and must not be used as a production-ready approval
 
-### Critical Fixes Required Before Deployment
-1. Add missing scripts to package.json or fix CI workflow
-2. Resolve npm vulnerabilities with `npm audit fix`
-3. Update ACCEPTANCE_REPORT to match actual CI status
-4. Re-verify CI passes on 100% of main branch commits
+### Critical Fixes Required Before Production Acceptance
+1. Execute live Supabase Auth and cross-tenant negative RLS tests
+2. Execute Inngest trigger/worker/checkpoint/audit/retry/idempotency tests
+3. Record redacted OpenAI/Anthropic, Stripe sandbox, PostHog and Sentry/Langfuse evidence
+4. Run two real pilot scenarios with baseline, benefit, error and acceptance measures
+5. Complete the 13-week cash flow, unit economics, budget and downside scenario
+6. Complete KPI owner/baseline/target/query/alarm fields
+7. Close or justify duplicate issues and draft PRs
+8. Obtain G0-G12 evidence and human operational acceptance
 
 **See PRODUCTION_VERIFICATION_REPORT.md for full details.**
 
 ## Known Limitations (Phase v0.1.0)
 
 1. **Mock AI Providers**: Responses are simulated, not real
-   - Solution: Phase 15+ will integrate real OpenAI/Anthropic APIs
+   - Solution: Complete the real provider acceptance runbook; missing credentials remain `credential_not_configured`
 
 2. **Mock Authentication**: Uses headers instead of JWT
-   - Solution: Phase 12+ will use real Supabase Auth
+   - Solution: Complete the live Supabase Auth/RLS acceptance runbook
 
 3. **Single Database Region**: Supabase setup doesn't include read replicas
    - Solution: Add replicas for larger deployments
@@ -410,26 +427,27 @@ npm run lint       # 0 errors
 
 ## Conclusion - UPDATED 2026-09-26
 
-Mause AI v0.1.0 has **solid underlying architecture** and all features work correctly when tested locally. All 12 phases (3-14) are complete and code quality is high.
+Mause AI v0.1.0 has a solid underlying architecture and local test evidence. The implementation is not equivalent to live production acceptance.
 
 **However, the project is NOT ready for production because:**
 
-1. **CI/CD Pipeline is Broken**: GitHub Actions fails all 14 runs due to missing npm scripts (`format:check`, `lint:check` not defined in package.json)
+1. **Live acceptance is incomplete**: Auth/RLS, Inngest, provider, pilot, finance, KPI and operations evidence is not complete
 
-2. **Cannot Validate Automatically**: Until CI passes, we cannot guarantee the code passes all checks on every commit
+2. **Production behavior is not proven by local tests**: health and CI do not prove tenant isolation or workflow execution
 
-3. **Oversold Status**: Previous ACCEPTANCE_REPORT claimed ✅ approval when CI was actually failing
+3. **Status is reconciled**: this report no longer claims that implementation completion equals production readiness
 
-**Acceptance Status**: ⚠️ **CONDITIONAL**
+**Acceptance Status**: ⚠️ **CONDITIONAL / NOT ACCEPTED**
 
-Acceptance is **conditional on fixing the CI pipeline** within the next 3-5 hours. Once the missing npm scripts are added and all 14+ previous runs would pass, the project can be approved for production.
+Acceptance remains conditional on the live and business gates listed above. No
+production approval is granted by this document.
 
 **What Needs to Happen Next:**
-1. Add `format:check` and `lint:check` scripts to package.json
-2. Fix npm vulnerabilities with audit fix
-3. Verify CI passes on main branch
-4. Update this report
-5. Schedule production deployment
+1. Execute the canonical production acceptance runbooks
+2. Record redacted integration and pilot evidence
+3. Complete finance/KPI/G0-G12 records
+4. Classify and close duplicate GitHub issues/PRs
+5. Reconcile this report against the merged main commit
 
 ---
 
