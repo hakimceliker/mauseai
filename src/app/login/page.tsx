@@ -13,6 +13,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [recoveryMode, setRecoveryMode] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -20,6 +22,20 @@ export default function LoginPage() {
     event.preventDefault();
     setSubmitting(true);
     setError(null);
+    setNotice(null);
+
+    if (recoveryMode) {
+      const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (recoveryError) {
+        setError('Parola yenileme bağlantısı gönderilemedi. E-posta adresini kontrol edin.');
+      } else {
+        setNotice('Parola yenileme bağlantısı e-posta adresinize gönderildi.');
+      }
+      setSubmitting(false);
+      return;
+    }
 
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
@@ -69,7 +85,11 @@ export default function LoginPage() {
           {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
           <button disabled={submitting} type="submit" className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
-            {submitting ? 'Giriş yapılıyor…' : 'Giriş yap'}
+            {submitting ? (recoveryMode ? 'Bağlantı gönderiliyor…' : 'Giriş yapılıyor…') : (recoveryMode ? 'Yenileme bağlantısı gönder' : 'Giriş yap')}
+          </button>
+          {notice && <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
+          <button type="button" onClick={() => { setRecoveryMode((value) => !value); setError(null); setNotice(null); }} className="w-full text-sm font-medium text-blue-600 hover:underline">
+            {recoveryMode ? 'Giriş ekranına dön' : 'Şifremi unuttum'}
           </button>
         </form>
       </section>
