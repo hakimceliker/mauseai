@@ -1,8 +1,9 @@
-import { AIProvider, AIMessage, AIResponse } from './providers/base-provider';
+import { AIProvider, AIMessage, AIResponse, CredentialNotConfiguredError } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
 import { OpenAIProvider } from './providers/openai';
 import { AnthropicProvider } from './providers/anthropic';
 import { observability } from '@/src/lib/observability';
+import { LocalOllamaProvider } from './providers/local-ollama';
 
 /**
  * AI Router - selects appropriate provider based on environment configuration
@@ -12,6 +13,7 @@ import { observability } from '@/src/lib/observability';
  */
 export class AIRouter {
   private provider: AIProvider;
+  private readonly fallbackProvider?: AIProvider;
 
   constructor() {
     const configuredProvider = process.env.AI_PROVIDER?.trim().toLowerCase();
@@ -39,6 +41,10 @@ export class AIRouter {
         this.provider = new MockGPTProvider();
         break;
     }
+    if (process.env.LOCAL_AI_ENABLED !== 'false' && process.env.LOCAL_AI_BASE_URL) {
+      this.fallbackProvider = this.provider;
+      this.provider = new LocalOllamaProvider();
+    }
   }
 
   /**
@@ -53,21 +59,59 @@ export class AIRouter {
    */
   async call(messages: AIMessage[]): Promise<AIResponse> {
     const startedAt = new Date().toISOString();
+    const startedAtMs = Date.now();
     try {
       const response = await this.provider.call(messages);
-      void observability.reportTrace({
-        name: `${this.provider.name}.completion`,
-        input: messages,
-        output: response.content,
-        metadata: { provider: this.provider.name, tokens_used: response.tokens_used },
-        startedAt,
-        endedAt: new Date().toISOString(),
-      }).catch(() => undefined);
+      this.emitTelemetry(response, false, startedAtMs);
+      this.reportTrace(response, messages, startedAt);
       return response;
     } catch (error) {
+      if (this.fallbackProvider) {
+        const reason = this.classifyFailure(error);
+        console.warn(JSON.stringify({ event: 'ai_provider_fallback', provider: this.provider.name, reason, next: this.fallbackProvider.name }));
+        try {
+          const response = await this.fallbackProvider.call(messages);
+          this.emitTelemetry(response, true, startedAtMs, reason);
+          this.reportTrace(response, messages, startedAt, { fallback: true, fallback_reason: reason });
+          return response;
+        } catch (fallbackError) {
+          void observability.reportException(fallbackError, { provider: this.fallbackProvider.name, fallback: true }).catch(() => undefined);
+        }
+      }
       void observability.reportException(error, { provider: this.provider.name }).catch(() => undefined);
       throw error;
     }
+  }
+
+  private emitTelemetry(response: AIResponse, fallback: boolean, startedAtMs: number, fallbackReason?: string): void {
+    console.info(JSON.stringify({
+      event: 'ai_provider_selected',
+      provider: response.provider,
+      model: response.provider === 'local' ? process.env.LOCAL_AI_MODEL ?? 'qwen3:8b' : undefined,
+      route: response.provider === 'local' ? 'LOCAL' : 'CLOUD',
+      fallback,
+      fallback_reason: fallbackReason,
+      latency_ms: Date.now() - startedAtMs,
+      tokens_used: response.tokens_used ?? 0,
+      cost: response.cost ?? 0,
+    }));
+  }
+
+  private reportTrace(response: AIResponse, messages: AIMessage[], startedAt: string, metadata: Record<string, unknown> = {}): void {
+    void observability.reportTrace({
+      name: `${response.provider}.completion`,
+      input: messages,
+      output: response.content,
+      metadata: { provider: response.provider, tokens_used: response.tokens_used, ...metadata },
+      startedAt,
+      endedAt: new Date().toISOString(),
+    }).catch(() => undefined);
+  }
+
+  private classifyFailure(error: unknown): string {
+    if (error instanceof CredentialNotConfiguredError) return 'credential_not_configured';
+    if (error instanceof Error && /timeout|network|connect/i.test(error.message)) return 'network_or_timeout';
+    return 'provider_error';
   }
 
   /**
