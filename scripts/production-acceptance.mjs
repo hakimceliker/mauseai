@@ -16,6 +16,21 @@ const pollDelayMs = Number(process.env.SMOKE_POLL_DELAY_MS || 5000);
 const evidenceFile = process.env.SMOKE_EVIDENCE_FILE || '';
 const results = [];
 
+const integrationRequirements = [
+  ['supabase_url', 'NEXT_PUBLIC_SUPABASE_URL'],
+  ['supabase_anon_key', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'],
+  ['supabase_service_role', 'SUPABASE_SERVICE_ROLE_KEY'],
+  ['inngest_event_key', 'INNGEST_EVENT_KEY'],
+  ['inngest_signing_key', 'INNGEST_SIGNING_KEY'],
+  ['openai_provider', 'OPENAI_API_KEY'],
+  ['anthropic_provider', 'ANTHROPIC_API_KEY'],
+  ['stripe_sandbox', 'PAYMENT_API_KEY'],
+  ['posthog_analytics', 'POSTHOG_KEY'],
+  ['sentry', 'SENTRY_DSN'],
+  ['langfuse_public', 'LANGFUSE_PUBLIC_KEY'],
+  ['langfuse_secret', 'LANGFUSE_SECRET_KEY'],
+];
+
 function record(name, status, detail) {
   const item = { name, status, detail };
   results.push(item);
@@ -68,6 +83,10 @@ record('inngest_endpoint', [200, 401, 405].includes(inngest.response.status) ? '
 
 const anonymous = await request('/api/tasks');
 record('anonymous_access_rejected', anonymous.response.status === 401 ? 'PASS' : 'FAIL', String(anonymous.response.status));
+
+for (const [name, envName] of integrationRequirements) {
+  record(`config_${name}`, process.env[envName] ? 'PASS' : 'NOT_RUN', process.env[envName] ? 'configured' : `credential_not_configured:${envName}`);
+}
 
 if (configured('user_a_credential', tokenA)) {
   const invalid = await request('/api/tasks', { token: 'invalid-token' });
