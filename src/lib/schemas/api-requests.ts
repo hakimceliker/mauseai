@@ -5,6 +5,9 @@ import { validators } from './index';
 export const CreateTaskRequestSchema = z.object({
   workflow_id: validators.tenantId,
   input: z.record(z.unknown()).optional(),
+  expected_output: z.string().trim().min(1).max(10_000).optional(),
+  success_criteria: z.array(z.string().trim().min(1).max(2_000)).min(1).max(50).optional(),
+  approval_state: z.enum(['pending', 'approved']).optional(),
 });
 
 export type CreateTaskRequest = z.infer<typeof CreateTaskRequestSchema>;
