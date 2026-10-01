@@ -6,6 +6,21 @@ export interface TraceInput { name: string; traceId?: string; userId?: string; t
 
 const SENSITIVE_KEY = /(password|secret|token|api[-_]?key|authorization|cookie|private[-_]?key|service[-_]?role)/i;
 
+function configuredTimeoutMs(): number {
+  const parsed = Number.parseInt(process.env.OBSERVABILITY_TIMEOUT_MS || '3000', 10);
+  return Number.isFinite(parsed) ? Math.min(Math.max(parsed, 250), 30_000) : 3000;
+}
+
+async function fetchWithTimeout(input: RequestInfo | URL, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), configuredTimeoutMs());
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export function redactTelemetry(value: unknown, depth = 0): unknown {
   if (depth > 8) return '[REDACTED_DEPTH]';
   if (typeof value === 'string') return value.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]').replace(/sk-[A-Za-z0-9_-]+/g, '[REDACTED_KEY]').replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL]');
@@ -37,10 +52,12 @@ export class SentryAdapter {
     const eventId = randomUUID().replace(/-/g, '');
     const event = { event_id: eventId, platform: 'javascript', timestamp: Date.now() / 1000, exception: { values: [errorDetails(error)] }, extra: redactTelemetry(context) };
     try {
-      const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/x-sentry-envelope' }, body: `${JSON.stringify({ event_id: eventId, dsn, sent_at: new Date().toISOString() })}\n${JSON.stringify({ type: 'event' })}\n${JSON.stringify(event)}` });
+      const response = await fetchWithTimeout(url, { method: 'POST', headers: { 'content-type': 'application/x-sentry-envelope' }, body: `${JSON.stringify({ event_id: eventId, dsn, sent_at: new Date().toISOString() })}\n${JSON.stringify({ type: 'event' })}\n${JSON.stringify(event)}` });
       if (!response.ok) return { provider: 'sentry', status: 'error', eventId, reason: `http_${response.status}` };
       return { provider: 'sentry', status: 'ready', eventId };
-    } catch { return { provider: 'sentry', status: 'error', eventId, reason: 'network_error' }; }
+    } catch (error) {
+      return { provider: 'sentry', status: 'error', eventId, reason: error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'network_error' };
+    }
   }
 }
 
@@ -53,10 +70,12 @@ export class LangfuseAdapter {
     const payload = { batch: [{ id: input.traceId || randomUUID(), type: 'generation-create', timestamp: input.startedAt || new Date().toISOString(), body: { name: input.name, traceId: input.traceId, userId: input.userId, sessionId: input.tenantId, input: redactTelemetry(input.input), output: redactTelemetry(input.output), metadata: redactTelemetry(input.metadata), endTime: input.endedAt } }] };
     try {
       const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64');
-      const response = await fetch(`${baseUrl}/api/public/ingestion`, { method: 'POST', headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = await fetchWithTimeout(`${baseUrl}/api/public/ingestion`, { method: 'POST', headers: { authorization: `Basic ${auth}`, 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       if (!response.ok) return { provider: 'langfuse', status: 'error', reason: `http_${response.status}` };
       return { provider: 'langfuse', status: 'ready' };
-    } catch { return { provider: 'langfuse', status: 'error', reason: 'network_error' }; }
+    } catch (error) {
+      return { provider: 'langfuse', status: 'error', reason: error instanceof Error && error.name === 'AbortError' ? 'timeout' : 'network_error' };
+    }
   }
 }
 

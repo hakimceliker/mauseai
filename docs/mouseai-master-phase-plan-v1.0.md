@@ -15,6 +15,8 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 - [x] Faz 1: Kod kalite kapıları ve production smoke kontrolleri başarılı.
 - [~] Faz 2: Test kullanıcıları Tenant A/B’ye bağlandı; canlı Auth/RLS negatif testleri bekliyor.
 - [ ] Sonraki kapı: Auth/RLS kanıtı olmadan Faz 4 canlı Inngest kabulüne geçilmez.
+- [~] Faz 3: API execution contract and route boundary tests are in PR #89; local verification is 272 passed / 16 skipped, PR rerun and main re-verification pending.
+- [~] Faz 9: Observability transport timeout hardening is in PR #90; CI is still running, live provider evidence remains pending.
 
 ## Faz 0 — Kanun, kapsam ve tek kayıt
 
@@ -71,7 +73,7 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 - [x] Zod request/response şemaları.
 - [x] Task, conversation, offer ve timeline endpoint’leri.
 - [x] Tenant context ve authorization middleware.
-- [ ] `expected_output`, success criteria ve approval state zorunluluğu.
+- [~] `expected_output`, success criteria, approval state and route boundary tests are in PR #89; merge sonrası main doğrulaması bekliyor.
 - [ ] API integration testleri: anonymous, invalid token, valid tenant, cross-tenant.
 - [ ] OpenAPI/route sözleşmesi ve redacted error formatı.
 
@@ -167,7 +169,7 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 
 - [x] Structured logger, error logger ve secret/PII redaction.
 - [x] CodeQL, secret scan, dependency audit ve Docker workflow’ları.
-- [ ] Sentry error event ve correlation ID doğrulaması.
+- [~] Sentry/Langfuse/PostHog transport timeout hardening PR #90’da; canlı event/trace doğrulaması bekliyor.
 - [ ] Langfuse provider/task trace doğrulaması.
 - [ ] Threat model, attack-path ve RLS security review.
 - [ ] Backup/restore ve rollback tatbikatı.
