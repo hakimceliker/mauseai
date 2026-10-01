@@ -158,7 +158,7 @@ Bu dosya güncellenmeden ayrı parça “tamamlandı” raporu verilmez.
 | Build | PASS | `npm run build` |
 | Diff kontrolü | PASS | `git diff --check` |
 | Dependency audit | PASS | `npm audit --omit=dev --audit-level=high`, 0 vulnerability |
-| Production acceptance runner | NOT_RUN | `SMOKE_BASE_URL` yapılandırılmamış |
+| Production acceptance runner | PARTIAL | Production base URL ile health/readiness/anonymous erişim kontrolleri PASS |
 | Auth/tenant canlı API testi | credential_not_configured | `SMOKE_USER_A_TOKEN`, `SMOKE_USER_B_TOKEN` yok |
 | Inngest canlı workflow | credential_not_configured | `SMOKE_WORKFLOW_ID`, runtime Inngest erişimi yok |
 | Gerçek AI provider testi | credential_not_configured | OpenAI/Anthropic runtime credential kanıta alınmadı |
