@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `e7f1e34` (PR #94 merged; post-merge CI and CodeQL passed)
+**Main baseline at this branch point:** `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96 merged; prior runtime evidence is retained below)
 
 ## Status vocabulary
 
@@ -19,39 +19,41 @@
 
 **Overall:** `PARTIAL — NOT PRODUCTION-READY`
 
-Code and CI gates are healthy. Production acceptance is intentionally withheld until live Auth/RLS tenant isolation and Inngest workflow evidence are recorded with non-secret test credentials. Missing credentials are reported as `credential_not_configured`; no secret value is stored here.
+Code and CI gates are healthy. Overall product acceptance remains withheld until live Auth/RLS, Inngest, provider, verifier/recovery, pilot, business and operating evidence is recorded. Missing access is `credential_not_configured`, `NOT_RUN` or `BLOCKED`; no secret value is stored here.
 
 ## Execution ledger — 2026-10-01
 
-- **Completed phases:** F0 governance baseline; F1–F3 implementation increments represented by merged PRs #88 and #89; F9 observability timeout hardening represented by merged PR #90; status documentation/post-merge reconciliation represented by merged PR #91; production acceptance evidence and phased execution plan recorded by merged PR #93; post-merge status reconciliation for PR #94.
-- **Active phase:** Production acceptance evidence collection.
-- **Stopping point:** Main technical gates are verified; live Auth/RLS tenant isolation and live Inngest workflow evidence are still not executed.
-- **Incomplete phases:** Live Auth/RLS acceptance, tenant isolation negative tests, Inngest trigger/worker/checkpoint/audit/retry/idempotency/rollback evidence, real provider runtime proof, pilot/customer, finance, and G10–G12 operating acceptance.
-- **Missing work:** Approved test accounts and workflow identifiers in the approved secret source; production evidence bundle for each integration; pilot and business/KPI evidence.
+- **Completed implementation increments:** Code/document changes represented by merged PRs #88, #89, #90, #91, #93, #94 and #96. These merges do not mean P0–P9 packages or G0–G12 gates have been accepted.
+- **Active product package:** P0 runtime acceptance evidence collection; the [canonical roadmap](docs/mouseai-master-phase-plan-v1.0.md) separates P0–P9 packages from G0–G12 gates.
+- **Stopping point:** Main technical implementation/CI evidence exists; live Auth/RLS, Inngest, Local AI gateway and real provider calls are not verified.
+- **Incomplete packages/gates:** P0 live acceptance; P1 approval/data; P2/P3 pilots; P4 verifier/recovery and rollback evidence; P5/P6 applied tests; P7 finance/KPI; P8 legal/operating acceptance; P9 future enterprise scope; G0–G12 remain open as recorded in the gate register.
+- **Missing work:** Approved A/B test accounts and workflow ID in the approved secret source; an approved private Local AI gateway endpoint reachable from isolated staging; provider evidence; verifier/recovery tests; two pilot reports; real financial/KPI data and human decisions.
 - **Detected issues:** PR #90 initially conflicted in `.env.example`; PR #91 initially conflicted in `PROJECT_STATUS.md`; GitHub Actions emitted Node.js 20 and `ubuntu-latest` migration warnings; live acceptance credentials are not configured.
-- **Corrections:** Kept the branch’s secret-safe `.env.example` additions, pushed conflict-resolution commit `de0cbef`, merged PRs #90, #91, #93, and #94, verified main commit `e7f1e34`, refreshed production health/readiness, and reran the production acceptance runner with redacted output.
-- **Next operation:** Execute Auth/RLS and Inngest tests with approved test credentials and workflow identifiers; record PASS/FAIL evidence without exposing secrets.
-- **Completion:** Merge queue #88–#94 is 100% complete for the documented technical changes. Production acceptance remains 0/4 live gates verified; overall status remains `PARTIAL — NOT PRODUCTION-READY`.
+- **Corrections:** PR #96 is the verified main baseline for this worktree. This branch has not configured runtime secrets, accessed a gateway, altered cloud credentials, deployed production or merged to `main`.
+- **Next operation:** In isolated staging, configure an approved private gateway only in the authorized secret/config store, preserve the existing cloud provider, then capture Local → cloud fallback → Local recovery evidence. Do not expose Ollama `11434` or interrupt shared/live traffic.
+- **Completion:** Prior implementation merges are recorded; product acceptance is still incomplete. This branch adds no runtime acceptance.
 
 ## Evidence baseline
 
-| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90), [#91](https://github.com/hakimceliker/mauseai/pull/91), [#93](https://github.com/hakimceliker/mauseai/pull/93), [#94](https://github.com/hakimceliker/mauseai/pull/94); main commit `e7f1e34` | Live acceptance gates remain |
+| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90), [#91](https://github.com/hakimceliker/mauseai/pull/91), [#93](https://github.com/hakimceliker/mauseai/pull/93), [#94](https://github.com/hakimceliker/mauseai/pull/94), [#96](https://github.com/hakimceliker/mauseai/pull/96); main baseline `04256ac` | Live acceptance gates remain |
 
 | Area | Status | Evidence | Remaining gate |
 |---|---|---|---|
 | Governance and phase plan | DONE | [Canonical phase plan](docs/mouseai-master-phase-plan-v1.0.md), PR [#83](https://github.com/hakimceliker/mauseai/pull/83) | Keep status current |
+| Source-law reconciliation | PARTIAL | [Source register/change record](docs/governance/st36/SOURCE_REGISTER_AND_CHANGE_RECORD.md) | Conflicting source labels are preserved pending owner decision; no source binary was overwritten |
 | Code/quality gates | DONE | PR [#84](https://github.com/hakimceliker/mauseai/pull/84), main commit `6e950b4` | None for this gate |
 | Production health/readiness | VERIFIED | [Production smoke runbook](docs/production-smoke-runbook.md) | Refresh after releases |
 | Supabase profile-to-tenant mapping | VERIFIED | [Auth/Tenant runbook](docs/governance/st36/plan-004-auth-tenant-runbook.md) | Live login and negative RLS test |
 | Auth and tenant isolation | PARTIAL | Smoke runner returns `credential_not_configured` when tokens are absent | Run with approved test accounts |
 | Inngest worker/checkpoint/audit | PARTIAL | [Inngest acceptance runbook](docs/governance/st36/plan-005-inngest-acceptance-runbook.md) | Trigger a real production workflow |
 | AI providers | PARTIAL | Provider/cost runbook | Runtime provider proof without exposing keys |
+| Local AI gateway | BLOCKED / NOT_RUN | Existing local-first adapter; [acceptance guide](docs/integrations/local-ai-fallback.md) | Approved private gateway/runtime configuration and isolated three-step live test |
 | Payments | PARTIAL | Stripe sandbox only | User/payment acceptance decision |
 | Observability | PARTIAL | Sentry/Langfuse/PostHog plans | Live event/trace proof |
 
 ## Single next step
 
-Run the production acceptance checklist with approved test accounts and workflow identifiers. Do not mark production-ready from health endpoints alone.
+Run the isolated Local AI canary only after the approved gateway is available in the runtime secret/config store; preserve the existing cloud fallback. Continue Auth/RLS and Inngest acceptance separately. Do not mark production-ready from health endpoints, mocks or documents alone.
 
 ## MOUSE package execution
 

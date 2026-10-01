@@ -1,6 +1,11 @@
 # MouseAI — 14 Günün Tam Uygulama Backlog’u
 
-Bu belge 14 günün tamamını tek seferde tanımlar. Her günün görevi, sahibi, araçları, dosya çıktısı ve kabul ölçütü bellidir. Günler kullanıcıdan ayrı ayrı kopyala-yapıştır beklemeden sırayla yürütülür.
+Bu belge eski bir teknik backlog taslağıdır; gün numaraları takvim taahhüdü,
+proje süresi veya bağlayıcı ana yol haritası değildir. Yalnız P0/P1 içinde
+onaylanan bir uygulama dilimi olarak kullanılabilir ve ilgili G0–G12 geçiş
+kapılarına tabidir. Buradaki tik/teslim ifadesi tek başına gerçek uygulama veya
+kabul kanıtı değildir. Kanonik ürün sırası:
+[`mouseai-master-phase-plan-v1.0.md`](mouseai-master-phase-plan-v1.0.md).
 
 ## Ortak kurallar
 

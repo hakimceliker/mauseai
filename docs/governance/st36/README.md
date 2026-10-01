@@ -4,6 +4,8 @@ Bu klasör, 1 Ekim 2026 tarihli ST3.6 uyarlama paketinin MouseAI repo içindeki 
 
 ## Kaynak ve kapsam
 
+- Kanonik kaynak kimlikleri, hash/sürüm karşılaştırması ve açık metadata farkları:
+  [Source register and variance record](SOURCE_REGISTER_AND_CHANGE_RECORD.md).
 - 377 kontrol: PUK-001–PUK-357 ve ST-01–ST-20
 - 13 geçiş kapısı: G0–G12
 - 30 başlangıç/kabul görevi: PLAN-001–PLAN-030
@@ -27,6 +29,7 @@ Her kontrol satırı bir GitHub issue, görev sahibi, kabul koşulu, kanıt bağ
 ## Birleştirme
 
 Bu paket, [master gap roadmap](../../mouseai-master-gap-roadmap-v1.1.md), [task registry](../../task-registry.md) ve [production acceptance plan](../../production-acceptance-task-distribution.md) ile birlikte okunur. Dış kaynak PDF/DOCX arşivdir; bu klasördeki JSON/CSV kayıtları makine tarafından takip edilecek çalışma kopyasıdır.
+Yeni sağlanan büyük PDF'ler ikilenmeden metadata/hash kaydıyla izlenir; önceki kaynak byte kimlikleri silinmez.
 
 PLAN-004 için uygulanacak kabul sırası: [Auth ve tenant kabul runbook'u](plan-004-auth-tenant-runbook.md).
 
