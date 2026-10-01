@@ -11,19 +11,20 @@ describe('local-first AI routing', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     process.env = { ...originalEnv };
   });
 
   it('uses the private local gateway and records local tokens at zero API cost', async () => {
     process.env.AI_PROVIDER = 'openai';
     process.env.OPENAI_API_KEY = 'test-only-placeholder';
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     process.env.LOCAL_AI_ENABLED = 'true';
     process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
     process.env.LOCAL_AI_ACCESS_CLIENT_ID = 'test-client-id';
     process.env.LOCAL_AI_ACCESS_CLIENT_SECRET = 'test-client-secret';
 
-    const fetchMock = vi.fn().mockImplementation((input: URL | string, init?: RequestInit) => {
+    const fetchMock = vi.fn().mockImplementation((input: URL | string, _init?: RequestInit) => {
       if (String(input).endsWith('/api/tags')) {
         return Promise.resolve(new Response('', { status: 200 }));
       }
@@ -93,7 +94,7 @@ describe('local-first AI routing', () => {
   });
 
   it('does not send local requests from production to an insecure endpoint', async () => {
-    process.env.NODE_ENV = 'production';
+    vi.stubEnv('NODE_ENV', 'production');
     process.env.LOCAL_AI_BASE_URL = 'http://127.0.0.1:11434';
     process.env.LOCAL_AI_ACCESS_CLIENT_ID = '';
     process.env.LOCAL_AI_ACCESS_CLIENT_SECRET = '';
