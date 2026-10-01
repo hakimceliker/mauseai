@@ -1,6 +1,6 @@
 # MouseAI — G0 Repository ve Branch Kontrol Kaydı
 
-- **Last checked:** 2026-10-01
+- **Last checked (UTC):** 2026-10-01T20:53:04Z
 - **Repository:** `hakimceliker/mauseai`
 - **Default branch:** `main`
 - **Main SHA:** `04256ac21a1c95da957fab501fc87c7acdf4cdd2`
@@ -28,13 +28,22 @@
 ### Main branch protection
 
 Verified by `GET /repos/hakimceliker/mauseai/branches/main/protection` and
-`GET /repos/hakimceliker/mauseai/rulesets/24329825` on 2026-10-01. The
+`GET /repos/hakimceliker/mauseai/rulesets/24329825` at
+`2026-10-01T20:53:04Z` (`gh api`; [ruleset API](https://api.github.com/repos/hakimceliker/mauseai/rulesets/24329825),
+[branch-protection API](https://api.github.com/repos/hakimceliker/mauseai/branches/main/protection)).
+The
 branch-protection API itself has no numeric ruleset ID; the separate active
 repository ruleset is `main-protection`, ID `24329825`, enforcement `active`,
 target `refs/heads/main`, with no bypass actors. The ruleset API reports
 `created_at=2026-10-01T22:45:19.689+03:00` and
 `updated_at=2026-10-01T23:23:03.942+03:00`. The branch-protection GET is
 verified separately; the two controls are not conflated.
+
+The repository-settings UI previously showed `Unauthorized`; the direct API
+GETs above succeeded with the current CLI identity and confirm protection is
+active. The UI authorization discrepancy remains unresolved and is not
+evidence that protection is absent. No duplicate ruleset was created or
+settings changed during this recheck.
 
 Required strict status contexts:
 
@@ -49,10 +58,24 @@ Vercel
 Vercel Preview Comments
 ```
 
+These live context names map to actual workflow checks as follows; no
+non-existent context was added:
+
+| Required context | Actual check |
+|---|---|
+| `quality` | CI job running `npm run lint`, `npm run typecheck`, `npm test -- --run`, and `npm run build` |
+| `dependency-audit` | CI job running `npm audit --audit-level=high` |
+| `secret-scan` | Gitleaks workflow job |
+| `docker` | CI job running `docker build` |
+| `Analyze (javascript-typescript)` | CodeQL workflow matrix analysis job |
+| `CodeQL` | GitHub CodeQL analysis check |
+| `Vercel` | Vercel preview deployment check |
+| `Vercel Preview Comments` | Vercel preview comment check |
+
 The contexts were observed live on PR #92, #95 and #97; all were successful at
-the time of review. Protection also requires one approval, approval of the
-latest push, dismissal of stale reviews, admin enforcement, no force-push or
-deletion, and resolved review conversations.
+the recorded snapshot time. Protection also requires one approval, approval of
+the latest push, dismissal of stale reviews, admin enforcement, no force-push
+or deletion, and resolved review conversations.
 
 **Transparent setting history:** the first read of the legacy branch-protection
 endpoint returned `404 Branch not protected`; at that point a separate
@@ -60,7 +83,7 @@ rulesets query had not yet been made, so no claim is made that the main ruleset
 was absent. During this work the legacy branch protection was briefly enabled,
 removed after an interim verify-only instruction, then re-enabled after the
 user's explicit final instruction. A later rulesets read found the active
-`main-protection` ruleset above. Final direct GETs verify both controls. The branch-protection response was
+`main-protection` ruleset above. Final direct GETs verify both controls. The earlier branch-protection response was
 read at `2026-10-01T20:33:47Z` (GitHub request
 `CDD6:2D57A3:145F0C6:1456C0B:6ABEC3AB`); ruleset ID `24329825` was read at
 `2026-10-01T20:33:49Z` (request
@@ -75,6 +98,11 @@ response additionally requires latest-push approval, strict contexts
 No main code was pushed by this sequence. Re-read both APIs before later
 state-dependent claims.
 
+PR #96 merged at `2026-10-01T19:32:43Z`, before this ruleset's reported
+creation time (`2026-10-01T19:45:19Z`). The current policy is not retroactive;
+its present state does not establish which review policy was effective for
+that earlier merge.
+
 ### Actions permission boundary
 
 Workflow-level `permissions` is read-only for CI; CodeQL separately requests
@@ -88,13 +116,17 @@ used and pinning to verified full commit SHAs in a reviewed follow-up.
 
 ## Pull request, CI, and deployment evidence
 
+PR state and checks below were re-read at `2026-10-01T20:53:04Z`. PR #97's
+check results apply only to head `7e82276967aa6ed2a849f414a98e971098cf7558`.
+
 | Item | Live result |
 |---|---|
-| PR #92 | Open; mergeable; required checks pass; no reviews; `REVIEW_REQUIRED` |
+| PR #92 | Open, ready for review (`isDraft=false`); required checks pass; no reviews; `REVIEW_REQUIRED` |
 | PR #95 | Open on `chore/windows-acceptance-wrapper` to current main; mergeable; required checks pass; no reviews; `REVIEW_REQUIRED` |
-| PR #97 | Open on `hakimceliker-mouseai-kanun-uyarlamasi` to current main; mergeable; required checks pass; no reviews; `REVIEW_REQUIRED` |
-| Current main CI | `quality`, `dependency-audit`, `secret-scan`, `docker`, `Analyze (javascript-typescript)` pass on `04256ac` |
-| Production deployment | GitHub deployment `6793405140`, successful, SHA `04256ac21a1c95da957fab501fc87c7acdf4cdd2`, matching main |
+| PR #97 | Open on `hakimceliker-mouseai-kanun-uyarlamasi` to current main; head `7e82276967aa6ed2a849f414a98e971098cf7558`; all required checks pass; no reviews; `REVIEW_REQUIRED` |
+| PR #96 | Merged at `2026-10-01T19:32:43Z`; merge commit `04256ac21a1c95da957fab501fc87c7acdf4cdd2` is current main; PR and main checks pass |
+| Current main CI | `quality`, `dependency-audit`, `secret-scan`, `docker`, `Analyze (javascript-typescript)` and CodeQL pass on `04256ac`; [CI run 36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789), [CodeQL run 36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754) |
+| Production deployment | Deployment `6793405140` is `success`, SHA `04256ac21a1c95da957fab501fc87c7acdf4cdd2`, exactly matching current main; [deployment status](https://api.github.com/repos/hakimceliker/mauseai/deployments/6793405140/statuses) |
 | Health/readiness | Live HTTP 200 checks; see [integration evidence](INTEGRATION_EVIDENCE.md). Health is not integration acceptance. |
 
 ## Safety and rollback

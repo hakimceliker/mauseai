@@ -64,11 +64,13 @@ runtime or acceptance result.
 | `Proje_Fikri_Arastirma_ve_Yatirim_Karar_Modeli.pdf` | 93,473 | `16e319f70f29d2aa9f1fd46649e4417fcbfe197d44e5450ffc9e3f941557fb21` | Derived PDF; SRC-07 JSON remains canonical |
 | `Proje_Fikri_Arastirma_ve_Yatirim_Karar_Modeli.md` | 19,660 | `08a8d199a762ff36416e11e61c129369899761c45bc8162f9d44eb30fe8c2a77` | Derived Markdown; SRC-07 JSON remains canonical |
 
-The working 52-row acceptance CSV is **20,739 bytes**, SHA-256
-`2822779b9d07815166edf28007e5949c6f753af1101e66ae8ab04056d58c2fd9`.
-It contains PLAN-001–PLAN-030 plus MAU-ADAPT-001–MAU-ADAPT-022. Each shared
-PLAN ID has the same `Durum` value as SRC-04. Both files are retained in their
-respective roles; the working CSV was not rewritten.
+The working 52-row acceptance CSV contains PLAN-001–PLAN-030 plus
+MAU-ADAPT-001–MAU-ADAPT-022. Its original `Durum` values and 52 IDs are
+preserved. On 2026-10-01, task tracking columns were appended for branch, PR,
+commit, CI run, local test, evidence timestamp and next step; only PLAN-003 and
+PLAN-004 received concrete links to PR #97 evidence. The current Windows worktree file
+is **30,378 bytes**, SHA-256
+`f2ba05e827f50466c7ce209db6468186f1d65af54c9335fecc967708f1c3352f`.
 
 ## Repository counterpart and verification result
 
@@ -83,7 +85,7 @@ binary is not in Git, not that the supplied attachment was unavailable.
 | SRC-01 ST law PDF | `MAUSEAI_Ana_Kayit.json` SRC-01; metadata only | `SOURCE_MISSING` raw PDF; supplied bytes match the prior SRC-01 hash | `SOURCE_MISMATCH` inside PDF: active v3.6 vs cover/guide v3.4; not normalized |
 | SRC-02 earlier MouseAI DOCX | Ana record SRC-02 and `MAUSEAI_Dosya_Manifestosu.json` entry of same basename | `SOURCE_MISMATCH`: Ana record 1,080,392 bytes / `1b20…`; package manifest 1,560,563 bytes / `62b479…`; raw DOCX not copied | Same display version v1.0 does not establish same source bytes |
 | SRC-03 diagram atlas HTML | Ana record SRC-03; metadata only | `SOURCE_MISSING` raw HTML | v1.0 as supplied; supporting artifact, not acceptance |
-| SRC-04 30-row acceptance CSV | Ana record SRC-04; work view `MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv` | `SOURCE_MISMATCH` at file level: source 5,580 bytes / `6b906a…`; work view 20,739 bytes / `282277…`; 30 shared PLAN IDs retain the source `Durum` values | 30-row source preserved as metadata; 22 adaptation rows are repository work view only |
+| SRC-04 30-row acceptance CSV | Ana record SRC-04; work view `MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv` | `SOURCE_MISMATCH` at file level: source 5,580 bytes / `6b906a…`; current work view 30,378 bytes / `f2ba05…`; all 30 shared PLAN IDs retain the source `Durum` values | 30-row source preserved as metadata; 22 adaptation rows and evidence-tracking columns are repository work view only |
 | SRC-05 supplied MAUSEAI master PDF | Ana record SRC-05 and this variance record; earlier same-name manifest artifact | `SOURCE_MISMATCH`: supplied 3,563,460 bytes / `6672c3…`; earlier artifact 3,538,359 bytes / `58791c…`; supplied PDF binary not copied | Both say v1.0; do not infer a semantic version increment |
 | SRC-06 Senatech production/operations law PDF | Ana record SRC-06; metadata only | `SOURCE_MISSING` raw PDF | `SOURCE_MISMATCH`: filename v3.0 vs active PUK-001/body v3.2 |
 | SRC-07 decision-model JSON | Ana record SRC-07; JSON not copied | `SOURCE_MISSING` raw JSON | v1.0 JSON remains canonical; accompanying PDF/MD are derived, not independent authority |
@@ -105,7 +107,7 @@ tables above and in `MAUSEAI_Ana_Kayit.json`.
 | ST active v3.6 header vs v3.4 cover/guide | Same bytes as existing SRC-01; PDF header and closure identify v3.6 while cover metadata/opening guidance identify v3.4 | Preserve source filename and bytes; record the discrepancy. Use the explicitly active v3.6 adaptation statement as recorded by the supplied MouseAI master, pending owner resolution of the source metadata. |
 | Senatech filename v3.0 vs PUK-001 body v3.2 | SRC-06 file name says v3.0; internal title/active clauses state v3.2 | Register both labels verbatim. Do not rename, normalize, or silently choose a new version label. |
 | Earlier master DOCX metadata differs across repository records | Ana record SRC-02: 1,080,392 bytes/hash `1b20…`; package manifest DOCX: 1,560,563 bytes/hash `62b479d25b69a1ec965bdebc63fd83c000e577b636e644f282bf5a447a93540a` | Preserve both prior byte identities as historical entries; do not infer they are identical to SRC-05 or to each other. |
-| Source 30-row CSV vs expanded work register | SRC-04: 30 PLAN rows, 5,580 bytes; repository work register: 52 rows, 20,739 bytes | Keep all PLAN IDs and status values; retain 22 adaptation rows. No duplicate GitHub issues are created by this reconciliation. |
+| Source 30-row CSV vs expanded work register | SRC-04: 30 PLAN rows, 5,580 bytes; repository work register: 52 rows, 30,378 bytes after adding evidence-tracking fields | Keep all PLAN IDs and status values; retain 22 adaptation rows; unknown branch/PR/commit/CI fields remain `NOT_LINKED`/`NOT_RUN`. No duplicate GitHub issues are created by this reconciliation. |
 
 The source binaries are not copied into the repository: the existing manifest
 is a package inventory, and the supplied files' hashes, sizes, identities and

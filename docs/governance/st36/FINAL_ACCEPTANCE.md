@@ -2,6 +2,7 @@
 
 - **Decision:** `PARTIAL — NOT PRODUCTION-READY`
 - **Last verified:** 2026-10-01
+- **GitHub API snapshot (UTC):** 2026-10-01T20:53:04Z
 - **Main SHA:** `04256ac21a1c95da957fab501fc87c7acdf4cdd2`
 
 Acceptance is withheld until every required technical, live, business, human,
@@ -30,9 +31,9 @@ deployments do not independently pass a gate.
 | Finance | `BLOCKED — DECISION_PENDING` | 13-week template is blank; costs, budget, price, funding, and capacity were not supplied. |
 | Backup/restore | `NOT_RUN` | No restore rehearsal evidence. |
 | Incident/support | `BLOCKED — DECISION_PENDING` | Operations/on-call owner and support acceptance are not assigned. |
-| Independent review | `BLOCKED` | PR #92, #95, and #97 have no reviews; GitHub reports `REVIEW_REQUIRED`. The only listed non-owner contributor has read permission, not write/maintain review authority. |
-| Main CI | `VERIFIED` | Main SHA's quality, dependency-audit, secret-scan, Docker and Analyze checks succeeded. |
-| Production deployment | `VERIFIED` (deployment only) | Production deployment SHA matches main; this does not prove product acceptance. |
+| Independent review | `BLOCKED` | PR #92, #95, and #97 have no reviews; GitHub reports `REVIEW_REQUIRED`. PR #92 is ready for review. The only listed non-owner contributor has read permission, not write/maintain review authority. |
+| Main CI | `VERIFIED` | Current main SHA's quality, dependency-audit, secret-scan, Docker, Analyze and CodeQL checks succeeded after PR #96 merged. |
+| Production deployment | `VERIFIED` (deployment only) | Latest recorded Production deployment `6793405140` succeeded on SHA `04256ac21a1c95da957fab501fc87c7acdf4cdd2`, exactly matching current main; this does not prove product acceptance. |
 | Production health/readiness | `VERIFIED` (health only) | HTTP 200 endpoints; integration payload still reports mock/console/disconnected services. |
 | G0 | `DECISION_PENDING` | Sponsor, cost center and operations risk owner remain unapproved. |
 | G1–G8 | `PARTIAL / BLOCKED` | Current status and evidence are detailed in the master phase plan; required live, scope, owner, and risk evidence remains incomplete. |

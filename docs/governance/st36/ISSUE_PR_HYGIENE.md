@@ -1,24 +1,35 @@
 # MouseAI GitHub issue and pull-request inventory
 
-- **Last checked:** 2026-10-01
+- **Last checked (UTC):** 2026-10-01T20:53:04Z
 - **Repository:** `hakimceliker/mauseai`
-**Rule:** This is a read-only inventory. No issue or PR was assigned, closed,
-rebased, or merged by this reconciliation.
+**Rule:** No issue was assigned or closed. PR #96 had already merged before
+this snapshot; no PR was merged by this reconciliation.
 
 ## Active non-draft pull requests
 
-All three PRs were live-checked. Required CI/security/preview checks passed,
-branches are mergeable and based on current main, but no reviews exist.
+All three open PRs were live-checked at the timestamp above. Required
+CI/security/preview checks passed, but no independent reviews exist.
 `REVIEW_REQUIRED` is a merge blocker under the verified main protection.
 
 | PR | Branch | Base | Head | Status | Owner / milestone / next step |
 |---|---|---|---|---|---|
-| [#92](https://github.com/hakimceliker/mauseai/pull/92) | `codex/mauseai-local-ai-security-20261001` | `04256ac` | `7c8d2fbe23548ffdd26060a9f9114e7a8efb30d9` | `OPEN`, mergeable; all required checks pass | No assignee/milestone/review; request independent maintainer review |
-| [#95](https://github.com/hakimceliker/mauseai/pull/95) | `chore/windows-acceptance-wrapper` | `04256ac` | `2fe1b005e010f69d371f54c32c7497bd32cba769` | `OPEN`, mergeable; all required checks pass | No assignee/milestone/review; requested branch PR already exists |
-| [#97](https://github.com/hakimceliker/mauseai/pull/97) | `hakimceliker-mouseai-kanun-uyarlamasi` | `04256ac` | Current feature head; see PR | `OPEN`, mergeable; all required checks pass | No assignee/milestone/review; request independent maintainer review |
+| [#92](https://github.com/hakimceliker/mauseai/pull/92) | `codex/mauseai-local-ai-security-20261001` | `04256ac` | `7c8d2fbe23548ffdd26060a9f9114e7a8efb30d9` | `OPEN`, ready for review (`isDraft=false`); all required checks pass | No review; request independent maintainer review |
+| [#95](https://github.com/hakimceliker/mauseai/pull/95) | `chore/windows-acceptance-wrapper` | `04256ac` | `2fe1b005e010f69d371f54c32c7497bd32cba769` | `OPEN`; all required checks pass | No review; requested branch PR already exists |
+| [#97](https://github.com/hakimceliker/mauseai/pull/97) | `hakimceliker-mouseai-kanun-uyarlamasi` | `04256ac` | `7e82276967aa6ed2a849f414a98e971098cf7558` at snapshot | `OPEN`; all required checks pass at this head | No review; independent maintainer review required before merge |
 
 No new PR was created for `chore/windows-acceptance-wrapper`; #95 is its existing
 PR to current `main`.
+
+## Merged baseline
+
+PR [#96](https://github.com/hakimceliker/mauseai/pull/96) merged at
+`2026-10-01T19:32:43Z`; merge commit
+`04256ac21a1c95da957fab501fc87c7acdf4cdd2` is the current `main` SHA. Its
+required PR checks passed, and post-merge main CI run
+[36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789)
+and CodeQL run
+[36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754)
+passed. Production deployment `6793405140` is `success` on the same exact SHA.
 
 ## Historical draft PRs
 
@@ -70,6 +81,24 @@ that the newer issue is formally canonical or reopen/close anything.
 | #61 MOUSE-009 | #50 |
 | #62 MOUSE-010 | #51 |
 | #63 MOUSE-011 | #52 |
+
+The closed historical issues #42, #43, #45, #49, #50, #51 and #52 currently
+carry the `duplicate` label. #44, #46, #47 and #48 do not. All remain closed;
+this inventory does not infer additional duplicate relationships or change
+their state.
+
+## Acceptance task-card completeness
+
+The 52-row work view is
+[`MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv`](MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv).
+All PLAN IDs and existing `Durum` values were verified unchanged after adding
+branch, PR, commit, CI run, local test result, evidence timestamp and next-step
+columns. Only PLAN-003 and PLAN-004 are linked to PR #97 because those links are
+directly evidenced. The other 50 rows explicitly remain `NOT_LINKED`,
+`NOT_RUN`, or `NOT_RECORDED`; their existing owner-role fields are not treated
+as named-person assignments. `gh project list --owner hakimceliker` returned
+zero accessible GitHub Projects boards, so no external task cards were
+invented or modified.
 
 ## Metadata gaps and next action
 

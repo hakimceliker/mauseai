@@ -10,6 +10,10 @@ Bu klasör, 1 Ekim 2026 tarihli ST3.6 uyarlama paketinin MouseAI repo içindeki 
 - 13 geçiş kapısı: G0–G12
 - 30 başlangıç/kabul görevi: PLAN-001–PLAN-030
 - 22 uyarlama işi: MAU-ADAPT-001–MAU-ADAPT-022
+- 52 satırlı kabul çalışma görünümü: mevcut ID ve `Durum` korunur; GitHub
+  branch/PR/commit, CI, yerel test, kanıt zaman damgası ve sonraki adım alanları
+  eklenmiştir. Yalnız doğrulanan PLAN-003/004 bağlantıları doldurulmuş; diğer
+  bilinmeyenler `NOT_LINKED`/`NOT_RUN` olarak kalır.
 - 18 KPI kartı
 - 13 haftalık nakit girdisi
 - 50 kaynak bölüm ve 19 diyagram
@@ -19,7 +23,8 @@ Bu klasör, 1 Ekim 2026 tarihli ST3.6 uyarlama paketinin MouseAI repo içindeki 
 - `runtime_verified: false`
 - Kapılar: `BEKLEMEDE`
 - Kontrol matrisi: `TASLAK İNSAN İNCELEMESİ GEREKLİ`
-- Sorumlu ve kanıt alanları: boş; atama yapılmadan `GEÇTİ` kullanılamaz.
+- Named owner values remain `ATANACAK`; only PLAN-003/004 have linked PR/test
+  evidence. No task status or gate was advanced to `GEÇTİ`.
 - Bu dosyaların repo’da bulunması, kanunların uygulandığı veya production kabulünün verildiği anlamına gelmez.
 
 ## Uygulama kuralı

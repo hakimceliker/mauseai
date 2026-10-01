@@ -25,17 +25,23 @@ Code and CI gates are healthy. Overall product acceptance remains withheld until
 
 - Current `main`: `04256ac21a1c95da957fab501fc87c7acdf4cdd2`; main CI checks
   `quality`, `dependency-audit`, `secret-scan`, `docker`, and
-  `Analyze (javascript-typescript)` succeeded.
+  `Analyze (javascript-typescript)` and CodeQL succeeded ([CI run 36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789), [CodeQL run 36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754)).
 - Production GitHub deployment `6793405140` succeeded on the exact same SHA as
   `main`. Live `/api/health` and `/api/health/ready` returned HTTP 200, but
   health reported payment `mock`, analytics `console`, notifications
   `console`, and realtime `connected:false`; this is health/readiness evidence
   only, not acceptance of those integrations.
+- PR [#96](https://github.com/hakimceliker/mauseai/pull/96) merged at
+  `2026-10-01T19:32:43Z`; its merge commit is current main SHA
+  `04256ac21a1c95da957fab501fc87c7acdf4cdd2`. The post-merge main CI and
+  CodeQL runs passed, and the latest recorded Production deployment SHA
+  exactly matches main.
 - PRs [#92](https://github.com/hakimceliker/mauseai/pull/92),
   [#95](https://github.com/hakimceliker/mauseai/pull/95), and
   [#97](https://github.com/hakimceliker/mauseai/pull/97) are open, mergeable,
   and have passing required CI/security/preview checks. Each has no reviews and
-  remains `REVIEW_REQUIRED`; none was merged.
+  remains `REVIEW_REQUIRED`; #92 is already ready for review (`isDraft=false`).
+  PR #97's verified head is `7e82276967aa6ed2a849f414a98e971098cf7558`.
 - PR #95 already is the `chore/windows-acceptance-wrapper` → `main` PR; no
   duplicate PR was opened.
 - Main branch protection is active and verified: PR required, one approval,
@@ -44,12 +50,21 @@ Code and CI gates are healthy. Overall product acceptance remains withheld until
   contexts, active ruleset `main-protection` ID `24329825`, and the transient
   enable/restore/re-enable sequence are recorded in
   [repository control](docs/governance/st36/REPOSITORY_CONTROL_RECORD.md).
+- Fresh protection APIs at `2026-10-01T20:53:04Z` confirmed active ruleset
+  `main-protection` ID `24329825` and active legacy branch protection. The
+  repository settings UI's `Unauthorized` display remains an unresolved UI
+  authorization issue; the API GETs succeeded and no duplicate ruleset was
+  created.
 - GitHub Actions default token permission is `read`; PR approval by Actions is
   disabled. All Actions remain allowed and SHA pinning is not required; these
   repository-level settings were inspected, not changed.
 - Supplied source hash/version differences, binary-presence results, live
   integration blockers, and acceptance boundaries are indexed in
   [evidence](docs/evidence/INDEX.md).
+- The 52-row acceptance work view retains all existing IDs and `Durum` values.
+  Branch/PR/commit/CI/test/evidence-timestamp/next-step fields were added; only
+  PLAN-003 and PLAN-004 link to verified PR #97 work. Other work-item links and
+  test results remain `NOT_LINKED`/`NOT_RUN` until individually evidenced.
 
 ## Execution ledger — 2026-10-01
 
