@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `fe97b7b` (repository control plane merged via PR #85)
+**Main commit:** `d8239c6` (ST3.6 inventory reconciliation merged via PR #86)
 
 ## Status vocabulary
 
@@ -38,6 +38,10 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 ## Single next step
 
 Run the production acceptance checklist with approved test accounts and workflow identifiers. Do not mark production-ready from health endpoints alone.
+
+## MOUSE package execution
+
+The stale package branches are governed by the [ST3.6 MOUSE package rebase plan](docs/governance/st36/mouse-package-rebase-plan.md). Each package must be reimplemented or rebased from the current main commit and accepted through its own PR and CI evidence.
 
 ## Ownership
 
