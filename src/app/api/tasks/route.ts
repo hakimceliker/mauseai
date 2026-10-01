@@ -28,15 +28,35 @@ export async function POST(request: NextRequest) {
       throw new ValidationError(validation.error.flatten());
     }
 
+    const hasExecutionContract = Boolean(
+      validation.data.expected_output || validation.data.success_criteria
+    );
+    const approvalState = validation.data.approval_state ??
+      (hasExecutionContract ? 'pending' : 'approved');
+
     // Create task
     const task = await LiveTaskService.createTask(
       auth.tenantId,
       auth.userId,
       validation.data.workflow_id as Domain.WorkflowId,
-      validation.data.input || {}
+      {
+        ...(validation.data.input || {}),
+        ...(validation.data.expected_output || validation.data.success_criteria
+          ? {
+              __execution_contract: {
+                expected_output: validation.data.expected_output,
+                success_criteria: validation.data.success_criteria,
+                approval_state: approvalState,
+              },
+            }
+          : {}),
+      }
     );
 
-    if ((process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() !== 'mock') {
+    if (
+      approvalState === 'approved' &&
+      (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() !== 'mock'
+    ) {
       await inngest.send({
         name: 'task.execute',
         data: {
