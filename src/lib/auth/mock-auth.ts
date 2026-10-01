@@ -36,7 +36,9 @@ export function extractAuthContext(request: NextRequest): AuthContext | null {
 export function requireAuth(request: NextRequest): AuthContext {
   const auth = extractAuthContext(request);
   if (!auth) {
-    throw new Error('Unauthorized: missing auth headers');
+    // Keep the API boundary consistent with Supabase/JWT mode. A missing
+    // mock context is an authentication failure, never an internal error.
+    throw new AuthError();
   }
   return auth;
 }
