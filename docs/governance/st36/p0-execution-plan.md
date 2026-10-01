@@ -56,7 +56,7 @@ Eksik değerlerde runner güvenli biçimde durur ve `credential_not_configured` 
 | Auth | Test kullanıcısı giriş yapar | Token yok, 401 dışı davranış veya credential eksik |
 | Tenant A/B | Her kullanıcı tek tenant görür; tenantlar farklıdır | Karışık tenant verisi veya test hesabı yok |
 | Çapraz erişim | Diğer tenant task’ı 403/404 döner | 200 veya veri sızıntısı |
-| Workflow | `task/run`/task oluşturma ve worker terminal durumu gözlenir | Trigger, worker veya sync yok |
+| Workflow | `task.execute`/task oluşturma ve worker terminal durumu gözlenir | Trigger, worker veya sync yok |
 | Checkpoint | Task yanıtında/timeline’da checkpoint görünür | Kayıt yok veya gözlenemiyor |
 | Audit/cost | Task, audit ve maliyet kayıtları eşleşir | Canlı kayıt yok veya uzlaştırma yapılamıyor |
 | Retry/idempotency | Aynı olay ikinci yan etki üretmez | Duplicate kayıt/yan etki oluşur |
