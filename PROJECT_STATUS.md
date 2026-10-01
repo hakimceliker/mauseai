@@ -40,7 +40,7 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 | Work | Branch | PR | Status | Gate |
 |---|---|---|---|---|
 | Local-first AI and repository standard | `feat/local-ai-fallback-standard` | [#88](https://github.com/hakimceliker/mauseai/pull/88) | CODE_COMPLETE_LIVE_TEST_PENDING | Merge approval and local/cloud runtime evidence |
-| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | CI_GREEN_PENDING_MERGE | Merge approval, then main CI |
+| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | TESTS_UPDATED_CI_PENDING | 272 local tests; PR rerun, merge approval, then main CI |
 | Observability transport hardening | `feat/observability-timeout-hardening` | [#90](https://github.com/hakimceliker/mauseai/pull/90) | CI_IN_PROGRESS | CI completion, review, merge approval |
 
 These PRs are separate from `main` and are not production acceptance evidence until merged and re-verified on `main`.
