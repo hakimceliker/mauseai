@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `4423841` (ST3.6 MOUSE package rebase plan merged via PR #87)
+**Main commit:** `da1499a` (PR #90 merged; main CI and CodeQL passed)
 
 ## Status vocabulary
 
@@ -21,7 +21,21 @@
 
 Code and CI gates are healthy. Production acceptance is intentionally withheld until live Auth/RLS tenant isolation and Inngest workflow evidence are recorded with non-secret test credentials. Missing credentials are reported as `credential_not_configured`; no secret value is stored here.
 
+## Execution ledger — 2026-10-01
+
+- **Completed phases:** F0 governance baseline; F1–F3 implementation increments represented by merged PRs #88 and #89; F9 observability timeout hardening represented by merged PR #90.
+- **Active phase:** Post-merge verification and production acceptance preparation.
+- **Stopping point:** Main technical gates are verified; live Auth/RLS tenant isolation and live Inngest workflow evidence are still not executed.
+- **Incomplete phases:** Live Auth/RLS acceptance, tenant isolation negative tests, Inngest trigger/worker/checkpoint/audit/retry/idempotency/rollback evidence, real provider runtime proof, pilot/customer, finance, and G10–G12 operating acceptance.
+- **Missing work:** Approved test accounts and workflow identifiers in the approved secret source; production evidence bundle for each integration; pilot and business/KPI evidence.
+- **Detected issues:** PR #90 initially conflicted in `.env.example`; GitHub main CI and CodeQL were queued after merge; GitHub Actions emitted Node.js 20 and `ubuntu-latest` migration warnings.
+- **Corrections:** Kept the branch’s secret-safe `.env.example` additions, pushed the conflict-resolution commit `de0cbef`, merged PR #90, and verified main CI #203 and CodeQL #58 success.
+- **Next operation:** Execute the production acceptance runbook with approved test credentials; record PASS/FAIL evidence without exposing secrets.
+- **Completion:** Merge queue #88–#90 is 100% complete. Production acceptance is 0/4 live gates verified; overall status remains `PARTIAL — NOT PRODUCTION-READY`.
+
 ## Evidence baseline
+
+| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90); main commit `da1499a` | Live acceptance gates remain |
 
 | Area | Status | Evidence | Remaining gate |
 |---|---|---|---|
@@ -34,29 +48,6 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 | AI providers | PARTIAL | Provider/cost runbook | Runtime provider proof without exposing keys |
 | Payments | PARTIAL | Stripe sandbox only | User/payment acceptance decision |
 | Observability | PARTIAL | Sentry/Langfuse/PostHog plans | Live event/trace proof |
-
-## Current implementation queue — 2026-10-01
-
-| Work | Branch | PR | Status | Gate |
-|---|---|---|---|---|
-| Local-first AI and repository standard | `feat/local-ai-fallback-standard` | [#88](https://github.com/hakimceliker/mauseai/pull/88) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; live local/cloud runtime evidence remains pending |
-| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; 272 local tests passed, 16 skipped; main reverify pending |
-| Observability transport hardening | `feat/observability-timeout-hardening` | [#90](https://github.com/hakimceliker/mauseai/pull/90) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; live provider evidence remains credential_not_configured |
-
-These PRs are separate from `main` and are not production acceptance evidence until merged and re-verified on `main`.
-
-## Execution ledger — 2026-10-01
-
-| Record | Current truth |
-|---|---|
-| Completed phases | F0/F1 accepted on `main`; implementation work for F3 and F9 is complete on PR branches |
-| Active phase | Merge-gated integration: PRs #88, #89, #90 are CI-green and awaiting merge approval |
-| Stopping point | Before the first main merge; no production or customer-data operation was performed |
-| Incomplete phases | F2 live Auth/RLS, F3 main reverify, F4 Inngest live evidence, F5 provider runtime proof, F6 live reconciliation, F7/F8 live integration/UI acceptance, F9 live observability, F10–F12 pilot/operations acceptance |
-| Detected issues | Status entries lagged behind the latest PR CI results; live credential-backed evidence is unavailable without approved runtime test access |
-| Corrections made | Updated this ledger with exact PR/CI state; preserved `credential_not_configured` for missing live provider evidence |
-| Next operation | User-approved merge sequence, then main CI and health re-verification; afterward run authenticated tenant and Inngest acceptance tests |
-| Completion | Main accepted gates: 2/13 (~15%); implementation including open PRs: approximately 40%; production acceptance: not complete |
 
 ## Single next step
 
