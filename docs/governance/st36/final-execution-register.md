@@ -21,6 +21,8 @@ Bu kayıt aşağıdaki kaynakları tek yürütme görünümünde birleştirir:
 Repo kopyaları: `docs/governance/st36/`  
 Kanun: [`storage-and-repository-registry.md`](../../storage-and-repository-registry.md)
 
+Faz yürütme sırası ve tikli görev listesi: [`mouseai-master-phase-plan-v1.0.md`](../../mouseai-master-phase-plan-v1.0.md)
+
 ## 2. Genel durum
 
 | Alan | Durum | Kapanış şartı |

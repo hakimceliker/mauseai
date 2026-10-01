@@ -4,6 +4,8 @@
 **UI referansi:** Beyaz/şeffaf MouseAI çalışma alanı ekranı
 **Kural:** Main'e doğrudan push yok; her değişiklik branch -> PR -> CI -> review -> merge sırasındadır.
 
+> Fazların tek kanonik yürütme sırası için [`mouseai-master-phase-plan-v1.0.md`](mouseai-master-phase-plan-v1.0.md) kullanılır. Bu belge sistem kapsamı ve teknik referanstır; faz tikleri master faz planında tutulur.
+
 ## 1. Hedef ürün
 
 MouseAI, kullanıcının doğal dille hedef verdiği; hedefi task'a, task'ı dayanıklı workflow adımlarına dönüştüren; AI ajanlarını, insan onayını, maliyetleri, audit kayıtlarını ve tenant izolasyonunu birlikte yöneten bir operasyon platformudur.
