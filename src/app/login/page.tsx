@@ -4,10 +4,9 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key',
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,6 +22,12 @@ export default function LoginPage() {
     setSubmitting(true);
     setError(null);
     setNotice(null);
+
+    if (!supabase) {
+      setError('credential_not_configured: Supabase Auth yapılandırması eksik.');
+      setSubmitting(false);
+      return;
+    }
 
     if (recoveryMode) {
       const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email, {

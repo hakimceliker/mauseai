@@ -4,10 +4,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'mock-anon-key',
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -19,6 +18,7 @@ export default function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!supabase) return;
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) setReady(Boolean(data.session));
@@ -35,6 +35,7 @@ export default function ResetPasswordPage() {
     setNotice(null);
     if (password.length < 8) return setError('Şifre en az 8 karakter olmalı.');
     if (password !== confirmation) return setError('Şifreler eşleşmiyor.');
+    if (!supabase) return setError('credential_not_configured: Supabase Auth yapılandırması eksik.');
     setSubmitting(true);
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {
