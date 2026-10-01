@@ -32,14 +32,18 @@ export class OpenAIProvider implements AIProvider {
       choices?: Array<{ message?: { content?: string } }>;
       usage?: { prompt_tokens?: number; completion_tokens?: number };
     };
-    const inputTokens = payload.usage?.prompt_tokens ?? 0;
-    const outputTokens = payload.usage?.completion_tokens ?? 0;
+    const inputTokens = payload.usage?.prompt_tokens;
+    const outputTokens = payload.usage?.completion_tokens;
+    const usageAvailable = inputTokens !== undefined && outputTokens !== undefined;
     return {
       role: 'assistant',
       content: payload.choices?.[0]?.message?.content ?? '',
       provider: this.name,
-      tokens_used: inputTokens + outputTokens,
-      cost: (inputTokens * 0.00000015) + (outputTokens * 0.0000006),
+      tokens_used: usageAvailable ? inputTokens + outputTokens : undefined,
+      tokens_in: inputTokens,
+      tokens_out: outputTokens,
+      cost: usageAvailable ? (inputTokens * 0.00000015) + (outputTokens * 0.0000006) : undefined,
+      cost_basis: usageAvailable ? 'provider_rate_estimate' : 'unknown',
     };
   }
 }

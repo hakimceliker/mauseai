@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { routeAI } from '@/src/lib/ai/mock-router';
 import { AIRouter } from '@/src/lib/ai/ai-router';
+import { LocalOllamaProvider } from '@/src/lib/ai/providers/local-ollama';
 
 const messages = [{ role: 'user' as const, content: 'safe test prompt' }];
 
@@ -8,33 +10,53 @@ describe('local-first AI routing', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     process.env = { ...originalEnv };
   });
 
-  it('uses the local gateway when it succeeds', async () => {
+  it('uses the private local gateway and records local tokens at zero API cost', async () => {
     process.env.AI_PROVIDER = 'openai';
     process.env.OPENAI_API_KEY = 'test-only-placeholder';
+    process.env.NODE_ENV = 'production';
     process.env.LOCAL_AI_ENABLED = 'true';
     process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
-      choices: [{ message: { content: 'local response' } }],
-      usage: { prompt_tokens: 3, completion_tokens: 2 },
-    }), { status: 200, headers: { 'content-type': 'application/json' } })));
+    process.env.LOCAL_AI_ACCESS_CLIENT_ID = 'test-client-id';
+    process.env.LOCAL_AI_ACCESS_CLIENT_SECRET = 'test-client-secret';
 
-    const response = await new AIRouter().call(messages);
+    const fetchMock = vi.fn().mockImplementation((input: URL | string, init?: RequestInit) => {
+      if (String(input).endsWith('/api/tags')) {
+        return Promise.resolve(new Response('', { status: 200 }));
+      }
+      return Promise.resolve(new Response(JSON.stringify({
+        choices: [{ message: { content: 'local response' } }],
+        usage: { prompt_tokens: 3, completion_tokens: 2 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await routeAI({ taskId: 'task-1', goal: 'safe test prompt', riskLevel: 'L1' });
 
     expect(response.provider).toBe('local');
-    expect(response.content).toBe('local response');
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith('https://local-gateway.test/v1/chat/completions', expect.any(Object));
+    expect(response.output.response).toBe('local response');
+    expect(response.inputTokens).toBe(3);
+    expect(response.outputTokens).toBe(2);
+    expect(response.costCents).toBe(0);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[0]?.[0]).toEqual(new URL('https://local-gateway.test/api/tags'));
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({
+      'CF-Access-Client-Id': 'test-client-id',
+      'CF-Access-Client-Secret': 'test-client-secret',
+    });
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://local-gateway.test/v1/chat/completions');
   });
 
-  it('falls back to the cloud provider when local access fails', async () => {
+  it('falls back to the cloud provider when local access or inference fails', async () => {
     process.env.AI_PROVIDER = 'openai';
     process.env.OPENAI_API_KEY = 'test-only-placeholder';
     process.env.LOCAL_AI_ENABLED = 'true';
     process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
     const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response('', { status: 200 }))
       .mockRejectedValueOnce(new Error('connect timeout'))
       .mockResolvedValueOnce(new Response(JSON.stringify({
         choices: [{ message: { content: 'cloud response' } }],
@@ -46,9 +68,10 @@ describe('local-first AI routing', () => {
 
     expect(response.provider).toBe('openai');
     expect(response.content).toBe('cloud response');
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[0]?.[0]).toBe('https://local-gateway.test/v1/chat/completions');
-    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.openai.com/v1/chat/completions');
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[0]?.[0]).toEqual(new URL('https://local-gateway.test/api/tags'));
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('https://local-gateway.test/v1/chat/completions');
+    expect(fetchMock.mock.calls[2]?.[0]).toBe('https://api.openai.com/v1/chat/completions');
   });
 
   it('uses cloud directly when local routing is disabled', async () => {
@@ -58,6 +81,7 @@ describe('local-first AI routing', () => {
     process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       choices: [{ message: { content: 'cloud-only response' } }],
+      usage: { prompt_tokens: 2, completion_tokens: 1 },
     }), { status: 200, headers: { 'content-type': 'application/json' } }));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -66,5 +90,18 @@ describe('local-first AI routing', () => {
     expect(response.provider).toBe('openai');
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe('https://api.openai.com/v1/chat/completions');
+  });
+
+  it('does not send local requests from production to an insecure endpoint', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.LOCAL_AI_BASE_URL = 'http://127.0.0.1:11434';
+    process.env.LOCAL_AI_ACCESS_CLIENT_ID = '';
+    process.env.LOCAL_AI_ACCESS_CLIENT_SECRET = '';
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(new LocalOllamaProvider().call(messages))
+      .rejects.toThrow('production_requires_https_and_access_service_token');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

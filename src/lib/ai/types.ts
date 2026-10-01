@@ -1,4 +1,4 @@
-export type AIProviderName = "mock-gpt" | "mock-claude" | "openai" | "anthropic";
+export type AIProviderName = "mock-gpt" | "mock-claude" | "openai" | "anthropic" | "local";
 
 export type AIRequest = {
   taskId: string;

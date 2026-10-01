@@ -92,8 +92,11 @@ export class AIRouter {
       fallback,
       fallback_reason: fallbackReason,
       latency_ms: Date.now() - startedAtMs,
-      tokens_used: response.tokens_used ?? 0,
-      cost: response.cost ?? 0,
+      tokens_used: response.tokens_used ?? null,
+      tokens_in: response.tokens_in ?? null,
+      tokens_out: response.tokens_out ?? null,
+      cost_usd: response.cost ?? null,
+      cost_basis: response.cost_basis ?? (response.cost === undefined ? 'unknown' : 'provider_rate_estimate'),
     }));
   }
 
