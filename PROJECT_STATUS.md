@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `d8239c6` (ST3.6 inventory reconciliation merged via PR #86)
+**Main commit:** `4423841` (ST3.6 MOUSE package rebase plan merged via PR #87)
 
 ## Status vocabulary
 
@@ -34,6 +34,16 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 | AI providers | PARTIAL | Provider/cost runbook | Runtime provider proof without exposing keys |
 | Payments | PARTIAL | Stripe sandbox only | User/payment acceptance decision |
 | Observability | PARTIAL | Sentry/Langfuse/PostHog plans | Live event/trace proof |
+
+## Current implementation queue — 2026-10-01
+
+| Work | Branch | PR | Status | Gate |
+|---|---|---|---|---|
+| Local-first AI and repository standard | `feat/local-ai-fallback-standard` | [#88](https://github.com/hakimceliker/mauseai/pull/88) | CODE_COMPLETE_LIVE_TEST_PENDING | Merge approval and local/cloud runtime evidence |
+| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | CI_GREEN_PENDING_MERGE | Merge approval, then main CI |
+| Observability transport hardening | `feat/observability-timeout-hardening` | [#90](https://github.com/hakimceliker/mauseai/pull/90) | CI_IN_PROGRESS | CI completion, review, merge approval |
+
+These PRs are separate from `main` and are not production acceptance evidence until merged and re-verified on `main`.
 
 ## Single next step
 
