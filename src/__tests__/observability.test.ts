@@ -3,7 +3,7 @@ import { AIRouter } from '@/src/lib/ai/ai-router';
 import { ErrorLogger } from '@/src/lib/logging/error-logger';
 import { LangfuseAdapter, Observability, SentryAdapter, observability, redactTelemetry } from '@/src/lib/observability';
 
-afterEach(() => { vi.restoreAllMocks(); delete process.env.SENTRY_DSN; delete process.env.LANGFUSE_PUBLIC_KEY; delete process.env.LANGFUSE_SECRET_KEY; });
+afterEach(() => { vi.restoreAllMocks(); delete process.env.SENTRY_DSN; delete process.env.LANGFUSE_PUBLIC_KEY; delete process.env.LANGFUSE_SECRET_KEY; delete process.env.OBSERVABILITY_TIMEOUT_MS; });
 
 describe('observability adapters', () => {
   it('does not call the network when Sentry is not configured', async () => {
@@ -24,6 +24,15 @@ describe('observability adapters', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const result = await new Observability().reportException(new Error('test'), { password: 'never-send' });
     expect(result[0]).toMatchObject({ provider: 'sentry', status: 'error', reason: 'network_error' });
+  });
+
+  it('reports provider timeouts without leaking the underlying error', async () => {
+    process.env.SENTRY_DSN = 'https://public@example.com/1';
+    process.env.OBSERVABILITY_TIMEOUT_MS = '250';
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+    const result = await new SentryAdapter().captureException(new Error('test'));
+    expect(result).toMatchObject({ provider: 'sentry', status: 'error', reason: 'timeout' });
+    expect(result).not.toHaveProperty('message');
   });
 
   it('hooks AI completions and errors without blocking the caller', async () => {
