@@ -66,7 +66,7 @@ export default function OperationsDashboard() {
         <div><h1 className="text-4xl font-bold text-slate-900">Operasyon Genel Bakışı</h1><p className="text-slate-500">Tenant görevlerinin canlı durumu</p></div>
         <Link href="/tasks/new" className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">+ Yeni Görev</Link>
       </div>
-      {error && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{error}</div>}
+      {error && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{error} {error.includes('Oturum') && <Link className="font-semibold underline" href="/login">Giriş yap</Link>}</div>}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         <KpiCard label="Aktif Görevler" value={stats.active} color="cyan" icon={<span>⚡</span>} />
         <KpiCard label="Devam Ediyor" value={stats.running} color="blue" icon={<span>↻</span>} />
