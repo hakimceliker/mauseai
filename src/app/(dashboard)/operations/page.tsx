@@ -1,81 +1,24 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { KpiCard } from '@/src/components/KpiCard';
 import { TaskStatusTable, TaskStatusRow } from '@/src/components/TaskStatusTable';
 import { getBrowserAuthHeaders } from '@/src/lib/auth/browser-session';
 
 type Task = { id: string; status: string; input: Record<string, unknown>; created_at: string; completed_at?: string };
-
-function taskTitle(task: Task) {
-  return String(task.input.name ?? task.input.title ?? task.input.description ?? `Görev ${task.id.slice(0, 8)}`);
-}
-
-function statusForTable(status: string): TaskStatusRow['status'] {
-  if (status === 'completed') return 'completed';
-  if (status === 'waiting_approval' || status === 'paused') return 'waiting';
-  if (status === 'failed' || status === 'cancelled') return 'review';
-  return status === 'pending' ? 'active' : 'in_progress';
-}
+const agents = [['GPT', 'Pazarlama stratejisi özeti hazırlıyor', '70%', 'G'], ['Claude', 'Rakip analizi raporunu düzenliyor', '45%', 'C'], ['Research Agent', 'Sektör trendlerini araştırıyor', '80%', 'R'], ['Browser Agent', 'Web sitelerinden veri topluyor', '60%', 'B'], ['CRM Agent', 'Potansiyel müşterileri zenginleştiriyor', '30%', 'CRM']] as const;
+function taskTitle(task: Task) { return String(task.input.name ?? task.input.title ?? task.input.description ?? `Görev ${task.id.slice(0, 8)}`); }
+function statusForTable(status: string): TaskStatusRow['status'] { if (status === 'completed') return 'completed'; if (status === 'waiting_approval' || status === 'paused') return 'waiting'; if (status === 'failed' || status === 'cancelled') return 'review'; return status === 'pending' ? 'active' : 'in_progress'; }
 
 export default function OperationsDashboard() {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        const response = await fetch('/api/tasks', { headers: await getBrowserAuthHeaders(), cache: 'no-store' });
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error?.code === 'AUTH_ERROR' ? 'Oturum açmanız gerekiyor.' : 'Görevler alınamadı.');
-        if (mounted) setTasks(payload.data ?? []);
-      } catch (cause) {
-        if (mounted) setError(cause instanceof Error ? cause.message : 'Görevler alınamadı.');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    void load();
-    return () => { mounted = false; };
-  }, []);
-
-  const stats = useMemo(() => ({
-    active: tasks.filter((task) => !['completed', 'failed', 'cancelled'].includes(task.status)).length,
-    running: tasks.filter((task) => ['planning', 'running'].includes(task.status)).length,
-    waiting: tasks.filter((task) => ['waiting_approval', 'paused'].includes(task.status)).length,
-    failed: tasks.filter((task) => task.status === 'failed').length,
-    completed: tasks.filter((task) => task.status === 'completed').length,
-  }), [tasks]);
-
-  const rows: TaskStatusRow[] = tasks.map((task) => ({
-    id: task.id,
-    department: 'Tenant',
-    taskName: taskTitle(task),
-    status: statusForTable(task.status),
-    assignee: 'MouseAI',
-    progress: task.status === 'completed' ? 100 : task.status === 'running' ? 50 : 0,
-    updated: new Date(task.completed_at ?? task.created_at).toLocaleString('tr-TR'),
-  }));
-
-  return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between gap-4">
-        <div><h1 className="text-4xl font-bold text-slate-900">Operasyon Genel Bakışı</h1><p className="text-slate-500">Tenant görevlerinin canlı durumu</p></div>
-        <Link href="/tasks/new" className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white">+ Yeni Görev</Link>
-      </div>
-      {error && <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{error}</div>}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <KpiCard label="Aktif Görevler" value={stats.active} color="cyan" icon={<span>⚡</span>} />
-        <KpiCard label="Devam Ediyor" value={stats.running} color="blue" icon={<span>↻</span>} />
-        <KpiCard label="Onay Bekliyor" value={stats.waiting} color="orange" icon={<span>◷</span>} />
-        <KpiCard label="Hata" value={stats.failed} color="red" icon={<span>!</span>} />
-        <KpiCard label="Tamamlandı" value={stats.completed} color="green" icon={<span>✓</span>} />
-      </div>
-      <section className="space-y-3"><div><h2 className="text-2xl font-bold text-slate-900">Canlı Görevler</h2><p className="text-sm text-slate-500">Supabase tenant verisinden okunuyor.</p></div><TaskStatusTable data={rows} loading={loading} /></section>
-      {!loading && !error && tasks.length === 0 && <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">Bu tenant için henüz görev yok. Yeni görev oluşturarak başlayın.</div>}
-    </div>
-  );
+  const [tasks, setTasks] = useState<Task[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null); const [filter, setFilter] = useState('Tümü');
+  useEffect(() => { let mounted = true; async function load() { try { const response = await fetch('/api/tasks', { headers: await getBrowserAuthHeaders(), cache: 'no-store' }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error?.code === 'AUTH_ERROR' ? 'Oturum açmanız gerekiyor.' : 'Görevler alınamadı.'); if (mounted) setTasks(payload.data ?? []); } catch (cause) { if (mounted) setError(cause instanceof Error ? cause.message : 'Görevler alınamadı.'); } finally { if (mounted) setLoading(false); } } void load(); return () => { mounted = false; }; }, []);
+  const rows: TaskStatusRow[] = tasks.map(task => ({ id: task.id, department: 'Tenant', taskName: taskTitle(task), status: statusForTable(task.status), assignee: 'MouseAI', progress: task.status === 'completed' ? 100 : task.status === 'running' ? 50 : 0, updated: new Date(task.completed_at ?? task.created_at).toLocaleString('tr-TR') }));
+  const visibleRows = filter === 'Tümü' ? rows : rows.filter(row => filter === 'Tamamlandı' ? row.status === 'completed' : filter === 'Beklemede' ? row.status === 'waiting' : row.status === 'in_progress');
+  return <div className="grid min-h-[calc(100vh-74px)] grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="px-5 py-8 sm:px-8 lg:px-10"><div className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="mb-2 text-sm text-slate-500">Merhaba Deniz,</p><h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Bugün neyi MouseAI ekibine devredelim?</h1><p className="mt-2 text-slate-500">Hedefini söyle, gerisini ekibin halletsin. Araştır, analiz et, uygula; senin için sonuçlandırsın.</p></div><Link href="/tasks/new" className="rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700">＋ Yeni hedef ata</Link></div>
+      <section className="mb-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-4 flex items-center justify-between"><h2 className="text-lg font-bold">AI Ekibim <span className="ml-2 text-sm font-medium text-emerald-600">● 5/5 çevrimiçi</span></h2><Link href="/operations" className="text-sm font-semibold text-blue-600">Tüm ekibi gör →</Link></div><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{agents.map(([name, task, progress, mark]) => <div key={name} className="rounded-xl border border-slate-200 p-3 transition hover:-translate-y-0.5 hover:shadow-md"><div className="flex items-center gap-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-blue-50 font-bold text-blue-600">{mark}</span><div><p className="text-sm font-bold">{name}</p><p className="text-[11px] text-emerald-600">● Çevrimiçi</p></div></div><p className="mt-3 min-h-10 text-xs text-slate-500">{task}</p><div className="mt-2 flex items-center gap-2"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-blue-500" style={{ width: progress }} /></div><span className="text-[11px] text-slate-500">{progress}</span></div></div>)}</div></section>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-bold">Görev Gelen Kutusu</h2><span className="text-sm text-slate-500">⌘ Son güncelleme</span></div><div className="mb-4 flex gap-5 overflow-x-auto border-b border-slate-100 text-sm">{['Tümü', 'Devam Ediyor', 'Tamamlandı', 'Beklemede'].map(item => <button key={item} onClick={() => setFilter(item)} className={`whitespace-nowrap border-b-2 pb-3 font-medium ${filter === item ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500'}`}>{item}{item === 'Tümü' && <span className="ml-1 rounded-full bg-blue-50 px-2 text-xs">{tasks.length || 12}</span>}</button>)}</div>{error && <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">{error}</div>}<TaskStatusTable data={visibleRows} loading={loading} />{!loading && !error && tasks.length === 0 && <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-slate-500">Bu tenant için henüz görev yok.</div>}<div className="mt-5 flex gap-2 rounded-xl border border-blue-200 bg-blue-50/50 p-2"><span className="px-2 py-2 text-slate-400">⌕</span><input className="min-w-0 flex-1 bg-transparent text-sm outline-none" placeholder="MouseAI ekibine bir görev ver..." aria-label="Hızlı görev" /><Link href="/tasks/new" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">Gönder</Link></div><div className="mt-3 flex flex-wrap gap-2">{['Araştır', 'Analiz et', 'Rapor hazırla', 'Veri topla', 'CRM’e kaydet', 'Fikir üret'].map(item => <button key={item} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs text-slate-600 hover:border-blue-300 hover:text-blue-600">{item}</button>)}</div></section></div>
+    <aside className="border-t border-slate-200 bg-white px-5 py-8 xl:border-l xl:border-t-0"><div className="flex items-center justify-between"><h2 className="text-lg font-bold">Görev Devri</h2><button aria-label="Paneli kapat" className="text-2xl text-slate-400">×</button></div><div className="mt-6 rounded-xl bg-slate-50 p-4"><p className="font-semibold text-slate-800">Rakip analizi raporu hazırla</p><p className="mt-2 text-sm leading-6 text-slate-500">Son 6 ayda Türk pazarındaki 5 rakibi analiz et, güçlü/zayıf yönleri ve fırsatları kapsamlı raporla.</p></div><div className="mt-6 space-y-5 border-l-2 border-blue-100 pl-5 text-sm"><div><p className="font-semibold text-slate-800">Görev alındı</p><p className="text-xs text-slate-400">2 saat önce</p></div><div><p className="font-semibold text-slate-800">Claude devraldı</p><p className="mt-1 text-slate-500">Analiz için kaynakları topluyorum.</p></div><div><p className="font-semibold text-slate-800">Çalışma devam ediyor</p><p className="text-xs text-slate-400">5 kaynaktan veri toplandı</p><Link href="/operations" className="mt-2 inline-block font-semibold text-blue-600">Detayları gör →</Link></div></div><div className="mt-8"><h3 className="font-bold">Çıktılar <span className="ml-1 rounded-full bg-slate-100 px-2 text-xs">2</span></h3><div className="mt-3 space-y-2"><div className="flex items-center justify-between rounded-lg border border-slate-100 p-3 text-sm"><span>▣ Rakip Analizi (Taslak)</span><span className="text-slate-400">↓</span></div><div className="flex items-center justify-between rounded-lg border border-slate-100 p-3 text-sm"><span>▤ Veri Tablosu</span><span className="text-slate-400">↓</span></div></div></div><button className="mt-8 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:border-blue-300 hover:text-blue-600">Claude’e mesaj gönder</button></aside>
+  </div>;
 }
