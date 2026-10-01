@@ -27,3 +27,5 @@ Her kontrol satırı bir GitHub issue, görev sahibi, kabul koşulu, kanıt bağ
 ## Birleştirme
 
 Bu paket, [master gap roadmap](../../mouseai-master-gap-roadmap-v1.1.md), [task registry](../../task-registry.md) ve [production acceptance plan](../../production-acceptance-task-distribution.md) ile birlikte okunur. Dış kaynak PDF/DOCX arşivdir; bu klasördeki JSON/CSV kayıtları makine tarafından takip edilecek çalışma kopyasıdır.
+
+PLAN-004 için uygulanacak kabul sırası: [Auth ve tenant kabul runbook'u](plan-004-auth-tenant-runbook.md).
