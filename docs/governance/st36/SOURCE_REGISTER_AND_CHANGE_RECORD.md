@@ -70,6 +70,33 @@ It contains PLAN-001–PLAN-030 plus MAU-ADAPT-001–MAU-ADAPT-022. Each shared
 PLAN ID has the same `Durum` value as SRC-04. Both files are retained in their
 respective roles; the working CSV was not rewritten.
 
+## Repository counterpart and verification result
+
+The source files were available as user-supplied attachments and their byte
+counts/hashes were verified before this record was created. The repository
+tracks the hashes and roles in `MAUSEAI_Ana_Kayit.json` and this record; it
+does not copy every source binary. `SOURCE_MISSING` below means the raw source
+binary is not in Git, not that the supplied attachment was unavailable.
+
+| Source | Repo counterpart | Repo hash/result | Version result |
+|---|---|---|---|
+| SRC-01 ST law PDF | `MAUSEAI_Ana_Kayit.json` SRC-01; metadata only | `SOURCE_MISSING` raw PDF; supplied bytes match the prior SRC-01 hash | `SOURCE_MISMATCH` inside PDF: active v3.6 vs cover/guide v3.4; not normalized |
+| SRC-02 earlier MouseAI DOCX | Ana record SRC-02 and `MAUSEAI_Dosya_Manifestosu.json` entry of same basename | `SOURCE_MISMATCH`: Ana record 1,080,392 bytes / `1b20…`; package manifest 1,560,563 bytes / `62b479…`; raw DOCX not copied | Same display version v1.0 does not establish same source bytes |
+| SRC-03 diagram atlas HTML | Ana record SRC-03; metadata only | `SOURCE_MISSING` raw HTML | v1.0 as supplied; supporting artifact, not acceptance |
+| SRC-04 30-row acceptance CSV | Ana record SRC-04; work view `MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv` | `SOURCE_MISMATCH` at file level: source 5,580 bytes / `6b906a…`; work view 20,739 bytes / `282277…`; 30 shared PLAN IDs retain the source `Durum` values | 30-row source preserved as metadata; 22 adaptation rows are repository work view only |
+| SRC-05 supplied MAUSEAI master PDF | Ana record SRC-05 and this variance record; earlier same-name manifest artifact | `SOURCE_MISMATCH`: supplied 3,563,460 bytes / `6672c3…`; earlier artifact 3,538,359 bytes / `58791c…`; supplied PDF binary not copied | Both say v1.0; do not infer a semantic version increment |
+| SRC-06 Senatech production/operations law PDF | Ana record SRC-06; metadata only | `SOURCE_MISSING` raw PDF | `SOURCE_MISMATCH`: filename v3.0 vs active PUK-001/body v3.2 |
+| SRC-07 decision-model JSON | Ana record SRC-07; JSON not copied | `SOURCE_MISSING` raw JSON | v1.0 JSON remains canonical; accompanying PDF/MD are derived, not independent authority |
+| SRC-07-PDF decision-model PDF export | Source register only; PDF not copied | `SOURCE_MISSING` raw PDF; attachment 93,473 bytes / `16e319f70f29d2aa9f1fd46649e4417fcbfe197d44e5450ffc9e3f941557fb21` | Derived export; JSON SRC-07 remains canonical |
+| SRC-07-MD decision-model Markdown export | Source register only; Markdown not copied | `SOURCE_MISSING` raw Markdown; attachment 19,660 bytes / `08a8d199a762ff36416e11e61c129369899761c45bc8162f9d44eb30fe8c2a77` | Derived export; JSON SRC-07 remains canonical |
+| SRC-08 project data-request XLSX | Ana record SRC-08; workbook not copied | `SOURCE_MISSING` raw workbook | Five-sheet input template; no version label established; requested values are unprovided |
+| SRC-09 projection closeout PDF | Ana record SRC-09; PDF not copied | `SOURCE_MISSING` raw PDF | Documentation/projection closeout only; no product/live/profitability acceptance |
+
+The repository binary for SRC-04 is the expanded working register, not the
+30-row attachment. No raw source binary was overwritten. Full values, hashes,
+byte counts, and both historical DOCX/PDF identities remain in the source
+tables above and in `MAUSEAI_Ana_Kayit.json`.
+
 ## Open source variances and disposition
 
 | Variance | Evidence | Disposition |

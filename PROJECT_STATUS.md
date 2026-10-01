@@ -21,6 +21,36 @@
 
 Code and CI gates are healthy. Overall product acceptance remains withheld until live Auth/RLS, Inngest, provider, verifier/recovery, pilot, business and operating evidence is recorded. Missing access is `credential_not_configured`, `NOT_RUN` or `BLOCKED`; no secret value is stored here.
 
+## Current verified evidence — 2026-10-01
+
+- Current `main`: `04256ac21a1c95da957fab501fc87c7acdf4cdd2`; main CI checks
+  `quality`, `dependency-audit`, `secret-scan`, `docker`, and
+  `Analyze (javascript-typescript)` succeeded.
+- Production GitHub deployment `6793405140` succeeded on the exact same SHA as
+  `main`. Live `/api/health` and `/api/health/ready` returned HTTP 200, but
+  health reported payment `mock`, analytics `console`, notifications
+  `console`, and realtime `connected:false`; this is health/readiness evidence
+  only, not acceptance of those integrations.
+- PRs [#92](https://github.com/hakimceliker/mauseai/pull/92),
+  [#95](https://github.com/hakimceliker/mauseai/pull/95), and
+  [#97](https://github.com/hakimceliker/mauseai/pull/97) are open, mergeable,
+  and have passing required CI/security/preview checks. Each has no reviews and
+  remains `REVIEW_REQUIRED`; none was merged.
+- PR #95 already is the `chore/windows-acceptance-wrapper` → `main` PR; no
+  duplicate PR was opened.
+- Main branch protection is active and verified: PR required, one approval,
+  latest-push approval, stale review dismissal, strict status checks, admin
+  enforcement, no force-push/deletion, and conversation resolution. Exact
+  contexts, active ruleset `main-protection` ID `24329825`, and the transient
+  enable/restore/re-enable sequence are recorded in
+  [repository control](docs/governance/st36/REPOSITORY_CONTROL_RECORD.md).
+- GitHub Actions default token permission is `read`; PR approval by Actions is
+  disabled. All Actions remain allowed and SHA pinning is not required; these
+  repository-level settings were inspected, not changed.
+- Supplied source hash/version differences, binary-presence results, live
+  integration blockers, and acceptance boundaries are indexed in
+  [evidence](docs/evidence/INDEX.md).
+
 ## Execution ledger — 2026-10-01
 
 - **Completed implementation increments:** Code/document changes represented by merged PRs #88, #89, #90, #91, #93, #94 and #96. These merges do not mean P0–P9 packages or G0–G12 gates have been accepted.
@@ -40,14 +70,14 @@ Code and CI gates are healthy. Overall product acceptance remains withheld until
 | Area | Status | Evidence | Remaining gate |
 |---|---|---|---|
 | Governance and phase plan | DONE | [Canonical phase plan](docs/mouseai-master-phase-plan-v1.0.md), PR [#83](https://github.com/hakimceliker/mauseai/pull/83) | Keep status current |
-| Source-law reconciliation | PARTIAL | [Source register/change record](docs/governance/st36/SOURCE_REGISTER_AND_CHANGE_RECORD.md) | Conflicting source labels are preserved pending owner decision; no source binary was overwritten |
+| Source-law reconciliation | PARTIAL | [Source register/change record](docs/governance/st36/SOURCE_REGISTER_AND_CHANGE_RECORD.md) | Supplied files are hashed/registered; source/version mismatches and missing repo binaries are explicitly recorded pending owner decision |
 | Code/quality gates | DONE | PR [#84](https://github.com/hakimceliker/mauseai/pull/84), main commit `6e950b4` | None for this gate |
 | Production health/readiness | VERIFIED | [Production smoke runbook](docs/production-smoke-runbook.md) | Refresh after releases |
-| Supabase profile-to-tenant mapping | VERIFIED | [Auth/Tenant runbook](docs/governance/st36/plan-004-auth-tenant-runbook.md) | Live login and negative RLS test |
+| Supabase profile-to-tenant mapping | PARTIAL | Server-side `users` row is authoritative; regression test ignores token/user metadata as tenant authority | Live login and negative RLS test |
 | Auth and tenant isolation | PARTIAL | Smoke runner returns `credential_not_configured` when tokens are absent | Run with approved test accounts |
 | Inngest worker/checkpoint/audit | PARTIAL | [Inngest acceptance runbook](docs/governance/st36/plan-005-inngest-acceptance-runbook.md) | Trigger a real production workflow |
 | AI providers | PARTIAL | Provider/cost runbook | Runtime provider proof without exposing keys |
-| Local AI gateway | BLOCKED / NOT_RUN | Existing local-first adapter; [acceptance guide](docs/integrations/local-ai-fallback.md) | Approved private gateway/runtime configuration and isolated three-step live test |
+| Local AI gateway | PARTIAL / BLOCKED / NOT_RUN | Mock fallback/recovery tests and [acceptance guide](docs/integrations/local-ai-fallback.md) | Approved private gateway/runtime configuration and isolated three-step live test |
 | Payments | PARTIAL | Stripe sandbox only | User/payment acceptance decision |
 | Observability | PARTIAL | Sentry/Langfuse/PostHog plans | Live event/trace proof |
 
@@ -76,9 +106,20 @@ Every change must update this file or a linked evidence file, identify the branc
 
 ## GitHub inventory reconciliation — 2026-10-01
 
-- Combined open count was 36 because GitHub counts open issues and pull requests together.
-- Open issues: 18; duplicate MOUSE issue families remain classified in the ST3.6 register.
-- Open pull requests after historical cleanup: 11.
-- Draft package PRs: 11 (`MOUSE-001`–`MOUSE-011`).
-- Historical PRs #1, #2, #3, #5, #6, #7 and #8: **CLOSED without merge**; their branches/commits were preserved.
-- MOUSE draft branches are stale against current `main` (53 commits behind; 2–4 commits ahead). They must be rebased/reimplemented from current `main` or closed; they are not completion evidence.
+The live inventory is maintained in
+[ISSUE_PR_HYGIENE.md](docs/governance/st36/ISSUE_PR_HYGIENE.md). At the latest
+check, active issues #53–#63 are assigned to the project owner and the
+`ST3.6 Production Acceptance` milestone; historical issues #42–#52 are closed.
+Open draft PRs #64–#74 are 85 commits behind current `main`; #71 and #72 also
+conflict. They remain unmerged and untouched pending authorized owner
+disposition. PRs #92/#95/#97 await independent review. No issue/PR was assigned,
+closed, rebased, or merged as part of this reconciliation.
+
+## Acceptance and evidence links
+
+- [Acceptance report](ACCEPTANCE_REPORT.md) — historical implementation
+  summary with this current status taking precedence.
+- [Evidence index](docs/evidence/INDEX.md)
+- [Integration evidence](docs/governance/st36/INTEGRATION_EVIDENCE.md)
+- [Final acceptance matrix](docs/governance/st36/FINAL_ACCEPTANCE.md)
+- [Pilot/KPI/finance/release register](docs/governance/st36/PILOT_KPI_FINANCE_RELEASE.md)

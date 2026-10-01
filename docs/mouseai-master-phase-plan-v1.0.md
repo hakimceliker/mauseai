@@ -68,10 +68,13 @@ tamamlandığı anlamına gelmez.
 ### Güncel teknik yürütme durumu — 2026-10-01
 
 - Main taban commit’i: `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96 merge).
-- Kod/CI değişiklikleri için PR #88, #89, #90, #91, #93, #94 ve #96 kayıtlı; bu merge’ler P0–P9 veya G0–G12 kabulü değildir.
+- Kod/CI değişiklikleri için PR #88, #89, #90, #91, #93, #94 ve #96 kayıtlı; PR #92, #95 ve #97 açık, tüm gerekli kontrolleri yeşil fakat bağımsız review bekliyor. Bu merge’ler veya açık PR’lar P0–P9/G0–G12 kabulü değildir.
 - API test/kalite kanıtları merged PR-lerde mevcut; live Auth/RLS, Inngest ve provider testleri yürütülmedi.
 - P0 live acceptance için approved A/B test accounts, workflow ID ve private gateway/provider erişimi gerekiyor.
 - Eksik finans, KPI, sponsor ve operasyon kararları tahmin edilmez; `BLOCKED`, `NOT_RUN`, `VERİ YOK` veya `KARAR BEKLİYOR` kalır.
+- Production deployment `6793405140` başarılı ve SHA’sı `main` SHA `04256ac` ile eşleşiyor. `/api/health` ve `/api/health/ready` HTTP 200; health payload payment=`mock`, analytics=`console`, realtime disconnected. Bu yalnız health/readiness kanıtıdır.
+- Main branch protection PR, bir bağımsız approval, son push approval, strict quality/security/deployment checks, no force-push/delete ve conversation resolution gerektirir; policy GET evidence [repository control record](governance/st36/REPOSITORY_CONTROL_RECORD.md)'de tutulur.
+- Canlı ve ticari kabul sınırları [integration evidence](governance/st36/INTEGRATION_EVIDENCE.md), [final acceptance](governance/st36/FINAL_ACCEPTANCE.md) ve [pilot/KPI/finance/release register](governance/st36/PILOT_KPI_FINANCE_RELEASE.md)'de tarihli durumla izlenir.
 
 ## Faz 0 — Kanun, kapsam ve tek kayıt
 

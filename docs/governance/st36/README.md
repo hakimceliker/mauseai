@@ -38,3 +38,16 @@ PLAN-005 için uygulanacak kabul sırası: [Inngest production workflow kabul ru
 PLAN-006/007 için uygulanacak kabul sırası: [Provider ve maliyet kabul runbook'u](plan-006-007-provider-cost-runbook.md).
 
 Tüm ST3.6 kapsamının tek birleşik durumu: [Final execution register](final-execution-register.md).
+
+## 2026-10-01 canlı kayıtları
+
+- [Repository ve branch kontrolleri](REPOSITORY_CONTROL_RECORD.md)
+- [Source hash/version karşılaştırması](SOURCE_REGISTER_AND_CHANGE_RECORD.md)
+- [Auth, Inngest, provider ve entegrasyon kanıtı](INTEGRATION_EVIDENCE.md)
+- [Final acceptance matrisi](FINAL_ACCEPTANCE.md)
+- [Pilot, KPI, finans ve release durumu](PILOT_KPI_FINANCE_RELEASE.md)
+- [Issue/PR envanteri ve açık insan aksiyonları](ISSUE_PR_HYGIENE.md)
+- [Evidence index](../../evidence/INDEX.md)
+
+Bu ek kayıtlar hiçbir canlı kanıt veya kullanıcı kararı eksikliğini kapatmaz;
+mevcut genel durum `PARTIAL — NOT PRODUCTION-READY` olarak kalır.

@@ -14,10 +14,7 @@ export interface AuthSession {
 }
 
 export class SupabaseAuth {
-  /**
-   * Verify a JWT token and extract claims
-   * In real implementation, this would verify the Supabase JWT
-   */
+  /** Verify the token with Supabase and resolve its server-side tenant membership. */
   static async verifyToken(token: string): Promise<AuthUser | null> {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -31,13 +28,8 @@ export class SupabaseAuth {
     const user = (await response.json()) as {
       id?: string;
       email?: string;
-      app_metadata?: { tenant_id?: string };
-      user_metadata?: { tenant_id?: string };
     };
     if (!user.id) return null;
-
-    const claimTenant = user.app_metadata?.tenant_id ?? user.user_metadata?.tenant_id;
-    if (claimTenant) return { id: user.id, email: user.email, tenant_id: claimTenant };
 
     // Tenant membership is authoritative in the server-side users table.
     const admin = getSupabaseAdminClient();
