@@ -31,3 +31,5 @@ Bu paket, [master gap roadmap](../../mouseai-master-gap-roadmap-v1.1.md), [task 
 PLAN-004 için uygulanacak kabul sırası: [Auth ve tenant kabul runbook'u](plan-004-auth-tenant-runbook.md).
 
 PLAN-005 için uygulanacak kabul sırası: [Inngest production workflow kabul runbook'u](plan-005-inngest-acceptance-runbook.md).
+
+PLAN-006/007 için uygulanacak kabul sırası: [Provider ve maliyet kabul runbook'u](plan-006-007-provider-cost-runbook.md).
