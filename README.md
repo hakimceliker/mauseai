@@ -321,3 +321,7 @@ MIT
 - GitHub Issues: Report bugs and request features
 - Documentation: See ARCHITECTURE.md and RUNBOOK.md
 - Email: hakimceliker.ac@gmail.com
+
+# Project control
+
+Current status, ownership, acceptance vocabulary, and remaining production gates are maintained in [PROJECT_STATUS.md](PROJECT_STATUS.md). The repository/PR/CI/integration source-of-truth matrix is in [docs/repository-control-matrix.md](docs/repository-control-matrix.md).
