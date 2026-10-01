@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `da1499a` (PR #90 merged; main CI and CodeQL passed)
+**Main commit:** `b053d99` (PR #91 merged; post-merge CI and CodeQL passed)
 
 ## Status vocabulary
 
@@ -23,19 +23,19 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 
 ## Execution ledger — 2026-10-01
 
-- **Completed phases:** F0 governance baseline; F1–F3 implementation increments represented by merged PRs #88 and #89; F9 observability timeout hardening represented by merged PR #90.
-- **Active phase:** Post-merge verification and production acceptance preparation.
+- **Completed phases:** F0 governance baseline; F1–F3 implementation increments represented by merged PRs #88 and #89; F9 observability timeout hardening represented by merged PR #90; status documentation/post-merge reconciliation represented by merged PR #91.
+- **Active phase:** Production acceptance evidence collection.
 - **Stopping point:** Main technical gates are verified; live Auth/RLS tenant isolation and live Inngest workflow evidence are still not executed.
 - **Incomplete phases:** Live Auth/RLS acceptance, tenant isolation negative tests, Inngest trigger/worker/checkpoint/audit/retry/idempotency/rollback evidence, real provider runtime proof, pilot/customer, finance, and G10–G12 operating acceptance.
 - **Missing work:** Approved test accounts and workflow identifiers in the approved secret source; production evidence bundle for each integration; pilot and business/KPI evidence.
-- **Detected issues:** PR #90 initially conflicted in `.env.example`; GitHub main CI and CodeQL were queued after merge; GitHub Actions emitted Node.js 20 and `ubuntu-latest` migration warnings.
-- **Corrections:** Kept the branch’s secret-safe `.env.example` additions, pushed the conflict-resolution commit `de0cbef`, merged PR #90, and verified main CI #203 and CodeQL #58 success.
-- **Next operation:** Execute the production acceptance runbook with approved test credentials; record PASS/FAIL evidence without exposing secrets.
-- **Completion:** Merge queue #88–#90 is 100% complete. Production acceptance is 0/4 live gates verified; overall status remains `PARTIAL — NOT PRODUCTION-READY`.
+- **Detected issues:** PR #90 initially conflicted in `.env.example`; PR #91 initially conflicted in `PROJECT_STATUS.md`; GitHub Actions emitted Node.js 20 and `ubuntu-latest` migration warnings; live acceptance credentials are not configured.
+- **Corrections:** Kept the branch’s secret-safe `.env.example` additions, pushed conflict-resolution commit `de0cbef`, merged PRs #90 and #91, verified main commit `b053d99`, and ran the production acceptance runner with redacted output.
+- **Next operation:** Execute Auth/RLS and Inngest tests with approved test credentials and workflow identifiers; record PASS/FAIL evidence without exposing secrets.
+- **Completion:** Merge queue #88–#91 is 100% complete. Production acceptance remains 0/4 live gates verified; overall status remains `PARTIAL — NOT PRODUCTION-READY`.
 
 ## Evidence baseline
 
-| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90); main commit `da1499a` | Live acceptance gates remain |
+| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90), [#91](https://github.com/hakimceliker/mauseai/pull/91); main commit `b053d99` | Live acceptance gates remain |
 
 | Area | Status | Evidence | Remaining gate |
 |---|---|---|---|
