@@ -37,6 +37,10 @@ Auth PASS
 
 Eksik credential, test çalıştırılmadı veya kanıt yoksa sonuç `NOT_RUN`, `BLOCKED` veya `credential_not_configured` kalır.
 
+## 3.1 ST3.6 kontrol envanteri
+
+ST3.6 paketi repo’ya `docs/governance/st36/` altında alınmıştır. Envanter 377 kontrol, 13 kapı, 30 PLAN kaydı, 22 uyarlama işi ve 18 KPI kartı içerir. Paket doğrulamasına göre runtime henüz doğrulanmamış, tüm kapılar beklemede ve 377 kontrolün tamamı insan incelemesi istemektedir. Bu nedenle envanter tamlığı ile uygulama kabulü ayrı tutulur.
+
 ## 4. P0 — Canlı kabulü açan kritik yol
 
 | Kod | İş | Sahip | Çıktı | Bağımlılık |

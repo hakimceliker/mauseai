@@ -1,0 +1,20 @@
+{
+  "source_sections": 50,
+  "source_diagrams": 19,
+  "source_acceptance_rows": 30,
+  "updated_tasks": 52,
+  "controls": 377,
+  "gates": 13,
+  "additional_diagrams": 5,
+  "kpi_parent_cards": 18,
+  "dependency_cycles": false,
+  "source_law_unchanged": true,
+  "runtime_tests": false,
+  "control_mapping_status": "TASLAK İNSAN İNCELEMESİ GEREKLİ",
+  "pdf_pages": 171,
+  "all_377_ids_in_pdf": true,
+  "layout_bounds_issues": [],
+  "atlas_source_svg_count": 19,
+  "atlas_added_image_count": 5,
+  "zip_integrity": "PASS"
+}
