@@ -84,18 +84,23 @@ critical thresholds, last measured value, and evidence link. Missing values stay
 
 ## Issue/PR cleanup plan
 
-The live GitHub snapshot contains 18 open issues and 18 open PRs, of which 11
-are drafts. The repository also exposes a 36-item combined open count because
-GitHub counts issues and pull requests together.
+The 2026-10-01 GitHub snapshot initially contained 18 open issues and 18 open
+PRs, of which 11 were drafts. The repository exposed a 36-item combined open
+count because GitHub counts issues and pull requests together. Historical PRs
+#1, #2, #3, #5, #6, #7 and #8 were then closed without merging; their branches
+and commits were preserved.
 
 Canonical policy:
 
 1. Keep one canonical MOUSE-001–011 issue and one implementation PR per package.
 2. Close historical duplicate issues with a comment linking the canonical issue.
-3. Close stale historical PRs (#1–#8) without merging them.
-4. Keep draft package PRs only when they have a current owner, branch, scope and
-   next action; otherwise close them with the reason recorded here.
-5. A merged commit on `main` plus CI and evidence is the only completion proof.
+3. Historical PRs #1–#8 are closed without merging; no branch was deleted.
+4. Rebase or reimplement the 11 MOUSE draft packages from current `main` before
+   considering them. The current branches are 53 commits behind and are not
+   completion evidence.
+5. Keep a draft package PR only when it has a current owner, branch, scope and
+   next action; otherwise close it with the reason recorded here.
+6. A merged commit on `main` plus CI and evidence is the only completion proof.
 
 Cleanup is an external GitHub state change and must be recorded with the date,
 record number and reason. No issue/PR is silently deleted.

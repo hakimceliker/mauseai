@@ -5,6 +5,8 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
+**Main commit:** `fe97b7b` (repository control plane merged via PR #85)
+
 ## Status vocabulary
 
 - **DONE:** implemented and merged into `main`, with required CI evidence.
@@ -51,3 +53,12 @@ Run the production acceptance checklist with approved test accounts and workflow
 ## Change-control rule
 
 Every change must update this file or a linked evidence file, identify the branch/PR/commit, and state whether the result is DONE, VERIFIED, PARTIAL, BLOCKED, or PRODUCTION-READY.
+
+## GitHub inventory reconciliation — 2026-10-01
+
+- Combined open count was 36 because GitHub counts open issues and pull requests together.
+- Open issues: 18; duplicate MOUSE issue families remain classified in the ST3.6 register.
+- Open pull requests after historical cleanup: 11.
+- Draft package PRs: 11 (`MOUSE-001`–`MOUSE-011`).
+- Historical PRs #1, #2, #3, #5, #6, #7 and #8: **CLOSED without merge**; their branches/commits were preserved.
+- MOUSE draft branches are stale against current `main` (53 commits behind; 2–4 commits ahead). They must be rebased/reimplemented from current `main` or closed; they are not completion evidence.
