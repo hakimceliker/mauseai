@@ -39,11 +39,24 @@ Code and CI gates are healthy. Production acceptance is intentionally withheld u
 
 | Work | Branch | PR | Status | Gate |
 |---|---|---|---|---|
-| Local-first AI and repository standard | `feat/local-ai-fallback-standard` | [#88](https://github.com/hakimceliker/mauseai/pull/88) | CODE_COMPLETE_LIVE_TEST_PENDING | Merge approval and local/cloud runtime evidence |
-| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | TESTS_UPDATED_CI_PENDING | 272 local tests; PR rerun, merge approval, then main CI |
-| Observability transport hardening | `feat/observability-timeout-hardening` | [#90](https://github.com/hakimceliker/mauseai/pull/90) | CI_IN_PROGRESS | CI completion, review, merge approval |
+| Local-first AI and repository standard | `feat/local-ai-fallback-standard` | [#88](https://github.com/hakimceliker/mauseai/pull/88) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; live local/cloud runtime evidence remains pending |
+| Phase 3 API execution contract | `feat/phase-3-api-contract-hardening` | [#89](https://github.com/hakimceliker/mauseai/pull/89) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; 272 local tests passed, 16 skipped; main reverify pending |
+| Observability transport hardening | `feat/observability-timeout-hardening` | [#90](https://github.com/hakimceliker/mauseai/pull/90) | CI_GREEN_REVIEW_AND_MERGE_PENDING | 8/8 PR checks green; live provider evidence remains credential_not_configured |
 
 These PRs are separate from `main` and are not production acceptance evidence until merged and re-verified on `main`.
+
+## Execution ledger — 2026-10-01
+
+| Record | Current truth |
+|---|---|
+| Completed phases | F0/F1 accepted on `main`; implementation work for F3 and F9 is complete on PR branches |
+| Active phase | Merge-gated integration: PRs #88, #89, #90 are CI-green and awaiting merge approval |
+| Stopping point | Before the first main merge; no production or customer-data operation was performed |
+| Incomplete phases | F2 live Auth/RLS, F3 main reverify, F4 Inngest live evidence, F5 provider runtime proof, F6 live reconciliation, F7/F8 live integration/UI acceptance, F9 live observability, F10–F12 pilot/operations acceptance |
+| Detected issues | Status entries lagged behind the latest PR CI results; live credential-backed evidence is unavailable without approved runtime test access |
+| Corrections made | Updated this ledger with exact PR/CI state; preserved `credential_not_configured` for missing live provider evidence |
+| Next operation | User-approved merge sequence, then main CI and health re-verification; afterward run authenticated tenant and Inngest acceptance tests |
+| Completion | Main accepted gates: 2/13 (~15%); implementation including open PRs: approximately 40%; production acceptance: not complete |
 
 ## Single next step
 
