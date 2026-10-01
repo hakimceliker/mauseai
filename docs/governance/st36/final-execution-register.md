@@ -146,3 +146,21 @@ Task | Owner | Branch | PR | Commit | Test | CI | Evidence | Status | Blocker | 
 ```
 
 Bu dosya güncellenmeden ayrı parça “tamamlandı” raporu verilmez.
+
+## 9. 2026-10-01 yürütme kanıtı
+
+| Kontrol | Sonuç | Kanıt / not |
+|---|---|---|
+| Supabase profil eşlemesi | PASS | İki test kullanıcısı Tenant A/B ile `owner` rolüne bağlandı ve SQL Editor üzerinden doğrulandı |
+| Lint | PASS | `npm run lint` |
+| Typecheck | PASS | `npm run typecheck` |
+| Test | PASS | 28 test dosyası, 266 başarılı; 16 skip |
+| Build | PASS | `npm run build` |
+| Diff kontrolü | PASS | `git diff --check` |
+| Dependency audit | PASS | `npm audit --omit=dev --audit-level=high`, 0 vulnerability |
+| Production acceptance runner | NOT_RUN | `SMOKE_BASE_URL` yapılandırılmamış |
+| Auth/tenant canlı API testi | credential_not_configured | `SMOKE_USER_A_TOKEN`, `SMOKE_USER_B_TOKEN` yok |
+| Inngest canlı workflow | credential_not_configured | `SMOKE_WORKFLOW_ID`, runtime Inngest erişimi yok |
+| Gerçek AI provider testi | credential_not_configured | OpenAI/Anthropic runtime credential kanıta alınmadı |
+
+Bu kayıt secret, token, parola veya ham production response içermez. Auth profil eşlemesi tamamlanmış olsa da canlı API/RLS ve Inngest kabul kapıları kanıtlanmadan production kabulü verilmez.
