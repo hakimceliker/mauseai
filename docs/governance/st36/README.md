@@ -33,3 +33,5 @@ PLAN-004 için uygulanacak kabul sırası: [Auth ve tenant kabul runbook'u](plan
 PLAN-005 için uygulanacak kabul sırası: [Inngest production workflow kabul runbook'u](plan-005-inngest-acceptance-runbook.md).
 
 PLAN-006/007 için uygulanacak kabul sırası: [Provider ve maliyet kabul runbook'u](plan-006-007-provider-cost-runbook.md).
+
+Tüm ST3.6 kapsamının tek birleşik durumu: [Final execution register](final-execution-register.md).
