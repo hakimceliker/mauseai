@@ -1,0 +1,17 @@
+{
+  "schema": "mouseai.g10.kpi-cards.v1",
+  "as_of": "2026-10-02",
+  "status": "DRAFT_VALIDATION_REQUIRED",
+  "status_vocabulary": {"missing_data": "VERİ YOK", "missing_target": "HEDEF BEKLİYOR", "not_calculable": "HESAPLANAMAZ"},
+  "cards": [
+    {"id":"G10-KPI-01","name":"Görev kabul oranı","formula":"accepted_tasks / completed_in_scope_tasks","source":"task_runs + acceptance_records","direction":"higher_is_better","baseline":null,"target":null,"unit":"ratio","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-02","name":"İlk seferde kabul","formula":"accepted_without_revision / reviewed_eligible_outputs","source":"verification_results + revision_events","direction":"higher_is_better","baseline":null,"target":null,"unit":"ratio","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-03","name":"Yeniden iş oranı","formula":"outputs_requiring_revision / reviewed_eligible_outputs","source":"revision_events + verification_results","direction":"lower_is_better","baseline":null,"target":null,"unit":"ratio","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-04","name":"Baz zamana göre fayda","formula":"baseline_total_time - mouseai_total_time","source":"pilot_pairs","direction":"higher_is_better","baseline":null,"target":null,"unit":"time","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-05","name":"Baz kaliteye göre fark","formula":"mouseai_quality_score - baseline_quality_score","source":"pilot_pairs + evaluator","direction":"maintain_or_improve","baseline":null,"target":null,"unit":"score_delta","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-06","name":"Baz maliyete göre fayda","formula":"baseline_relevant_cost - mouseai_relevant_cost","source":"pilot_pairs + cost_ledger","direction":"higher_is_better","baseline":null,"target":null,"unit":"currency","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-07","name":"İnsan düzeltme yükü","formula":"correction_count and correction_time per accepted task","source":"intervention_events","direction":"lower_is_better","baseline":null,"target":null,"unit":"count_and_time","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"},
+    {"id":"G10-KPI-08","name":"Kullanıcı kabulü","formula":"accepted_pilot_tasks / eligible_pilot_tasks","source":"pilot_acceptance_records","direction":"higher_is_better","baseline":null,"target":null,"unit":"ratio","window":null,"owner":null,"status":"VERİ YOK / HEDEF BEKLİYOR"}
+  ],
+  "measurement_controls": {"deduplication":"tenant + project + task + event identity","late_events":"recalculate by version and retain prior value and reason","sandbox":"exclude from production/pilot cohort and report separately","zero_denominator":"HESAPLANAMAZ","missing_source":"VERİ YOK"}
+}
