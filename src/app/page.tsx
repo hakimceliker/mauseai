@@ -21,7 +21,7 @@ export default function Home() {
         <h2>Features</h2>
         <ul style={{ lineHeight: '1.8' }}>
           <li>Multi-tenant task execution with Inngest</li>
-          <li>AI provider routing (GPT, Claude, or mock)</li>
+          <li>AI provider routing (Local AI with guarded OpenAI/Claude fallback)</li>
           <li>Step-by-step workflow execution with checkpoints</li>
           <li>Idempotent step execution with duplicate detection</li>
           <li>Cost tracking and tenant credit limits</li>
@@ -48,9 +48,8 @@ cp .env.example .env.local
 npm run dev
 
 # Open http://localhost:3000
-# Try with mock auth headers:
-# x-tenant-id: your-tenant-uuid
-# x-user-id: your-user-uuid
+# Production/API requests require a Supabase bearer token.
+# Mock x-tenant-id/x-user-id headers are local-only and must never be used in production.
 `}
         </pre>
       </section>
@@ -62,8 +61,7 @@ npm run dev
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
 {`curl -X POST ${appUrl}/api/tasks \\
   -H "Content-Type: application/json" \\
-  -H "x-tenant-id: tenant-1" \\
-  -H "x-user-id: user-1" \\
+  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>" \\
   -d '{
     "workflow_id": "workflow-1",
     "input": { "prompt": "Hello AI" }
@@ -73,23 +71,20 @@ npm run dev
         <h3>Get Task Status</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
 {`curl ${appUrl}/api/tasks/task-uuid \\
-  -H "x-tenant-id: tenant-1" \\
-  -H "x-user-id: user-1"`}
+  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>"`}
         </pre>
 
         <h3>Create Conversation</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
 {`curl -X POST ${appUrl}/api/conversations \\
-  -H "x-tenant-id: tenant-1" \\
-  -H "x-user-id: user-1"`}
+  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>"`}
         </pre>
 
         <h3>Create Offer</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
 {`curl -X POST ${appUrl}/api/offers \\
   -H "Content-Type: application/json" \\
-  -H "x-tenant-id: tenant-1" \\
-  -H "x-user-id: user-1" \\
+  -H "Authorization: Bearer <SUPABASE_ACCESS_TOKEN>" \\
   -d '{
     "template_id": "template-1",
     "discount_percent": 15,
