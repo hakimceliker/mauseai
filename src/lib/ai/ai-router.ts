@@ -96,7 +96,10 @@ export class AIRouter {
       tokens_in: response.tokens_in ?? null,
       tokens_out: response.tokens_out ?? null,
       cost_usd: response.cost ?? null,
-      cost_basis: response.cost_basis ?? (response.cost === undefined ? 'unknown' : 'provider_rate_estimate'),
+      cost_basis: response.cost_basis ??
+        (response.provider.startsWith('mock-')
+          ? 'mock'
+          : response.cost === undefined ? 'unknown' : 'provider_rate_estimate'),
     }));
   }
 

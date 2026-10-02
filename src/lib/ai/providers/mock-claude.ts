@@ -19,6 +19,7 @@ export class MockClaudeProvider implements AIProvider {
       provider: this.name,
       tokens_used: Math.floor(Math.random() * 600) + 150,
       cost: 0.00015,
+      cost_basis: 'mock',
     };
   }
 }

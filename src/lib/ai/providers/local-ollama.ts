@@ -9,7 +9,9 @@ export class LocalOllamaProvider implements AIProvider {
     const baseUrl = (process.env.LOCAL_AI_BASE_URL ?? '').replace(/\/$/, '');
     if (!baseUrl) throw new AIProviderError(this.name, 'LOCAL_AI_BASE_URL_not_configured');
 
-    const gatewayMode = process.env.LOCAL_AI_PROTOCOL === 'gateway' || /:8080(?:\/|$)/.test(baseUrl);
+    const configuredProtocol = process.env.LOCAL_AI_PROTOCOL?.trim().toLowerCase();
+    const gatewayMode = configuredProtocol === 'gateway' ||
+      (!configuredProtocol && /:8080(?:\/|$)/.test(baseUrl));
     const healthPath = process.env.LOCAL_AI_HEALTH_PATH ?? (gatewayMode ? '/health' : '/api/tags');
     const connectTimeoutMs = this.timeoutMs(process.env.LOCAL_AI_CONNECT_TIMEOUT_MS, 3000, 250);
     const inferenceTimeoutMs = this.timeoutMs(process.env.LOCAL_AI_INFERENCE_TIMEOUT_MS, 45000, 1000);
@@ -45,6 +47,7 @@ export class LocalOllamaProvider implements AIProvider {
       const healthResponse = await fetch(new URL(healthPath, baseUrl + '/'), {
         method: 'GET',
         headers,
+        redirect: 'error',
         signal: healthController.signal,
       });
       if (!healthResponse.ok) {
@@ -70,6 +73,7 @@ export class LocalOllamaProvider implements AIProvider {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
+        redirect: 'error',
         signal: inferenceController.signal,
       });
       if (!response.ok) {

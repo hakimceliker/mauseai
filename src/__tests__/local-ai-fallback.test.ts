@@ -48,7 +48,46 @@ describe('local-first AI routing', () => {
       'CF-Access-Client-Id': 'test-client-id',
       'CF-Access-Client-Secret': 'test-client-secret',
     });
+    expect(fetchMock.mock.calls[0]?.[1]?.redirect).toBe('error');
+    expect(fetchMock.mock.calls[1]?.[1]?.redirect).toBe('error');
     expect(fetchMock.mock.calls[1]?.[0]).toBe('https://local-gateway.test/v1/chat/completions');
+  });
+
+  it('does not let a port-8080 heuristic override explicit Ollama protocol', async () => {
+    process.env.LOCAL_AI_BASE_URL = 'http://ollama.test:8080';
+    process.env.LOCAL_AI_PROTOCOL = 'ollama';
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response('', { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        response: 'ollama response',
+        usage: { input_tokens: 2, output_tokens: 1 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await new LocalOllamaProvider().call(messages);
+
+    expect(response.content).toBe('ollama response');
+    expect(fetchMock.mock.calls[1]?.[0]).toBe('http://ollama.test:8080/v1/chat/completions');
+    expect(JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string)).toMatchObject({
+      model: 'qwen3:8b',
+      stream: false,
+    });
+  });
+
+  it('preserves unavailable provider usage and cost as null', async () => {
+    process.env.AI_PROVIDER = 'openai';
+    process.env.OPENAI_API_KEY = 'test-only-placeholder';
+    process.env.LOCAL_AI_ENABLED = 'false';
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      choices: [{ message: { content: 'usage unavailable' } }],
+    }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await routeAI({ taskId: 'task-unknown-usage', goal: 'safe test prompt', riskLevel: 'L1' });
+
+    expect(response.inputTokens).toBeNull();
+    expect(response.outputTokens).toBeNull();
+    expect(response.costCents).toBeNull();
   });
 
   it('falls back to the cloud provider when local access or inference fails', async () => {
