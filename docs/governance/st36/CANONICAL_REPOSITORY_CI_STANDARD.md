@@ -1,49 +1,58 @@
-# MouseAI — Canonical Repository and CI Standard
+# MouseAI — Güncel Depo ve Aynalama Kanunu
 
-**Status:** `IN_PROGRESS — POLICY DOCUMENTED, ACCESS/PIPELINE VERIFICATION PENDING`
+**Sürüm:** 03.10.2026  
+**Durum:** `IN_PROGRESS — POLICY UPDATED, MIRROR VERIFICATION PENDING`
 
-## Repository roles
+## 1. Kaynak ve yedek modeli
 
-| System | Role | Rule |
+| Sistem | Rol | Yetki modeli |
 |---|---|---|
-| GitLab | Canonical primary repository | Source of truth for code, issues, merge requests and primary CI |
-| GitHub | Mirror/backup | Readable mirror and secondary review/evidence surface; not a competing source of truth |
-| Forgejo v15.0.9 LTS on the private Windows/Docker server | Private backup/staging and local CI | No public exposure; access and retention remain administrator-controlled |
-| Codeberg | Conditional public mirror | Use only when the project is appropriate and platform policy permits it |
+| GitHub | Kanonik çalışma kaynağı | Branch, PR, CI, güvenlik ve kabul kayıtlarının kaynağı |
+| Forgejo v15.0.9 | Yerel salt-okunur pull-mirror/yedek | GitHub’dan çeker; geliştirme kaynağı değildir |
+| GitLab | Bu standartta kullanılmayan harici kaynak | MouseAI için kanonik kaynak değildir |
+| Codeberg | Yalnızca açıkça uygun projelerde opsiyonel mirror | Platform ve içerik politikası önkoşuludur |
 
-## Change flow
+Forgejo’dan GitHub/GitLab’a otomatik push, force-push, silme veya kaynak değiştirme yapılmaz. Kaynak depolar yedekleme amacıyla korunur ve silinmez.
 
-1. Work starts from the canonical GitLab repository and a dedicated branch.
-2. Local tests and the private Forgejo CI run before publishing a mirror update.
-3. The GitHub mirror is updated from the same commit and must retain commit/branch identity.
-4. Evidence records link the canonical commit, mirror ref, CI run, deployment state and acceptance gate.
-5. Merge, production deployment and live commands remain disabled by default until explicitly approved and independently reviewed.
+## 2. Yetki ve güvenlik
 
-## Safety rules
+- GitHub aynalama yetkisi yalnızca `Contents: Read-only` ve `Metadata: Read-only` kapsamındadır.
+- Mirror hesabında yazma ve silme yetkisi bulunmaz.
+- Secret, token, API key veya private key mesajlara, dosyalara ve loglara yazılmaz.
+- Canlı emirler kapalıdır; finansal testler paper/non-production modundadır.
+- Production, DNS, secret, ödeme, repository silme ve geri dönüşü zor işlemler için açık insan onayı gerekir.
 
-- Never treat GitHub and GitLab as independent sources of truth.
-- Never push directly to a protected main/default branch.
-- Never copy secrets, customer data, private keys or live command payloads into any mirror or CI log.
-- Production deployment is opt-in; staging/backup is not production.
-- Crypto, financial execution or platform-restricted content must not be mirrored to Codeberg or any unsuitable public service.
-- A green mirror CI run cannot by itself prove live production acceptance.
+## 3. Proje sınırları
 
-## Required evidence
+TechCriptoAI, STECH AI, MouseAI ve LETFON AI ayrı projelerdir.
 
-Each change must record:
+- Dosya, branch, commit, deployment ve secret paylaşılmaz.
+- Bir projedeki değişiklik başka projenin deposuna kopyalanmaz.
+- Her proje kendi GitHub deposunda geliştirilir.
+- Forgejo yalnızca aynı GitHub deposunu ayrı isimle aynalar.
 
-- canonical GitLab project and branch,
-- canonical commit SHA,
-- GitHub mirror ref and synchronization result,
-- Forgejo job and artifact result,
-- test/security summary,
-- deployment state (`DISABLED`, `STAGING`, or `PRODUCTION`),
-- owner, timestamp and rollback path.
+## 4. Çalışma akışı
 
-## Current acceptance state
+1. Değişiklik kanonik GitHub deposunda ayrı branch’te yapılır.
+2. PR, CI, test, build, güvenlik ve kabul kanıtları GitHub’da doğrulanır.
+3. Forgejo aynası periyodik olarak GitHub’dan pull eder.
+4. Forgejo’ya manuel geliştirme, kaynak değiştirme veya GitHub’a geri yazma yapılmaz.
+5. Her görev şu alanlarla raporlanır: proje, kaynak repo, kabul edilen commit SHA, test sonucu, mirror durumu ve kalan engeller.
+6. GitHub planı, production secret’ı, yetkili Supabase hesabı, domain/DNS, hukuk veya ticari onay isteyen işler `BLOCKED`/`PARTIAL` kalır.
 
-This policy document does not claim that GitLab, GitHub mirror or Forgejo connectivity is live and verified. Those connections require account URLs, credentials/configuration and a controlled non-production synchronization test. Until that evidence exists, the repository-control gate remains `BLOCKED`/`NOT_RUN`.
+## 5. Kanıt sözleşmesi
+
+Her görev için GitHub repo/branch, kabul edilen commit SHA, PR ve CI bağlantıları, Forgejo mirror adı/son çekme zamanı/kaynak SHA, test-güvenlik sonucu, deployment durumu, sahip, zaman damgası ve rollback yolu kaydedilir.
+
+Mirror senkronizasyonu başarıyla gerçekleşmiş olsa bile bu, production kabulü değildir.
+
+## 6. Mevcut MouseAI durumu
+
+- Kanonik geliştirme kaynağı: `hakimceliker/mauseai` GitHub deposu.
+- Forgejo mirror: erişim ve son SHA doğrulaması ayrıca kanıtlanacak.
+- Canlı production emirleri ve finansal işlemler kapalı.
+- Gerçek credential, production, hukuk ve işletme kanıtı olmayan kapılar `BLOCKED`/`NOT_RUN` kalır.
 
 ## Rollback
 
-Stop mirror synchronization, preserve the canonical GitLab commit, and revert only the affected staging/mirror ref. Do not delete the canonical source or alter production data.
+Mirror senkronizasyonunu durdur, kanonik GitHub commit’ini koru ve yalnızca Forgejo mirror ref’ini geri al. Kanonik kaynağı silme veya değiştirme.
