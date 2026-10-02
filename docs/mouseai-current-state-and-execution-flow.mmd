@@ -1,0 +1,129 @@
+%% MouseAI — current state, dependencies, tools and acceptance gates
+%% Snapshot: 2026-10-02 — PARTIAL / NOT PRODUCTION-READY
+flowchart TB
+  classDef done fill:#dcfce7,stroke:#16a34a,color:#14532d
+  classDef partial fill:#fef3c7,stroke:#d97706,color:#78350f
+  classDef blocked fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+  classDef external fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+  classDef tool fill:#f3e8ff,stroke:#9333ea,color:#581c87
+
+  START([MouseAI execution start]) --> F0
+
+  subgraph F0[FAZ 0 — Kanonik yönetişim]
+    F0A[Repo / branch / ownership kayıtları]:::done --> F0B[Ruleset, PR, CI ve secret policy]:::done
+    F0B --> F0C[PROJECT_STATUS + evidence index]:::partial
+  end
+  F0C --> REVIEW{Bağımsız Write reviewer var mı?}:::blocked
+  REVIEW -- Hayır --> REVIEW_BLOCK[PR #92 #95 #97 #98<br/>REVIEW_REQUIRED — merge yapılamaz]:::blocked
+  REVIEW -- Evet --> MERGE[Reviewer approval + merge]:::external
+
+  subgraph F1[FAZ 1 — Kod ve kalite]
+    Q[Lint / typecheck / test / build]:::done
+    S[Secret scan / dependency audit / Docker / CodeQL]:::done
+    Q --> S
+  end
+  MERGE --> F1
+  F1 --> DEPLOY
+
+  subgraph F2[FAZ 2 — Yayın ve route doğrulama]
+    DEPLOY[Vercel production deployment]:::external
+    ROUTES[/login /auth/reset-password /operations<br/>/api/health /api/health/ready]:::partial
+    SHA[Deployment SHA = main SHA + smoke evidence]:::partial
+    DEPLOY --> ROUTES --> SHA
+  end
+  SHA --> AUTH
+
+  subgraph F3[FAZ 3 — Auth / tenant / RLS]
+    AUTH[Supabase Auth login/logout/reset]:::external
+    TENANTS[İki test tenantı oluştur]:::external
+    ISO[Pozitif erişim + cross-tenant negatif erişim]:::blocked
+    EXP[Token expiry + RLS + storage sınırı]:::blocked
+    AUTH --> TENANTS --> ISO --> EXP
+  end
+  EXP --> ING
+
+  subgraph F4[FAZ 4 — Durable workflow]
+    ING[Inngest production sync]:::external
+    TRIGGER[task/run trigger]:::blocked
+    WORKER[Worker + checkpoint + audit]:::blocked
+    RETRY[Retry + idempotency + failure/rollback]:::blocked
+    ING --> TRIGGER --> WORKER --> RETRY
+  end
+  RETRY --> PROVIDERS
+
+  subgraph F5[FAZ 5 — AI provider ve maliyet]
+    PROVIDERS[OpenAI / Anthropic gerçek runtime çağrısı]:::blocked
+    LOCAL[Local AI: Ollama / gateway]:::external
+    FALLBACK[Offline / timeout / invalid response → cloud fallback]:::blocked
+    COST[Redacted latency / token / cost ledger]:::blocked
+    LOCAL --> FALLBACK --> PROVIDERS --> COST
+  end
+  COST --> INTEGRATIONS
+
+  subgraph F6[FAZ 6 — Entegrasyon kanıtları]
+    INTEGRATIONS[Entegrasyon kabul matrisi]:::partial
+    STRIPE[Stripe sandbox webhook]:::blocked
+    POSTHOG[PostHog event delivery]:::blocked
+    OBS[Sentry / Langfuse error + trace]:::blocked
+    REALTIME[Supabase Realtime bağlantısı]:::blocked
+    INTEGRATIONS --> STRIPE
+    INTEGRATIONS --> POSTHOG
+    INTEGRATIONS --> OBS
+    INTEGRATIONS --> REALTIME
+  end
+  INTEGRATIONS --> UI
+
+  subgraph F7[FAZ 7 — Ürün deneyimi]
+    UI[Visily/Figma ana tasarımına uyum]:::partial
+    DASH[Dashboard + AI ekip kartları + görev gelen kutusu]:::partial
+    HANDOFF[Sağ panel görev devri / timeline / çıktılar]:::partial
+    STATES[Loading / empty / error / responsive / a11y]:::partial
+    UI --> DASH --> HANDOFF --> STATES
+  end
+  STATES --> DOCS
+
+  subgraph F8[FAZ 8 — Kanıt ve dokümantasyon]
+    DOCS[ACCEPTANCE_REPORT + PROJECT_STATUS]:::partial
+    MATRIX[Repo / PR / CI / deploy / integration master matrix]:::partial
+    RUNBOOKS[Runbook, rollback, incident, support]:::partial
+    DOCS --> MATRIX --> RUNBOOKS
+  end
+  RUNBOOKS --> PILOT
+
+  subgraph F9[FAZ 9 — Pilot, finans, KPI]
+    PILOT[İki gerçek pilot senaryosu]:::blocked
+    BASELINE[Baseline → hedef → sonuç → hata/rework]:::blocked
+    FIN[13 haftalık nakit + unit economics + downside]:::blocked
+    KPI[KPI: tanım, kaynak, sorgu, baseline, hedef, alarm]:::blocked
+    PILOT --> BASELINE
+    FIN --> KPI
+    BASELINE --> KPI
+  end
+  KPI --> GATES
+
+  subgraph F10_12[FAZ 10–12 — Release ve işletme kabulü]
+    GATES[G10 teknik yayın]:::blocked --> G11[G11 ticari / iç kullanım]:::blocked --> G12[G12 işletme ve müşteri kabulü]:::blocked
+    G12 --> ACCEPT{Tüm kanıtlar mevcut mu?}:::blocked
+    ACCEPT -- Hayır --> NOTREADY[PARTIAL — NOT PRODUCTION-READY]:::blocked
+    ACCEPT -- Evet --> READY[PRODUCTION-READY / ACCEPT]:::done
+  end
+
+  subgraph TOOLS[Ortak araç sahipliği]
+    GH[GitHub: branch, PR, review, CI, CodeQL, issues]:::tool
+    VE[Vercel: env, deployment, route smoke]:::tool
+    SB[Supabase: Auth, DB, RLS, Storage, Realtime]:::tool
+    IN[Inngest: durable workflow, retry, checkpoint]:::tool
+    AI[OpenAI + Anthropic + Local gateway]:::tool
+    PAY[Stripe sandbox]:::tool
+    ANA[PostHog + Sentry + Langfuse]:::tool
+    DESIGN[Visily / Figma]:::tool
+  end
+
+  GH -. governs .-> REVIEW
+  VE -. deploys .-> DEPLOY
+  SB -. proves .-> AUTH
+  IN -. executes .-> ING
+  AI -. serves .-> PROVIDERS
+  PAY -. evidences .-> STRIPE
+  ANA -. observes .-> OBS
+  DESIGN -. references .-> UI
