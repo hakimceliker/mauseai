@@ -1,4 +1,11 @@
+import { redirect } from 'next/navigation';
+
 export default function Home() {
+  redirect('/operations');
+  /*
+   * The technical API reference remains in the repository documentation.
+   * The product entry point intentionally opens the canonical MouseAI workspace.
+   */
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
   return (
