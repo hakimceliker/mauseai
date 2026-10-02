@@ -10,9 +10,14 @@ LOCAL_AI_BASE_URL=https://private-tunnel-or-gateway-url
 LOCAL_AI_MODEL=qwen3:8b
 LOCAL_AI_CONNECT_TIMEOUT_MS=3000
 LOCAL_AI_INFERENCE_TIMEOUT_MS=45000
+LOCAL_AI_PROTOCOL=ollama
+LOCAL_AI_HEALTH_PATH=/api/tags
+# Add both headers for production Cloudflare Access service tokens in secret storage.
+LOCAL_AI_ACCESS_CLIENT_ID=...
+LOCAL_AI_ACCESS_CLIENT_SECRET=...
 ```
 
-`localhost:11434` yalnızca aynı makinedeki geliştirme içindir. Production için Ollama portu doğrudan internete açılmaz; private network veya güvenli tunnel/gateway kullanılır.
+`localhost:11434` yalnızca aynı makinedeki geliştirme içindir. Production için Ollama portu doğrudan internete açılmaz; HTTPS ile güvenli private tunnel ve Cloudflare Access service token gerekir. Local health probe 3 saniyede başarısız olursa mevcut cloud provider devreye girer. Inference ve response body için ayrı 45 saniyelik üst sınır vardır.
 
 ## Güvenlik sözleşmesi
 
@@ -24,7 +29,7 @@ LOCAL_AI_INFERENCE_TIMEOUT_MS=45000
 
 ## Güvenli telemetry
 
-Router yalnızca şu redakte alanları loglar: `LOCAL`/`CLOUD` rotası, provider/model, fallback durumu ve nedeni, latency, token sayısı ve tahmini maliyet. Prompt ve provider yanıtı application loguna yazılmaz.
+Router yalnızca şu redakte alanları loglar: `LOCAL`/`CLOUD` rotası, provider/model, fallback durumu ve nedeni, latency, input/output/total token sayısı, cost basis ve cost. Usage yoksa token ve cloud cost alanları `null` kalır. Mevcut OpenAI/Anthropic model-rate değerleri tahmindir; provider faturası değildir. Local API cost sıfırdır; donanım/enerji giderini içermez. Prompt ve provider yanıtı application loguna yazılmaz.
 
 ## Kabul senaryoları
 

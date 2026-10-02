@@ -19,6 +19,7 @@ export class MockGPTProvider implements AIProvider {
       provider: this.name,
       tokens_used: Math.floor(Math.random() * 500) + 100,
       cost: 0.0001,
+      cost_basis: 'mock',
     };
   }
 }

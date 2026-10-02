@@ -6,9 +6,9 @@ export async function recordCost(params: {
   taskId: string;
   stepId?: string;
   provider: string;
-  costCents: number;
-  inputTokens: number;
-  outputTokens: number;
+  costCents: number | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
 }) {
   const supabase = getSupabaseAdminClient();
   const { error } = await supabase.from("cost_events").insert({
@@ -28,7 +28,7 @@ export async function recordCost(params: {
     .eq("tenant_id", params.tenantId)
     .single();
   if (readError) throw readError;
-  const nextSpent = (task.spent_cents ?? 0) + params.costCents;
+  const nextSpent = (task.spent_cents ?? 0) + (params.costCents ?? 0);
   if (task.budget_limit_cents !== null && nextSpent > task.budget_limit_cents) {
     const error = new Error("BUDGET_EXCEEDED");
     Object.assign(error, { code: "BUDGET_EXCEEDED" });
