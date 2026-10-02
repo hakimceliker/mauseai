@@ -39,10 +39,23 @@ describe('demo acceptance harness', () => {
     expect((await create(demoTenantA, 'demo-user-a', 'Tenant A')).status).toBe(201);
     expect((await create(demoTenantB, 'demo-user-b', 'Tenant B')).status).toBe(201);
 
+    const tenantBResponse = await GET(new NextRequest('https://demo.local/api/tasks', {
+      headers: requestHeaders(demoTenantB, 'demo-user-b'),
+    }));
+    const tenantBBody = await tenantBResponse.json();
+
     const tenantAResponse = await GET(new NextRequest('https://demo.local/api/tasks', {
       headers: requestHeaders(demoTenantA, 'demo-user-a'),
     }));
     const tenantABody = await tenantAResponse.json();
+
+    expect(tenantBResponse.status).toBe(200);
+    expect(tenantBBody.data).toHaveLength(1);
+    expect(tenantBBody.data[0]).toMatchObject({
+      tenant_id: demoTenantB,
+      user_id: 'demo-user-b',
+      input: { goal: 'Tenant B' },
+    });
 
     expect(tenantAResponse.status).toBe(200);
     expect(tenantABody.data).toHaveLength(1);
@@ -52,6 +65,12 @@ describe('demo acceptance harness', () => {
       input: { goal: 'Tenant A' },
     });
     expect(tenantABody.data[0].input.__execution_contract.approval_state).toBe('pending');
+    expect(tenantABody.data).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ tenant_id: demoTenantB }),
+    ]));
+    expect(tenantBBody.data).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ tenant_id: demoTenantA }),
+    ]));
   });
 
   it('rejects anonymous demo access and never requires a real password', async () => {
