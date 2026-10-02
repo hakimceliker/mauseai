@@ -1,4 +1,13 @@
+import { redirect } from 'next/navigation';
+
 export default function Home() {
+  redirect('/operations');
+  /*
+   * The technical API reference remains in the repository documentation.
+   * The product entry point intentionally opens the canonical MouseAI workspace.
+   */
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
   return (
     <div style={{ fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <header style={{ borderBottom: '1px solid #e0e0e0', paddingBottom: '20px', marginBottom: '20px' }}>
@@ -7,6 +16,10 @@ export default function Home() {
         <p style={{ marginTop: '10px' }}>
           <a href="/operations" style={{ color: '#0066cc', textDecoration: 'none', fontWeight: 'bold' }}>
             → Dashboard'a Git
+          </a>
+          {' · '}
+          <a href="/login" style={{ color: '#0066cc', textDecoration: 'none', fontWeight: 'bold' }}>
+            Giriş yap
           </a>
         </p>
       </header>
@@ -54,7 +67,7 @@ npm run dev
 
         <h3>Create a Task</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
-{`curl -X POST http://localhost:3000/api/tasks \\
+{`curl -X POST ${appUrl}/api/tasks \\
   -H "Content-Type: application/json" \\
   -H "x-tenant-id: tenant-1" \\
   -H "x-user-id: user-1" \\
@@ -66,21 +79,21 @@ npm run dev
 
         <h3>Get Task Status</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
-{`curl http://localhost:3000/api/tasks/task-uuid \\
+{`curl ${appUrl}/api/tasks/task-uuid \\
   -H "x-tenant-id: tenant-1" \\
   -H "x-user-id: user-1"`}
         </pre>
 
         <h3>Create Conversation</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
-{`curl -X POST http://localhost:3000/api/conversations \\
+{`curl -X POST ${appUrl}/api/conversations \\
   -H "x-tenant-id: tenant-1" \\
   -H "x-user-id: user-1"`}
         </pre>
 
         <h3>Create Offer</h3>
         <pre style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', overflow: 'auto' }}>
-{`curl -X POST http://localhost:3000/api/offers \\
+{`curl -X POST ${appUrl}/api/offers \\
   -H "Content-Type: application/json" \\
   -H "x-tenant-id: tenant-1" \\
   -H "x-user-id: user-1" \\
