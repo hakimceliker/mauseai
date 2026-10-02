@@ -12,6 +12,7 @@ describe('Supabase production auth boundary', () => {
   afterEach(() => {
     process.env.AUTH_PROVIDER = originalProvider;
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = originalAnon;
   });
@@ -43,5 +44,38 @@ describe('Supabase production auth boundary', () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     await expect(SupabaseAuth.verifyToken('redacted-test-token')).resolves.toBeNull();
+  });
+
+  it('uses the server-side tenant membership instead of user-controlled metadata', async () => {
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://project.supabase.co');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-anon-key');
+    vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-role-key');
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith('/auth/v1/user')) {
+        return new Response(JSON.stringify({
+          id: 'user-1',
+          email: 'user@example.test',
+          app_metadata: { tenant_id: 'stale-tenant' },
+          user_metadata: { tenant_id: 'attacker-tenant' },
+        }), { status: 200, headers: { 'content-type': 'application/json' } });
+      }
+      if (url.includes('/rest/v1/users')) {
+        return new Response(JSON.stringify([{ tenant_id: 'authoritative-tenant' }]), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      return new Response(null, { status: 404 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(SupabaseAuth.verifyToken('redacted-test-token')).resolves.toEqual({
+      id: 'user-1',
+      email: 'user@example.test',
+      tenant_id: 'authoritative-tenant',
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

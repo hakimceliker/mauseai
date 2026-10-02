@@ -1,0 +1,42 @@
+name: Security report (non-sensitive)
+description: Record a security work item without publishing exploit details.
+title: "[Security] "
+body:
+  - type: markdown
+    attributes:
+      value: "This public form is only for a non-sensitive summary. Do not include exploit steps, credentials, tokens, private data, or customer information. Submit sensitive findings through GitHub's private vulnerability reporting instead."
+  - type: input
+    id: component
+    attributes:
+      label: Affected component
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Preliminary severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+        - Undetermined
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Public-safe summary
+      description: Keep this high-level; do not describe an exploitable payload.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential impact and affected versions
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Suggested mitigation or private-report reference

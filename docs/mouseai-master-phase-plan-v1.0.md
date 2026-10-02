@@ -1,22 +1,80 @@
-# MouseAI Master Faz Planı v1.0
+# MouseAI — Kanonik Ürün Yol Haritası ve Teknik Yürütme Planı
 
-Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yerine yalnızca bu faz sırası izlenir. Her madde tamamlandığında kanıtı eklenir ve `[x]` yapılır. Kanıt yoksa madde tamamlanmış sayılmaz.
+**Belge sürümü:** v1.0
+**Son uzlaştırma:** 2026-10-01
+**Kanonik üst kaynaklar:** ST Ana Kanun v3.6 → MAUSEAI Master Kanun ve Şartname v1.0
+
+Bu belge üst kanun değildir. `P0–P9` ürün/teknik paketleri ve `G0–G12`
+kabul kapıları kanonik yürütme eksenidir; eski `F0–F12` başlıkları yalnız
+önceki teknik uygulama dilimlerini kaydeder. Bir teknik dilimin veya belgenin
+tamamlanması ilgili G kapısını otomatik geçirmez. 14 günlük backlog ve demo
+spesifikasyonu varsa yalnız P0/P1 kapsamındaki, üst kapılara tabi bir uygulama
+dilimidir; takvim tarihi, üst yol haritası veya kabul kanıtı değildir.
+
+Ana kanunun 17 aşaması, beş zorunlu modeli, A–L iş kırılımı ve G0–G12
+kapıları P0–P9 uygulama paketlerinin tamamında korunur. P0–P9 stratejik A–H
+akışının veya G kapılarının yerine geçmez.
 
 **Repo:** `hakimceliker/mauseai`  
 **Kanonik branch kuralı:** `main` doğrudan değiştirilmez; her faz `branch → PR → CI → review → merge → main doğrulaması` zinciriyle yürür.  
 **Kod sahibi:** GPT/Codex  
 **Review sahibi:** Claude veya bağımsız reviewer  
 **Hesap/secret/ödeme sahibi:** Kullanıcı  
-**Kabul dili:** `PLANNED`, `IN_PROGRESS`, `CODE_COMPLETE_LIVE_TEST_PENDING`, `COMPLETE`, `BLOCKED`.
+**Kabul dili:** `PLANNED`, `IN_PROGRESS`, `CODE_COMPLETE_LIVE_TEST_PENDING`, `COMPLETE`, `BLOCKED`. Kanıt gerektiren G kapıları ana kayıtta ayrıca `BEKLEMEDE`, `DÜZELTME`, `GEÇTİ` veya gerekçeli `UYGULANAMAZ` kullanır.
 
-## Güncel yürütme durumu — 2026-10-01
+## Kanonik ürün paketleri — 2026-10-01
 
-- [x] Faz 0: PR #83 merge edildi; merge commit `3521c24`; main CI yeşil.
-- [x] Faz 1: Kod kalite kapıları ve production smoke kontrolleri başarılı.
-- [~] Faz 2: Test kullanıcıları Tenant A/B’ye bağlandı; canlı Auth/RLS negatif testleri bekliyor.
-- [ ] Sonraki kapı: Auth/RLS kanıtı olmadan Faz 4 canlı Inngest kabulüne geçilmez.
-- [~] Faz 3: API execution contract and route boundary tests are in PR #89; local verification is 272 passed / 16 skipped, PR rerun and main re-verification pending.
-- [~] Faz 9: Observability transport timeout hardening is in PR #90; CI is still running, live provider evidence remains pending.
+| Paket | Kapsam | Durum ve sınır |
+|---|---|---|
+| P0 | Canlı başlangıç, repo/runtime envanteri, Auth/RLS, Inngest, provider, audit/cost/idempotency | `PARTIAL`; kod/CI temeli var, gerçek A/B Auth/RLS, workflow, provider ve uzlaştırma kanıtları bekliyor. Local gateway da gerçek staging kanıtı olmadan kabul edilmiş sayılmaz. |
+| P1 | Hedef/plan, tool kataloğu, onay/devralma ve API bakım kapsamı | Taslaklar mevcut; G0/G1 kararları ve kabul kanıtları bekliyor. |
+| P2 | API bakım pilotu | `BLOCKED` — pilot çalıştırılmadı. |
+| P3 | Windows runner pilotu | `BLOCKED` — cihaz pilotu çalıştırılmadı. |
+| P4 | Bağımsız verifier, UNKNOWN, bounded retry, recovery/rollback | `NOT_ACCEPTED`; P2/P3 pilotlarından önce kritik güvenlik ve doğru sonuç ön koşulu olarak doğrulanmalı, pilot sonrasına ertelenemez. |
+| P5 | Ortak çalışma, hafıza, provenance ve devralma | Tasarım/uygulama kabulü bekliyor. |
+| P6 | Eval, kalite metriği, yöntem sürümleri ve canary | Veri seti/baseline ve ölçüm kanıtı bekliyor. |
+| P7 | BI, KPI, finans, fiyat ve unit economics | `BLOCKED` — gerçek girdiler/baseline yok; değerler `VERİ YOK`/`KARAR BEKLİYOR`. |
+| P8 | Hukuk, site/satış, release, backup/restore, incident ve destek | `BLOCKED` — onay ve işletme kanıtı bekliyor. |
+| P9 | Enterprise SSO/SCIM, özel tenant, residency ve marketplace | Gelecek kapsam; mevcut müşteri talebi/ön koşul kanıtı yok. |
+
+## G0–G12 geçiş kapıları
+
+| Kapı | Kanonik anlam | Güncel durum |
+|---|---|---|
+| G0 | Proje açılışı | `BLOCKED` — sponsor, maliyet merkezi, operasyon risk sahibi ve başlangıç kararı kullanıcı onayı bekliyor |
+| G1 | İhtiyaç | `BLOCKED` — müşteri/iş ihtiyacı kanıtı yok |
+| G2 | Fizibilite | `PARTIAL` — şablonlar var, gerçek beş-model girdileri ve yetkili onay yok |
+| G3 | Kapsam | `BLOCKED` — pilot başarı/çıkış sözleşmesi yok |
+| G4 | Organizasyon | `BLOCKED` — tekil sorumlu, bütçe ve kapasite onayı yok |
+| G5 | Mimari | `PARTIAL` — tasarım/CI kanıtı var, canlı güvenlik/ortam kabulü eksik |
+| G6 | Prototip | `PARTIAL` — kod/test temeli var, kabul edilmiş uçtan uca prototip kanıtı eksik |
+| G7 | Uçtan uca geliştirme | `BLOCKED` — Auth/tenant ve durable workflow canlı kanıtı eksik |
+| G8 | Kalite ve güvenlik | `BLOCKED` — live security, verifier/recovery ve rollback kanıtı eksik |
+| G9 | Pilot | `BLOCKED` — iki pilot çalıştırılmadı; gerekli G0–G8 ve P4 kontrolleri açık |
+| G10 | Teknik yayın | `BLOCKED` — G0–G9 ve teknik yayın/rollback kararı yok |
+| G11 | Satış veya yetkili iç kullanım | `BLOCKED` — satış/tahsilat veya bilinçli iç kullanım kabulü yok |
+| G12 | Sürdürülebilir işletme | `BLOCKED` — operasyon sahibi, KPI, destek ve süreklilik kabulü yok |
+
+Bu durumlar kaynak/gap kayıtlarındaki kanıt sınırını özetler; ek veya belge
+tek başına kapı geçirmez. G10 teknik yayın, G11 ticari açılış/yetkili iç
+kullanım ve G12 sürdürülebilir işletme farklı kararlardır.
+
+## Teknik uygulama dilimleri (eski F0–F12)
+
+Bu dilimler repo içi teknik iş kalemlerini gruplar. Bunların `[x]` işaretleri
+yalnız kod/doküman teslimini ifade eder; G0–G12 kabulü veya P0–P9 paketinin
+tamamlandığı anlamına gelmez.
+
+### Güncel teknik yürütme durumu — 2026-10-01
+
+- Main taban commit’i: `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96 merge).
+- Kod/CI değişiklikleri için PR #88, #89, #90, #91, #93, #94 ve #96 kayıtlı; PR #92, #95 ve #97 açık, tüm gerekli kontrolleri yeşil fakat bağımsız review bekliyor. Bu merge’ler veya açık PR’lar P0–P9/G0–G12 kabulü değildir.
+- API test/kalite kanıtları merged PR-lerde mevcut; live Auth/RLS, Inngest ve provider testleri yürütülmedi.
+- P0 live acceptance için approved A/B test accounts, workflow ID ve private gateway/provider erişimi gerekiyor.
+- Eksik finans, KPI, sponsor ve operasyon kararları tahmin edilmez; `BLOCKED`, `NOT_RUN`, `VERİ YOK` veya `KARAR BEKLİYOR` kalır.
+- Production deployment `6793405140` başarılı ve SHA’sı `main` SHA `04256ac` ile eşleşiyor. `/api/health` ve `/api/health/ready` HTTP 200; health payload payment=`mock`, analytics=`console`, realtime disconnected. Bu yalnız health/readiness kanıtıdır.
+- Main branch protection PR, bir bağımsız approval, son push approval, strict quality/security/deployment checks, no force-push/delete ve conversation resolution gerektirir; policy GET evidence [repository control record](governance/st36/REPOSITORY_CONTROL_RECORD.md)'de tutulur.
+- Canlı ve ticari kabul sınırları [integration evidence](governance/st36/INTEGRATION_EVIDENCE.md), [final acceptance](governance/st36/FINAL_ACCEPTANCE.md) ve [pilot/KPI/finance/release register](governance/st36/PILOT_KPI_FINANCE_RELEASE.md)'de tarihli durumla izlenir.
 
 ## Faz 0 — Kanun, kapsam ve tek kayıt
 
@@ -227,7 +285,7 @@ Bu belge MouseAI'nin A'dan Z'ye tek yürütme planıdır. Dağınık görev yeri
 **Dosyalar:** `docs/governance/st36/`, `docs/security/`, `docs/deploy/`, final acceptance evidence.  
 **Kabul:** Dört ana kapı birlikte PASS olmadan production kabulü verilmez.
 
-## Fazların yürütme sırası
+## Eski teknik dilimlerin yürütme sırası (ürün/gate sırası değildir)
 
 ```text
 F0 Kanun/kayıt
@@ -245,16 +303,18 @@ F0 Kanun/kayıt
  → F12 Hukuk/Operasyon/Final kabul
 ```
 
-## Paralel yürütülebilen işler
+## Teknik işlerde paralellik (gate geçişi sayılmaz)
 
-F2’den sonra F8 UI, F9 dokümantasyon, F10 KPI şablonu ve F12 hukuk taslağı paralel hazırlanabilir. Ancak canlı kabul bağımlılıkları değişmez:
+Teknik dilimlerin bir kısmı paralel yürütülebilir. Bu, kanonik P0–P9
+bağımlılıklarını veya G0–G12 kabul sırasını değiştirmez:
 
 ```text
-F2 PASS → F4 canlı workflow
-F4 PASS → F6 canlı uzlaştırma
-F5 credential + F6 → gerçek maliyet kabulü
-F8 + F9 → pilot
-F0–F11 kanıtları → F12 final kabul
+G0–G8 ve P4 verifier/recovery kanıtı → izinli G9 pilot
+G9 PASS + G0–G9 kanıtları → G10 teknik yayın kararı
+G10 PASS + yetkili ticari/iç kullanım kararı → G11
+G11 PASS + sürdürülebilir operasyon kanıtı → G12
+P0 Auth/tenant PASS → bağımlı live Inngest acceptance
+P0 provider + audit/cost evidence → real cost reconciliation
 ```
 
 ## Her fazın kapanış şablonu
@@ -275,4 +335,7 @@ Kalan engel:
 Sıradaki faz:
 ```
 
-**Nihai kural:** Faz yeşil tik almadan sonraki bağımlı fazın kabulü verilmez. Credential, canlı veri veya insan kararı gerektiren maddeler durdurulmaz; `credential_not_configured`, `NOT_RUN` veya `DECISION_PENDING` olarak tek ana kayda yazılır.
+**Nihai kural:** Eski teknik faz tikleri gate geçirmez. Kanıt, credential,
+canlı veri veya insan kararı gereken işler `credential_not_configured`,
+`NOT_RUN`, `BLOCKED` veya `KARAR BEKLİYOR` olarak kaydedilir. G10 teknik yayın,
+G11 ticari/yetkili iç kullanım ve G12 sürdürülebilir işletme ayrı kabul edilir.
