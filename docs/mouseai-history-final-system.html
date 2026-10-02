@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MouseAI — Başlangıçtan Bugüne Nihai Sistem Akışı</title>
+<style>
+:root{--bg:#07101e;--panel:#101b30;--panel2:#152540;--text:#eef4ff;--muted:#a9b8d2;--line:#2b4166;--green:#36d399;--amber:#f4bd4f;--red:#fb7185;--blue:#65a9ff;--purple:#c084fc}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top right,#193459 0,#07101e 45%);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}main{max-width:1600px;margin:auto;padding:28px}h1{font-size:32px;margin:0 0 5px}h2{margin:34px 0 14px}h3{margin:0 0 7px;font-size:17px}p{color:var(--muted)}.meta{color:var(--muted)}.banner{margin:20px 0;padding:17px 20px;border:1px solid #8e243c;background:#351626;border-radius:15px}.banner b{color:#fecdd3}.legend{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.tag{padding:6px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}.done{background:#123327;border-color:#17734d;color:#b7f7dc}.partial{background:#392b10;border-color:#916219;color:#fde6a2}.blocked{background:#401729;border-color:#a92b4b;color:#fecdd3}.future{background:#18243a;border-color:#456288;color:#c5d9ff}.tool{background:#2b1741;border-color:#864bb9;color:#ecd7ff}.timeline{position:relative;margin:22px 0}.timeline:before{content:"";position:absolute;left:20px;top:0;bottom:0;width:3px;background:linear-gradient(var(--green),var(--blue),var(--red))}.event{position:relative;margin:0 0 16px;padding-left:57px}.dot{position:absolute;left:10px;top:16px;width:23px;height:23px;border-radius:50%;border:4px solid var(--bg);background:var(--green)}.event.partial .dot{background:var(--amber)}.event.blocked .dot{background:var(--red)}.event.future .dot{background:var(--blue)}.event article{background:rgba(16,27,48,.95);border:1px solid var(--line);border-radius:15px;padding:15px 17px}.event .date{color:var(--blue);font-weight:700;font-size:13px}.event ul{margin:7px 0 0;padding-left:20px;color:var(--muted)}.flow{display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:10px;align-items:stretch}.node{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-height:145px}.node:not(:last-child):after{content:"→";position:absolute;right:-13px;top:50%;color:var(--blue);font-size:24px;z-index:2}.node h3{font-size:15px}.node p{font-size:13px;margin:6px 0}.grid{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}.card h3{color:#d9e6ff}.card p{margin:0;font-size:14px}.arch{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:13px;align-items:center}.arch>div{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px}.arch .center{background:var(--panel2);border-color:#4d77b8}.arch .arrow{text-align:center;color:var(--blue);font-size:25px;background:transparent;border:0}.check{display:inline-block;font-size:13px;padding:3px 7px;border-radius:7px;margin:2px 0}.check.done{background:#123327}.check.blocked{background:#401729}.check.partial{background:#392b10}footer{margin-top:35px;color:var(--muted);font-size:13px}@media(max-width:1100px){.flow{grid-template-columns:repeat(3,minmax(160px,1fr))}.node:not(:last-child):after{display:none}.grid{grid-template-columns:repeat(2,minmax(190px,1fr))}}@media(max-width:650px){main{padding:16px}h1{font-size:25px}.flow,.grid,.arch{grid-template-columns:1fr}.arch .arrow{transform:rotate(90deg)}}
+</style>
+</head>
+<body><main>
+<h1>MouseAI — Başlangıçtan Bugüne Nihai Sistem</h1>
+<div class="meta">Tarihsel kayıt + mevcut mimari + kabul akışı · Güncel durum snapshot: 2 Ekim 2026</div>
+<div class="banner"><b>Gerçek nihai karar:</b> Teknik temel güçlü ve CI kanıtlıdır; ancak bağımsız maintainer review/merge, canlı Auth/RLS, Inngest, provider, entegrasyon, pilot, finans ve işletme kanıtları tamamlanmadığı için sistem henüz <b>PARTIAL — NOT PRODUCTION-READY</b> durumundadır.</div>
+<div class="legend"><span class="tag done">Tamamlandı / kanıtlı</span><span class="tag partial">Kısmi</span><span class="tag blocked">Eksik / engelli</span><span class="tag future">Sonraki adım</span><span class="tag tool">Araç katmanı</span></div>
+
+<h2>1. Başlangıçtan bugüne değişim akışı</h2>
+<section class="timeline">
+ <div class="event done"><span class="dot"></span><article><div class="date">Başlangıç — Proje açılışı</div><h3>MouseAI kapsamı ve kanonik repo tanımlandı</h3><ul><li>Tek repo, branch ve dosya sahipliği ilkeleri kuruldu.</li><li>GPT/Codex, Claude, kullanıcı ve servis sorumlulukları ayrıştırıldı.</li><li>G0–G12 kapı modeli ve MOUSE paketleri oluşturuldu.</li></ul></article></div>
+ <div class="event done"><span class="dot"></span><article><div class="date">Aşama 0 — Merkezi hazırlık</div><h3>Yönetişim ve kalite omurgası kuruldu</h3><ul><li>Nihai anayasa, görev defteri, değişiklik kontrolü ve araç rol matrisi hazırlandı.</li><li>PR/CI/secret kuralları ve doküman envanteri oluşturuldu.</li><li>PR #41 merge edildi; temel CI yeşil hale geldi.</li></ul></article></div>
+ <div class="event done"><span class="dot"></span><article><div class="date">Aşama 1 — Teknik paketler</div><h3>Uygulama altyapısı genişletildi</h3><ul><li>Next.js proxy ve readiness düzeni eklendi.</li><li>Supabase Auth/RLS, tenant, migration ve storage sınırları uygulandı.</li><li>Inngest worker/checkpoint, AI adapter’ları, Stripe sınırı, UI ve observability temelleri eklendi.</li></ul></article></div>
+ <div class="event done"><span class="dot"></span><article><div class="date">PR #76–#96 dönemi</div><h3>Kalite, güvenlik ve production health güçlendirildi</h3><ul><li>CodeQL, quality, secret scan, dependency audit ve Docker kontrolleri standardize edildi.</li><li>Production health/readiness doğrulandı; Vercel deployment main SHA ile eşleşti.</li><li>Auth yapılandırması yokken sahte/mok credential kullanımı engellendi.</li></ul></article></div>
+ <div class="event partial"><span class="dot"></span><article><div class="date">PR #92/#95/#97/#98 dönemi</div><h3>Repository governance ve Local AI fallback hazırlanıyor</h3><ul><li>CODEOWNERS, issue şablonları, Dependabot ve governance kayıtları hazırlandı.</li><li>PR #98’de login/reset ortak Supabase client’a taşındı; config yoksa güvenli engel eklendi.</li><li>Kontroller yeşil olsa da bağımsız Write reviewer olmadığı için merge tamamlanmadı.</li></ul></article></div>
+ <div class="event blocked"><span class="dot"></span><article><div class="date">Bugünkü durak</div><h3>Canlı kabul kapıları bekliyor</h3><ul><li>Auth/RLS/tenant negatif testleri çalıştırılmadı.</li><li>Inngest gerçek production run kanıtı yok.</li><li>Provider, entegrasyon, pilot, finans ve G10–G12 kanıtları eksik.</li></ul></article></div>
+ <div class="event future"><span class="dot"></span><article><div class="date">Sonraki rota</div><h3>Review → merge → canlı kabul → işletme</h3><ul><li>Bağımsız reviewer davetinin kabulü ve review.</li><li>Merge sonrası deployment/route smoke.</li><li>G7–G12 kanıtlarıyla nihai kabul.</li></ul></article></div>
+</section>
+
+<h2>2. Nihai sistemin iş akışı</h2>
+<section class="flow">
+ <div class="node done"><h3>1. Kullanıcı</h3><p>Login olur, tenant bağlamı alınır, hedef/görev girilir.</p></div>
+ <div class="node done"><h3>2. Next.js/API</h3><p>Auth, tenant, input validation ve permission kontrolü.</p></div>
+ <div class="node partial"><h3>3. Supabase</h3><p>Profile, tenant, RLS, audit ve storage sınırı.</p></div>
+ <div class="node blocked"><h3>4. Inngest</h3><p>Durable trigger, worker, checkpoint ve retry.</p></div>
+ <div class="node blocked"><h3>5. AI Router</h3><p>Local AI denenir; hata/timeout varsa OpenAI/Anthropic fallback.</p></div>
+ <div class="node blocked"><h3>6. Verifier</h3><p>Sonuç doğrulanır, audit yazılır, kullanıcıya çıktı verilir.</p></div>
+</section>
+<section class="flow" style="margin-top:12px">
+ <div class="node partial"><h3>7. Gözlemleme</h3><p>Sentry/Langfuse trace, PostHog event, maliyet/latency.</p></div>
+ <div class="node partial"><h3>8. UI</h3><p>Beyaz dashboard, ekip kartları, görev kutusu ve görev devri.</p></div>
+ <div class="node blocked"><h3>9. Ödeme</h3><p>Stripe yalnız sandbox; webhook ve idempotency.</p></div>
+ <div class="node blocked"><h3>10. Pilot</h3><p>İki gerçek kullanım, baseline ve müşteri faydası.</p></div>
+ <div class="node blocked"><h3>11. KPI/Finans</h3><p>13 hafta nakit, unit economics, KPI ve alarm eşikleri.</p></div>
+ <div class="node blocked"><h3>12. Kabul</h3><p>G10 teknik, G11 ticari, G12 işletme kabulü.</p></div>
+</section>
+
+<h2>3. Araçlar ve görevleri</h2>
+<section class="grid">
+ <div class="card"><h3>GitHub</h3><p>Branch, PR, review, ruleset, CI, CodeQL, issue, commit ve kanıt bağlantıları.</p></div>
+ <div class="card"><h3>Vercel</h3><p>Preview/production deploy, environment, SHA eşleşmesi, route smoke ve rollback.</p></div>
+ <div class="card"><h3>Supabase</h3><p>Auth, profil–tenant eşleşmesi, database, RLS, storage ve Realtime.</p></div>
+ <div class="card"><h3>Inngest</h3><p>Durable workflow, worker, checkpoint, retry, idempotency ve failure state.</p></div>
+ <div class="card"><h3>OpenAI / Anthropic</h3><p>Gerçek provider çağrısı, model/latency/token ve maliyet kanıtı.</p></div>
+ <div class="card"><h3>Local AI</h3><p>Ollama veya private gateway; erişim yoksa otomatik cloud fallback.</p></div>
+ <div class="card"><h3>Stripe</h3><p>Sandbox payment intent, webhook, signature ve idempotency testi.</p></div>
+ <div class="card"><h3>PostHog / Sentry / Langfuse</h3><p>Ürün event’i, hata, trace, alarm ve redakte gözlem kayıtları.</p></div>
+ <div class="card"><h3>Visily / Figma</h3><p>Ana beyaz dashboard, görev devri ve ekip deneyimi görsel referansı.</p></div>
+ <div class="card"><h3>Sheets / dokümanlar</h3><p>13 haftalık finans, KPI kartları, pilot baseline ve kabul raporu.</p></div>
+</section>
+
+<h2>4. Şu anki eksikler ve kapanış ölçütleri</h2>
+<section class="arch">
+ <div><h3>Teknik engeller</h3><span class="check blocked">Bağımsız Write reviewer</span><br><span class="check blocked">PR merge</span><br><span class="check blocked">Production route smoke</span><br><span class="check blocked">Auth/RLS canlı kanıtı</span><br><span class="check blocked">Inngest gerçek run</span></div>
+ <div class="center"><h3>Nihai kabul kapısı</h3><p>Doküman hazır olması yeterli değildir. Main commit, canlı çalışma, redakte kanıt, rollback ve işletme sonucu birlikte aranır.</p><span class="check partial">PARTIAL — NOT PRODUCTION-READY</span></div>
+ <div><h3>İşletme engelleri</h3><span class="check blocked">OpenAI/Anthropic gerçek çağrı</span><br><span class="check blocked">Stripe/PostHog/trace kanıtı</span><br><span class="check blocked">İki gerçek pilot</span><br><span class="check blocked">13 haftalık finans</span><br><span class="check blocked">G10–G12 onayı</span></div>
+</section>
+<h2>5. Kesin ilerleme sırası</h2>
+<p><b>Reviewer kabulü → PR review → PR merge → Main CI → Vercel production → route smoke → Supabase Auth/RLS → Inngest → AI provider/fallback → entegrasyonlar → UI tamamlaması → pilot → KPI/finans → G10 → G11 → G12 → nihai ACCEPT.</b></p>
+<footer>Bu sayfa canlı credential, token, müşteri verisi veya ödeme bilgisi içermez. Kırmızı maddeler gerçek kanıt gelmeden yeşile çevrilemez.</footer>
+</main></body></html>
