@@ -49,19 +49,19 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
-      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold text-blue-600">MouseAI</p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-950">Yeni şifre belirleyin</h1>
+    <main className="auth-page">
+      <section className="auth-card">
+        <div className="auth-brand"><span className="auth-brand-mark">M</span><span>MouseAI</span></div>
+        <div className="auth-heading"><h1>Yeni şifre belirleyin</h1><p>Hesabınızı güvenli bir şekilde güncelleyin.</p></div>
         {!ready ? (
-          <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">Bağlantı geçersiz veya süresi dolmuş. Giriş ekranından yeni bağlantı isteyin.</p>
+          <p className="auth-alert error">Bağlantı geçersiz veya süresi dolmuş. Giriş ekranından yeni bağlantı isteyin.</p>
         ) : (
-          <form className="mt-6 space-y-5" onSubmit={submit}>
-            <label className="block text-sm font-medium text-slate-700">Yeni şifre<input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" /></label>
-            <label className="block text-sm font-medium text-slate-700">Yeni şifre tekrar<input required type="password" minLength={8} autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" /></label>
-            {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
-            {notice && <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
-            <button disabled={submitting} type="submit" className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">{submitting ? 'Güncelleniyor…' : 'Şifreyi güncelle'}</button>
+          <form className="auth-form" onSubmit={submit}>
+            <label>Yeni şifre<input required type="password" minLength={8} autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} className="auth-input" /></label>
+            <label>Yeni şifre tekrar<input required type="password" minLength={8} autoComplete="new-password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className="auth-input" /></label>
+            {error && <p role="alert" className="auth-alert error">{error}</p>}
+            {notice && <p role="status" className="auth-alert success">{notice}</p>}
+            <button disabled={submitting} type="submit" className="primary-button auth-submit">{submitting ? 'Güncelleniyor…' : 'Şifreyi güncelle'}</button>
           </form>
         )}
       </section>
