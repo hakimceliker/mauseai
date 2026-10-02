@@ -16,8 +16,10 @@ LOCAL_AI_INFERENCE_TIMEOUT_MS=45000
 `LOCAL_AI_BASE_URL` satırındaki ifade yalnızca bir yer tutucudur; gerçek adres repoya
 yazılmaz. Staging/production için yalnız onaylı private tunnel, VPN veya gateway
 kullanılır. Ollama'nın `11434` portu internete açılmaz; production adapter doğrudan
-`11434` ve loopback adreslerini reddeder. Gateway protokolünde `LOCAL_AI_MODEL`
-istek gövdesine eklenir ve varsa gateway'in yanıtladığı modelle doğrulanır.
+`11434` ve normalize edilmiş IPv4/IPv6 loopback adreslerini reddeder. Gateway
+protokolünde `LOCAL_AI_MODEL` istek gövdesine eklenir ve yanıtın `model` alanı
+zorunludur; bu değer istenen model adıyla birebir eşleşmelidir. Ollama protokolünde
+yanıttaki model alanı isteğe bağlıdır; sunulursa aynı şekilde doğrulanır.
 
 `AI_PROVIDER` ve mevcut OpenAI/Anthropic credentials cloud fallback olarak kalır.
 Bunlar değiştirilmez ve hiçbir zaman rapora/loga alınmaz.

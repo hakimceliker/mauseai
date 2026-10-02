@@ -1,4 +1,26 @@
+import { isIP } from 'node:net';
 import { AIMessage, AIProvider, AIResponse, AIProviderError } from './base-provider';
+
+function isLoopbackHost(hostname: string): boolean {
+  const host = hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (host === 'localhost' || host.endsWith('.localhost')) return true;
+  if (isIP(host) === 4) return host.startsWith('127.');
+  if (isIP(host) !== 6) return false;
+
+  const [left, right = ''] = host.split('::');
+  const leftGroups = left ? left.split(':') : [];
+  const rightGroups = right ? right.split(':') : [];
+  const groups = [
+    ...leftGroups,
+    ...Array<string>(8 - leftGroups.length - rightGroups.length).fill('0'),
+    ...rightGroups,
+  ].map((group) => Number.parseInt(group, 16));
+
+  if (groups.slice(0, 7).every((group) => group === 0) && groups[7] === 1) return true;
+  const ipv4CompatibleOrMapped = groups.slice(0, 5).every((group) => group === 0)
+    && (groups[5] === 0 || groups[5] === 0xffff);
+  return ipv4CompatibleOrMapped && (groups[6] >> 8) === 127;
+}
 
 /** Ollama or senatech-ai-gateway OpenAI-compatible local adapter. */
 export class LocalOllamaProvider implements AIProvider {
@@ -23,7 +45,7 @@ export class LocalOllamaProvider implements AIProvider {
     if (
       process.env.NODE_ENV === 'production' &&
       (endpoint.port === '11434' ||
-        ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname))
+        isLoopbackHost(endpoint.hostname))
     ) {
       throw new AIProviderError(this.name, 'unsafe_endpoint');
     }
@@ -52,7 +74,10 @@ export class LocalOllamaProvider implements AIProvider {
       throw new AIProviderError(this.name, 'connect_timeout_or_network_error');
     }
     try {
-      if (!response.ok) throw new AIProviderError(this.name, `HTTP ${response.status}`);
+      if (!response.ok) {
+        controller.abort();
+        throw new AIProviderError(this.name, `HTTP ${response.status}`);
+      }
       let rawPayload: unknown;
       try {
         rawPayload = await response.json();

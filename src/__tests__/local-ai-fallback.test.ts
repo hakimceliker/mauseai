@@ -212,6 +212,52 @@ describe('local-first AI routing', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    'http://127.0.0.2:8080',
+    'http://127.255.255.255:8080',
+    'http://[::1]:8080',
+    'http://[::ffff:127.0.0.1]:8080',
+    'http://[::ffff:127.0.0.2]:8080',
+    'http://[::7f00:1]:8080',
+  ])('rejects production loopback endpoint %s on a permitted port', async (baseUrl) => {
+    vi.stubEnv('NODE_ENV', 'production');
+    process.env.LOCAL_AI_PROTOCOL = 'ollama';
+    process.env.LOCAL_AI_BASE_URL = baseUrl;
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(new LocalOllamaProvider().call(messages)).rejects.toThrow('unsafe_endpoint');
+
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('aborts a failed local HTTP response before falling back to cloud', async () => {
+    process.env.AI_PROVIDER = 'openai';
+    process.env.OPENAI_API_KEY = 'test-only-placeholder';
+    process.env.LOCAL_AI_ENABLED = 'true';
+    process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
+    let localRequestSignal: AbortSignal | undefined;
+    const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+      if (url === 'https://local-gateway.test/v1/chat/completions') {
+        localRequestSignal = init?.signal ?? undefined;
+        return Promise.resolve(new Response(
+          new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array([1])); } }),
+          { status: 502 },
+        ));
+      }
+      return Promise.resolve(new Response(JSON.stringify({
+        choices: [{ message: { content: 'cloud response' } }],
+      }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await new AIRouter().call(messages);
+
+    expect(response.provider).toBe('openai');
+    expect(localRequestSignal?.aborted).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('rejects direct Ollama and loopback endpoints in production', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     process.env.LOCAL_AI_BASE_URL = 'http://localhost:11434';
