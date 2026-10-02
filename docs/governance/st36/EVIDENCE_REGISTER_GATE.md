@@ -17,6 +17,44 @@ This register defines the single evidence contract linking repository, branch, P
 | State | Use only `PLANNED`, `IN_PROGRESS`, `VERIFIED`, `PARTIAL`, `BLOCKED`, `NOT_RUN`, `ACCEPTED` |
 | Next action | One owner and one concrete next step are required |
 
+## Canonical mapping fields
+
+Every evidence row must also carry these identifiers:
+
+| Field | Required value |
+|---|---|
+| Canonical gate | One of `G0` through `G12`; do not invent parallel gate names |
+| Canonical task | One MOUSE/PLAN identifier or an explicitly approved `OPERATIONS` record |
+| Source repository | `hakimceliker/mauseai` for this project |
+| Source branch | Exact Git ref that produced the evidence |
+| Source commit | Full SHA, not only a short label |
+| PR | Full GitHub PR URL or `N/A` for a non-code operational record |
+| Environment | `local`, `preview`, `production`, or `pilot` |
+| Deployment | Provider name, deployment URL or ID, and deployed commit SHA |
+| Recorded at | ISO-8601 timestamp and evidence owner |
+
+## Status normalization
+
+| Source status | Canonical status |
+|---|---|
+| planned, todo | `PLANNED` |
+| doing, in progress | `IN_PROGRESS` |
+| green CI, implemented | `VERIFIED` only for the stated technical scope |
+| partially complete | `PARTIAL` |
+| credential missing, human decision missing, quota blocked | `BLOCKED` |
+| not executed or no runtime result | `NOT_RUN` |
+| all required evidence and approval present | `ACCEPTED` |
+
+`VERIFIED` never implies live production or business acceptance unless the environment and evidence explicitly say so.
+
+## G0–G12 taxonomy
+
+The canonical gate names for this repository are:
+
+`G0` project opening · `G1` problem validation · `G2` founding model · `G3` scope/pilot · `G4` budget/capacity · `G5` architecture · `G6` contracts/security · `G7` Auth/tenant/RLS · `G8` durable workflow · `G9` providers/observability · `G10` pilot/KPI/finance · `G11` release/legal/support · `G12` operating acceptance.
+
+Older records using a different phase count must be marked `SUPERSEDED` or mapped to these names; they must not silently close a current gate.
+
 ## Reconciliation rules
 
 1. A branch commit is not a main-branch acceptance.
