@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'git (commit|push)'; then npm run typecheck && npx vitest run || exit 1; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "case \"$CLAUDE_FILE_PATH\" in supabase/migrations/*.sql) echo '[hook] Supabase migration değişti — RLS politikalarını ve tests/security/rls-negative.test.ts dosyasını kontrol et (supabase-migration-rls skill).';; docker-compose*.yml|Dockerfile) echo '[hook] UYARI: Bu repoda docker-compose.yml bulunmuyor, sadece tek-servisli Dockerfile var. \"Kısmen çalışma\" sorunları genelde eksik env (.env.local: SUPABASE_*, INNGEST_EVENT_KEY) kaynaklı.';; esac"
+          }
+        ]
+      }
+    ]
+  }
+}
