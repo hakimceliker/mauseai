@@ -2,11 +2,9 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient, SUPABASE_CONFIG_ERROR } from '@/src/lib/auth/supabase-browser-client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabase = getSupabaseBrowserClient();
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -35,7 +33,7 @@ export default function ResetPasswordPage() {
     setNotice(null);
     if (password.length < 8) return setError('Şifre en az 8 karakter olmalı.');
     if (password !== confirmation) return setError('Şifreler eşleşmiyor.');
-    if (!supabase) return setError('credential_not_configured: Supabase Auth yapılandırması eksik.');
+    if (!supabase) return setError(SUPABASE_CONFIG_ERROR);
     setSubmitting(true);
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {

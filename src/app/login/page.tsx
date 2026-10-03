@@ -2,11 +2,9 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient, SUPABASE_CONFIG_ERROR } from '@/src/lib/auth/supabase-browser-client';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
+const supabase = getSupabaseBrowserClient();
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,7 +22,7 @@ export default function LoginPage() {
     setNotice(null);
 
     if (!supabase) {
-      setError('credential_not_configured: Supabase Auth yapılandırması eksik.');
+      setError(SUPABASE_CONFIG_ERROR);
       setSubmitting(false);
       return;
     }
