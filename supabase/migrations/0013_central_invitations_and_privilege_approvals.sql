@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.invitations (
   token_hash TEXT NOT NULL UNIQUE,
   status VARCHAR(20) NOT NULL DEFAULT 'sent',
   invited_by UUID NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
+  accepted_auth_user_id UUID,
   accepted_user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   expires_at TIMESTAMP NOT NULL DEFAULT (NOW() + INTERVAL '72 hours'),
   accepted_at TIMESTAMP,
@@ -37,6 +38,9 @@ CREATE INDEX IF NOT EXISTS idx_invitations_tenant_status
   ON public.invitations(tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_invitations_email
   ON public.invitations(tenant_id, email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_accepted_auth_user
+  ON public.invitations(accepted_auth_user_id)
+  WHERE accepted_auth_user_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS public.privilege_approvals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

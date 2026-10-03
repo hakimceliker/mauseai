@@ -43,20 +43,27 @@ export async function createMemberInvitation(tenantId: string, actorId: string, 
 
 export async function acceptInvitation(token: string, acceptingAuthUserId: string, email: string) {
   const db = getSupabaseAdmin();
-  const { data: invitation, error } = await db.from('invitations').select('*')
-    .eq('token_hash', hashInvitationToken(token)).single();
-  if (error || !invitation) throw new NotFoundError();
-  const row = invitation as InvitationRow;
-  if (!canAcceptInvitation(row.status, new Date(row.expires_at))) throw new ConflictError();
-  if (normalizeInvitationEmail(email) !== row.email) throw new ForbiddenError();
-  const { data: existing } = await db.from('users').select('id').eq('tenant_id', row.tenant_id).eq('auth_user_id', acceptingAuthUserId).maybeSingle();
+  const tokenHash = hashInvitationToken(token);
+  const { data: candidate, error: candidateError } = await db.from('invitations').select('*')
+    .eq('token_hash', tokenHash).single();
+  if (candidateError || !candidate) throw new NotFoundError();
+  const candidateRow = candidate as InvitationRow;
+  if (!canAcceptInvitation(candidateRow.status, new Date(candidateRow.expires_at))) throw new ConflictError();
+  if (normalizeInvitationEmail(email) !== candidateRow.email) throw new ForbiddenError();
+  const { data: existing } = await db.from('users').select('id').eq('tenant_id', candidateRow.tenant_id).eq('auth_user_id', acceptingAuthUserId).maybeSingle();
   if (existing) throw new ConflictError();
+  const acceptedAt = new Date().toISOString();
+  const { data: claimed, error: claimError } = await db.from('invitations').update({
+    status: 'accepted', accepted_auth_user_id: acceptingAuthUserId, accepted_at: acceptedAt, updated_at: acceptedAt,
+  }).eq('id', candidateRow.id).eq('status', 'sent').gt('expires_at', acceptedAt)
+    .select('*').single();
+  if (claimError || !claimed) throw new ConflictError();
+  const row = claimed as InvitationRow;
   const { data: member, error: memberError } = await db.from('users').insert({
     tenant_id: row.tenant_id, email: row.email, auth_user_id: acceptingAuthUserId, role: 'member',
   }).select('id,tenant_id,email,role').single();
   if (memberError || !member) throw new ConflictError();
-  const acceptedAt = new Date().toISOString();
-  await db.from('invitations').update({ status: 'accepted', accepted_user_id: member.id, accepted_at: acceptedAt, updated_at: acceptedAt }).eq('id', row.id).eq('status', 'sent');
+  await db.from('invitations').update({ accepted_user_id: member.id, updated_at: acceptedAt }).eq('id', row.id).eq('status', 'accepted').eq('accepted_auth_user_id', acceptingAuthUserId);
   await db.from('audit_logs').insert({
     tenant_id: row.tenant_id, action: 'invitation.accepted', entity_type: 'invitation', entity_id: row.id,
     actor: acceptingAuthUserId, details: { role: 'member' },
