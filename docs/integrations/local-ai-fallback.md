@@ -7,6 +7,7 @@ MouseAI local AI çağrılarında yapılandırılmış private gateway’i önce
 ```env
 LOCAL_AI_ENABLED=true
 LOCAL_AI_BASE_URL=https://private-tunnel-or-gateway-url
+LOCAL_AI_PROTOCOL=gateway
 LOCAL_AI_MODEL=qwen3:8b
 LOCAL_AI_CONNECT_TIMEOUT_MS=3000
 LOCAL_AI_INFERENCE_TIMEOUT_MS=45000

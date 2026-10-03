@@ -36,7 +36,11 @@ export class LocalOllamaProvider implements AIProvider {
       const payload = await response.json() as { response?: string; choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number; input_tokens?: number; output_tokens?: number } };
       const inputTokens = payload.usage?.input_tokens ?? payload.usage?.prompt_tokens ?? 0;
       const outputTokens = payload.usage?.output_tokens ?? payload.usage?.completion_tokens ?? 0;
-      return { role: 'assistant', content: payload.response ?? payload.choices?.[0]?.message?.content ?? '', provider: this.name, tokens_used: inputTokens + outputTokens, cost: 0 };
+      const content = payload.response ?? payload.choices?.[0]?.message?.content;
+      if (typeof content !== 'string' || content.trim().length === 0) {
+        throw new AIProviderError(this.name, 'invalid_response: empty or malformed local reply');
+      }
+      return { role: 'assistant', content, provider: this.name, tokens_used: inputTokens + outputTokens, cost: 0 };
     } finally {
       clearTimeout(timer);
     }

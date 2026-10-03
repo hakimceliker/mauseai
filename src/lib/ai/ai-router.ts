@@ -110,6 +110,7 @@ export class AIRouter {
 
   private classifyFailure(error: unknown): string {
     if (error instanceof CredentialNotConfiguredError) return 'credential_not_configured';
+    if (error instanceof Error && /invalid_response/i.test(error.message)) return 'invalid_response';
     if (error instanceof Error && /timeout|network|connect/i.test(error.message)) return 'network_or_timeout';
     return 'provider_error';
   }
