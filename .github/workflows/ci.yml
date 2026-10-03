@@ -68,3 +68,39 @@ jobs:
         uses: actions/checkout@v4
       - name: Build container
         run: docker build --tag mouseai-ci:${{ github.sha }} .
+
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build application
+        run: npm run build
+      - name: Start application
+        run: npm start &
+        env:
+          NODE_ENV: production
+      - name: Wait for server
+        run: sleep 5
+      - name: Test health endpoint
+        run: |
+          response=$(curl -s http://localhost:3000/api/health)
+          echo "Health check response:"
+          echo "$response"
+
+          # Verify response contains status field
+          if echo "$response" | grep -q '"status"'; then
+            echo "✓ Health endpoint is responding"
+            exit 0
+          else
+            echo "✗ Health endpoint did not respond with expected format"
+            exit 1
+          fi
