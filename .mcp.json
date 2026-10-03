@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase"],
+      "comment": "Migration, RLS advisor ve log okuma için. Proje kimlik bilgileri (SUPABASE_ACCESS_TOKEN vb.) kendi ortamınızda ayarlanmalı."
+    }
+  }
+}
