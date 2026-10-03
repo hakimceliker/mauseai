@@ -42,6 +42,7 @@
 22. `security-acceptance-report.md` — Gün 12 güvenlik kabul raporu
 23. `security/rls-performance-and-edge-functions.md` — RLS performans ve Edge standardı
 24. `security/secret-management-and-inngest-scheduling.md` — secret/Vault ve zamanlama standardı
+25. `central-invitation-and-approval-contract.md` — normal kullanıcı daveti ile yüksek riskli yetki onayının ayrımı
 
 ## E. Orkestrasyon ve dayanıklı iş akışı
 
