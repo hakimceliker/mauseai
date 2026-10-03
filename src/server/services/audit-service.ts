@@ -10,7 +10,7 @@ export async function writeAudit(params: {
   resourceType: string;
   resourceId?: string;
   payload?: Record<string, unknown>;
-  costCents?: number;
+  costCents?: number | null;
   riskLevel?: string;
 }) {
   const supabase = getSupabaseAdminClient();

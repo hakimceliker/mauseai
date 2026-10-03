@@ -55,6 +55,7 @@ Faz yürütme sırası ve tikli görev listesi: [`mouseai-master-phase-plan-v1.0
 | PLAN-005 | Inngest trigger, worker, checkpoint, retry, duplicate | Codex + Inngest | Canlı run bekliyor |
 | PLAN-006 | OpenAI/Anthropic gerçek çağrısı | Codex + kullanıcı | Credential bekliyor |
 | PLAN-007 | Audit ve maliyet uzlaştırması | Codex + finans | P005/P006 bağımlı |
+| Local AI | Private gateway, local-first routing and cloud fallback | Codex + authorized environment owner | Adapter exists; approved gateway/runtime config and real staged test are `BLOCKED`/`NOT_RUN` |
 
 ### P1–P9 — Diğer tüm kapsam
 
@@ -63,7 +64,7 @@ Faz yürütme sırası ve tikli görev listesi: [`mouseai-master-phase-plan-v1.0
 | P1 | API sözleşmeleri, tool kataloğu, approval/handoff, log redaction | P0 | Kod temeli var, kabul kanıtı bekliyor |
 | P2 | API bakım pilotu | P0/P1 | Pilot run bekliyor |
 | P3 | Windows bilgisayar runner’ı | P0/P1 | Cihaz pilotu bekliyor |
-| P4 | Verifier, UNKNOWN, bounded retry, rollback | P005 | Tasarım mevcut, failure run bekliyor |
+| P4 | Independent verifier, UNKNOWN, bounded retry, recovery/rollback | P0/P1 | `NOT_ACCEPTED`; verifier/authorization/duplicate-effect controls are critical prerequisites to P2/P3 pilots and may not be deferred |
 | P5 | Ortak çalışma, hafıza, provenance, devralma | P0/P1 | Uygulamalı test bekliyor |
 | P6 | Eval, kalite metriği, model yöntemi, canary | P006 | Veri seti ve baseline bekliyor |
 | P7 | BI, KPI, finans, fiyat ve unit economics | P002 | Gerçek ölçüm bekliyor |
@@ -112,32 +113,40 @@ Issue
 
 Test veya kanıt yoksa görev tamamlanmış sayılmaz.
 
-## 6. Tek final kabul kapısı
+## 6. Kanonik G0–G12 kabul kapıları
 
-```text
-G0–G6: ürün, kapsam, mimari ve güvenlik
-G7: Auth + tenant + Storage sınırı
-G8: Inngest + checkpoint + audit + idempotency
-G9: provider + maliyet + gözlemlenebilirlik
-G10: pilot + KPI + finans
-G11: hukuk + release + rollback
-G12: operasyon + müşteri kabulü
-```
+| Gate | Canonical meaning |
+|---|---|
+| G0 | Project opening |
+| G1 | Need |
+| G2 | Feasibility |
+| G3 | Scope |
+| G4 | Organization |
+| G5 | Architecture |
+| G6 | Prototype |
+| G7 | End-to-end development |
+| G8 | Quality and security |
+| G9 | Pilot |
+| G10 | Technical publication |
+| G11 | Sale or authorized internal use |
+| G12 | Sustainable operation |
+
+Technical packages P0–P9 (including Auth/RLS, Inngest, provider, verifier and
+finance work) supply evidence to these gates; they are not alternate gate
+definitions. G10, G11 and G12 are separate decisions. A pilot is G9, not G10.
 
 Final kabul yalnızca bütün ilgili kapılar için kanıt bulunduğunda verilir. Eksik credential veya çalıştırılmamış test `NOT_RUN`, `BLOCKED` veya `credential_not_configured` olarak kalır.
 
 ## 7. Şu an yapılacak tek sıra
 
-1. PR #83 CI ve insan review kapanışı.
-2. PLAN-004 Auth/tenant canlı testi.
-3. PLAN-004B Storage karar/test kapısı.
-4. PLAN-005 Inngest canlı workflow.
-5. PLAN-006 gerçek provider testi.
-6. PLAN-007 audit/cost uzlaştırması.
-7. P1–P4 uygulamalı pilotlar.
-8. P5–P8 ürün, finans, hukuk ve işletme kabulü.
-9. G0–G12 final kanıt tablosu.
-10. Production acceptance veya açıkça REJECT kararı.
+1. Resolve G0 owner/sponsor/cost-center/operations-risk decisions without inventing them.
+2. Configure approved non-secret test accounts and workflow ID only through the authorized secret source.
+3. Run Auth/RLS and tenant-isolation acceptance before dependent live workflow acceptance.
+4. Run the P0 Local AI canary only after an approved private gateway is available in isolated staging; preserve cloud fallback and perform Local → cloud → Local recovery without interrupting shared traffic.
+5. Complete Inngest, provider, audit/cost, verifier/recovery and duplicate-effect evidence.
+6. Require P4 controls before any P2/P3 pilot; collect pilot, finance/KPI, legal and operating evidence.
+7. Decide G9 pilot, G10 technical publication, G11 sale/authorized internal use, and G12 sustainable operation separately.
+8. Record final ACCEPT or REJECT with evidence; documentation completeness is not acceptance.
 
 ## 8. Raporlama standardı
 

@@ -24,6 +24,7 @@
 - Service role yalnızca server-side worker’da kullanılabilir.
 - Ödeme, para transferi, production deploy, veri silme ve bağlayıcı müşteri mesajı ayrı işlem onayı ister.
 - Yetkisiz veya belirsiz işlem `BLOCKED` durumuna alınır.
+- Normal, süreli ve yalnızca `member` rolü veren kullanıcı daveti genel çift-onay engeline takılmaz. Yüksek riskli rol/yetki etkinleştirmesi ise davet edenden farklı ikinci yetkilinin onayını gerektirir. Bu ayrım `docs/central-invitation-and-approval-contract.md` ile bağlayıcı politika olarak kaydedilmiştir.
 
 ## Onay sonucu
 

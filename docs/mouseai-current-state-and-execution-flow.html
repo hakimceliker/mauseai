@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MouseAI — Güncel Durum ve Yürütme Diyagramı</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --panel:#121a2e; --line:#2a385b; --text:#edf2ff; --muted:#a9b5d1; --green:#34d399; --amber:#fbbf24; --red:#fb7185; --blue:#60a5fa; }
+    * { box-sizing:border-box } body { margin:0; background:linear-gradient(135deg,#08101f,#111a31 55%,#0b1020); color:var(--text); font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
+    main { max-width:1500px; margin:0 auto; padding:28px; } h1 { margin:0 0 8px; font-size:30px } h2 { margin-top:30px } p { color:var(--muted) }
+    .banner { padding:16px 18px; border:1px solid #7f1d1d; background:#351522; border-radius:14px; margin:20px 0; } .banner strong { color:#fecdd3 }
+    .legend { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 24px; } .pill { padding:7px 11px; border-radius:999px; border:1px solid var(--line); color:var(--muted); } .done { border-color:#166534;color:#bbf7d0;background:#123125 }.partial { border-color:#92400e;color:#fde68a;background:#38280e }.blocked { border-color:#9f1239;color:#fecdd3;background:#3b1627 }.tool { border-color:#6b21a8;color:#e9d5ff;background:#281339 }
+    .flow { display:grid; grid-template-columns:repeat(4,minmax(210px,1fr)); gap:14px; align-items:stretch; } .phase { background:rgba(18,26,46,.9); border:1px solid var(--line); border-radius:16px; padding:16px; min-height:220px; box-shadow:0 12px 25px #0003; } .phase h3 { margin:0 0 10px; font-size:17px } .phase ul { padding-left:20px; margin:0; color:var(--muted) } .phase li { margin:7px 0 } .arrow { display:flex; align-items:center; justify-content:center; color:var(--blue); font-size:26px; }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(180px,1fr)); gap:12px; } .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; } .card h4 { margin:0 0 6px } code { color:#bfdbfe; } footer { margin-top:32px; color:var(--muted); font-size:13px; }
+    @media (max-width:1000px){ .flow{grid-template-columns:repeat(2,minmax(210px,1fr))}.grid{grid-template-columns:repeat(2,minmax(180px,1fr))}.arrow{display:none} } @media (max-width:600px){ main{padding:16px}.flow,.grid{grid-template-columns:1fr} h1{font-size:24px} }
+  </style>
+</head>
+<body><main>
+  <h1>MouseAI — Güncel Sistem, Eksikler ve Yürütme Akışı</h1>
+  <p>Snapshot: 2 Ekim 2026 · Kaynak: GitHub/production kayıtları ve <code>docs/governance/st36/st36-gap-closure-register.md</code></p>
+  <div class="banner"><strong>Mevcut karar: PARTIAL — NOT PRODUCTION-READY.</strong><br>CI ve teknik kod kapıları yeşil; bağımsız maintainer review/merge, canlı Auth/RLS, Inngest, provider, entegrasyon, pilot, finans ve G10–G12 kanıtları tamamlanmadan kabul verilemez.</div>
+  <div class="legend"><span class="pill done">Yeşil: tamamlandı/kanıtlı</span><span class="pill partial">Sarı: kısmi</span><span class="pill blocked">Kırmızı: eksik veya harici engel</span><span class="pill tool">Mor: araç/sorumluluk</span></div>
+  <section class="flow">
+    <article class="phase partial"><h3>Faz 0 — Yönetişim</h3><ul><li>Repo ve sahiplik kayıtları</li><li>Ruleset/PR/CI/secret policy</li><li>Durum ve kanıt indexi</li><li><span class="blocked">Eksik: bağımsız Write reviewer</span></li></ul></article>
+    <article class="phase done"><h3>Faz 1 — Kod/Kalite</h3><ul><li>Lint, typecheck, test, build</li><li>CodeQL, secret scan</li><li>Dependency audit, Docker</li><li>PR #98 kontrolleri yeşil</li></ul></article>
+    <article class="phase partial"><h3>Faz 2 — Yayın</h3><ul><li>Merge sonrası Vercel deploy</li><li>Login/reset/operations route smoke</li><li>Health/readiness + SHA eşleşmesi</li><li><span class="blocked">PR merge bekliyor</span></li></ul></article>
+    <article class="phase blocked"><h3>Faz 3 — Auth/RLS</h3><ul><li>İki gerçek test kullanıcısı</li><li>İki tenant izolasyonu</li><li>Cross-tenant negatif test</li><li>Logout/token expiry/storage</li></ul></article>
+    <article class="phase blocked"><h3>Faz 4 — Inngest</h3><ul><li>Production sync/trigger</li><li>Worker/checkpoint/audit</li><li>Retry/idempotency</li><li>Failure/rollback</li></ul></article>
+    <article class="phase blocked"><h3>Faz 5 — AI runtime</h3><ul><li>OpenAI ve Anthropic canlı çağrı</li><li>Local AI erişilebilirlik testi</li><li>Offline/timeout fallback</li><li>Redacted cost/token ledger</li></ul></article>
+    <article class="phase blocked"><h3>Faz 6 — Entegrasyon</h3><ul><li>Stripe sandbox webhook</li><li>PostHog event delivery</li><li>Sentry/Langfuse trace</li><li>Realtime bağlantısı</li></ul></article>
+    <article class="phase partial"><h3>Faz 7 — Ürün deneyimi</h3><ul><li>Ana beyaz dashboard tasarımı</li><li>AI ekip kartları ve görev kutusu</li><li>Görev devri paneli</li><li>Responsive/a11y/error states</li></ul></article>
+    <article class="phase partial"><h3>Faz 8 — Kanıt</h3><ul><li>PROJECT_STATUS</li><li>ACCEPTANCE_REPORT</li><li>Master repo/PR/CI/deploy tablosu</li><li>Rollback/incident/support runbook</li></ul></article>
+    <article class="phase blocked"><h3>Faz 9 — Pilot/Finans/KPI</h3><ul><li>İki gerçek pilot</li><li>Baseline/hedef/sonuç</li><li>13 haftalık nakit modeli</li><li>KPI ve alarm eşikleri</li></ul></article>
+    <article class="phase blocked"><h3>Faz 10–12 — Kabul</h3><ul><li>G10 teknik yayın</li><li>G11 ticari/iç kullanım</li><li>G12 işletme/müşteri kabulü</li><li>İmzalı kanıt olmadan kapanmaz</li></ul></article>
+  </section>
+  <h2>Araç kullanım matrisi</h2><section class="grid">
+    <article class="card"><h4>GitHub</h4><p>Branch, PR, review, ruleset, CI, CodeQL, issues ve evidence linkleri.</p></article>
+    <article class="card"><h4>Vercel</h4><p>Environment, deployment SHA, preview/production route smoke ve rollback.</p></article>
+    <article class="card"><h4>Supabase</h4><p>Auth, tenant/profile, RLS, storage ve Realtime canlı kanıtı.</p></article>
+    <article class="card"><h4>Inngest</h4><p>Durable workflow, worker, checkpoint, retry, idempotency ve failure run.</p></article>
+    <article class="card"><h4>OpenAI / Anthropic</h4><p>Gerçek sağlayıcı çağrısı, token/latency ve maliyetin redakte kaydı.</p></article>
+    <article class="card"><h4>Stripe</h4><p>Yalnız sandbox: webhook, payment intent ve idempotency kanıtı.</p></article>
+    <article class="card"><h4>PostHog / Sentry / Langfuse</h4><p>Event, hata, trace ve alarm kimlikleri; secret veya PII tutulmaz.</p></article>
+    <article class="card"><h4>Visily / Figma</h4><p>Ana beyaz dashboard, görev kutusu ve sağ görev devri panelinin görsel referansı.</p></article>
+  </section>
+  <h2>İlk uygulanacak sıra</h2><p>1) Bağımsız reviewer engelini çöz → 2) PR #98 ve ilgili kanonik PR’ları merge et → 3) Vercel route smoke → 4) Supabase Auth/RLS → 5) Inngest → 6) provider/fallback → 7) entegrasyonlar → 8) pilot/finans/KPI → 9) G10–G12.</p>
+  <footer>Bu görsel, kanıt bulunmayan maddeleri tamamlandı göstermez. Secret, token, müşteri verisi ve gerçek ödeme bu dosyada tutulmaz.</footer>
+</main></body></html>

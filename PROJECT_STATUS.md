@@ -5,7 +5,7 @@
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
 **Last verified:** 2026-10-01
 
-**Main commit:** `e7f1e34` (PR #94 merged; post-merge CI and CodeQL passed)
+**Main baseline at this branch point:** `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96 merged; prior runtime evidence is retained below)
 
 ## Status vocabulary
 
@@ -19,39 +19,86 @@
 
 **Overall:** `PARTIAL — NOT PRODUCTION-READY`
 
-Code and CI gates are healthy. Production acceptance is intentionally withheld until live Auth/RLS tenant isolation and Inngest workflow evidence are recorded with non-secret test credentials. Missing credentials are reported as `credential_not_configured`; no secret value is stored here.
+Code and CI gates are healthy. Overall product acceptance remains withheld until live Auth/RLS, Inngest, provider, verifier/recovery, pilot, business and operating evidence is recorded. Missing access is `credential_not_configured`, `NOT_RUN` or `BLOCKED`; no secret value is stored here.
+
+## Current verified evidence — 2026-10-01
+
+- Current `main`: `04256ac21a1c95da957fab501fc87c7acdf4cdd2`; main CI checks
+  `quality`, `dependency-audit`, `secret-scan`, `docker`, and
+  `Analyze (javascript-typescript)` and CodeQL succeeded ([CI run 36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789), [CodeQL run 36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754)).
+- Production GitHub deployment `6793405140` succeeded on the exact same SHA as
+  `main`. Live `/api/health` and `/api/health/ready` returned HTTP 200, but
+  health reported payment `mock`, analytics `console`, notifications
+  `console`, and realtime `connected:false`; this is health/readiness evidence
+  only, not acceptance of those integrations.
+- PR [#96](https://github.com/hakimceliker/mauseai/pull/96) merged at
+  `2026-10-01T19:32:43Z`; its merge commit is current main SHA
+  `04256ac21a1c95da957fab501fc87c7acdf4cdd2`. The post-merge main CI and
+  CodeQL runs passed, and the latest recorded Production deployment SHA
+  exactly matches main.
+- PRs [#92](https://github.com/hakimceliker/mauseai/pull/92),
+  [#95](https://github.com/hakimceliker/mauseai/pull/95), and
+  [#97](https://github.com/hakimceliker/mauseai/pull/97) are open, mergeable,
+  and have passing required CI/security/preview checks. Each has no reviews and
+  remains `REVIEW_REQUIRED`; #92 is already ready for review (`isDraft=false`).
+  PR #97's verified head is `7e82276967aa6ed2a849f414a98e971098cf7558`.
+- PR #95 already is the `chore/windows-acceptance-wrapper` → `main` PR; no
+  duplicate PR was opened.
+- Main branch protection is active and verified: PR required, one approval,
+  latest-push approval, stale review dismissal, strict status checks, admin
+  enforcement, no force-push/deletion, and conversation resolution. Exact
+  contexts, active ruleset `main-protection` ID `24329825`, and the transient
+  enable/restore/re-enable sequence are recorded in
+  [repository control](docs/governance/st36/REPOSITORY_CONTROL_RECORD.md).
+- Fresh protection APIs at `2026-10-01T20:53:04Z` confirmed active ruleset
+  `main-protection` ID `24329825` and active legacy branch protection. The
+  repository settings UI's `Unauthorized` display remains an unresolved UI
+  authorization issue; the API GETs succeeded and no duplicate ruleset was
+  created.
+- GitHub Actions default token permission is `read`; PR approval by Actions is
+  disabled. All Actions remain allowed and SHA pinning is not required; these
+  repository-level settings were inspected, not changed.
+- Supplied source hash/version differences, binary-presence results, live
+  integration blockers, and acceptance boundaries are indexed in
+  [evidence](docs/evidence/INDEX.md).
+- The 52-row acceptance work view retains all existing IDs and `Durum` values.
+  Branch/PR/commit/CI/test/evidence-timestamp/next-step fields were added; only
+  PLAN-003 and PLAN-004 link to verified PR #97 work. Other work-item links and
+  test results remain `NOT_LINKED`/`NOT_RUN` until individually evidenced.
 
 ## Execution ledger — 2026-10-01
 
-- **Completed phases:** F0 governance baseline; F1–F3 implementation increments represented by merged PRs #88 and #89; F9 observability timeout hardening represented by merged PR #90; status documentation/post-merge reconciliation represented by merged PR #91; production acceptance evidence and phased execution plan recorded by merged PR #93; post-merge status reconciliation for PR #94.
-- **Active phase:** Production acceptance evidence collection.
-- **Stopping point:** Main technical gates are verified; live Auth/RLS tenant isolation and live Inngest workflow evidence are still not executed.
-- **Incomplete phases:** Live Auth/RLS acceptance, tenant isolation negative tests, Inngest trigger/worker/checkpoint/audit/retry/idempotency/rollback evidence, real provider runtime proof, pilot/customer, finance, and G10–G12 operating acceptance.
-- **Missing work:** Approved test accounts and workflow identifiers in the approved secret source; production evidence bundle for each integration; pilot and business/KPI evidence.
+- **Completed implementation increments:** Code/document changes represented by merged PRs #88, #89, #90, #91, #93, #94 and #96. These merges do not mean P0–P9 packages or G0–G12 gates have been accepted.
+- **Active product package:** P0 runtime acceptance evidence collection; the [canonical roadmap](docs/mouseai-master-phase-plan-v1.0.md) separates P0–P9 packages from G0–G12 gates.
+- **Stopping point:** Main technical implementation/CI evidence exists; live Auth/RLS, Inngest, Local AI gateway and real provider calls are not verified.
+- **Incomplete packages/gates:** P0 live acceptance; P1 approval/data; P2/P3 pilots; P4 verifier/recovery and rollback evidence; P5/P6 applied tests; P7 finance/KPI; P8 legal/operating acceptance; P9 future enterprise scope; G0–G12 remain open as recorded in the gate register.
+- **Missing work:** Approved A/B test accounts and workflow ID in the approved secret source; an approved private Local AI gateway endpoint reachable from isolated staging; provider evidence; verifier/recovery tests; two pilot reports; real financial/KPI data and human decisions.
 - **Detected issues:** PR #90 initially conflicted in `.env.example`; PR #91 initially conflicted in `PROJECT_STATUS.md`; GitHub Actions emitted Node.js 20 and `ubuntu-latest` migration warnings; live acceptance credentials are not configured.
-- **Corrections:** Kept the branch’s secret-safe `.env.example` additions, pushed conflict-resolution commit `de0cbef`, merged PRs #90, #91, #93, and #94, verified main commit `e7f1e34`, refreshed production health/readiness, and reran the production acceptance runner with redacted output.
-- **Next operation:** Execute Auth/RLS and Inngest tests with approved test credentials and workflow identifiers; record PASS/FAIL evidence without exposing secrets.
-- **Completion:** Merge queue #88–#94 is 100% complete for the documented technical changes. Production acceptance remains 0/4 live gates verified; overall status remains `PARTIAL — NOT PRODUCTION-READY`.
+- **Corrections:** PR #96 is the verified main baseline for this worktree. This branch has not configured runtime secrets, accessed a gateway, altered cloud credentials, deployed production or merged to `main`.
+- **Next operation:** In isolated staging, configure an approved private gateway only in the authorized secret/config store, preserve the existing cloud provider, then capture Local → cloud fallback → Local recovery evidence. Do not expose Ollama `11434` or interrupt shared/live traffic.
+- **Completion:** Prior implementation merges are recorded; product acceptance is still incomplete. This branch adds no runtime acceptance.
 
 ## Evidence baseline
 
-| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90), [#91](https://github.com/hakimceliker/mauseai/pull/91), [#93](https://github.com/hakimceliker/mauseai/pull/93), [#94](https://github.com/hakimceliker/mauseai/pull/94); main commit `e7f1e34` | Live acceptance gates remain |
+| Release merge queue | DONE | PR [#88](https://github.com/hakimceliker/mauseai/pull/88), [#89](https://github.com/hakimceliker/mauseai/pull/89), [#90](https://github.com/hakimceliker/mauseai/pull/90), [#91](https://github.com/hakimceliker/mauseai/pull/91), [#93](https://github.com/hakimceliker/mauseai/pull/93), [#94](https://github.com/hakimceliker/mauseai/pull/94), [#96](https://github.com/hakimceliker/mauseai/pull/96); main baseline `04256ac` | Live acceptance gates remain |
 
 | Area | Status | Evidence | Remaining gate |
 |---|---|---|---|
 | Governance and phase plan | DONE | [Canonical phase plan](docs/mouseai-master-phase-plan-v1.0.md), PR [#83](https://github.com/hakimceliker/mauseai/pull/83) | Keep status current |
+| Source-law reconciliation | PARTIAL | [Source register/change record](docs/governance/st36/SOURCE_REGISTER_AND_CHANGE_RECORD.md) | Supplied files are hashed/registered; source/version mismatches and missing repo binaries are explicitly recorded pending owner decision |
 | Code/quality gates | DONE | PR [#84](https://github.com/hakimceliker/mauseai/pull/84), main commit `6e950b4` | None for this gate |
 | Production health/readiness | VERIFIED | [Production smoke runbook](docs/production-smoke-runbook.md) | Refresh after releases |
-| Supabase profile-to-tenant mapping | VERIFIED | [Auth/Tenant runbook](docs/governance/st36/plan-004-auth-tenant-runbook.md) | Live login and negative RLS test |
+| Supabase profile-to-tenant mapping | PARTIAL | Server-side `users` row is authoritative; regression test ignores token/user metadata as tenant authority | Live login and negative RLS test |
 | Auth and tenant isolation | PARTIAL | Smoke runner returns `credential_not_configured` when tokens are absent | Run with approved test accounts |
 | Inngest worker/checkpoint/audit | PARTIAL | [Inngest acceptance runbook](docs/governance/st36/plan-005-inngest-acceptance-runbook.md) | Trigger a real production workflow |
 | AI providers | PARTIAL | Provider/cost runbook | Runtime provider proof without exposing keys |
+| Local AI gateway | PARTIAL / BLOCKED / NOT_RUN | Mock fallback/recovery tests and [acceptance guide](docs/integrations/local-ai-fallback.md) | Approved private gateway/runtime configuration and isolated three-step live test |
 | Payments | PARTIAL | Stripe sandbox only | User/payment acceptance decision |
 | Observability | PARTIAL | Sentry/Langfuse/PostHog plans | Live event/trace proof |
 
 ## Single next step
 
-Run the production acceptance checklist with approved test accounts and workflow identifiers. Do not mark production-ready from health endpoints alone.
+Run the isolated Local AI canary only after the approved gateway is available in the runtime secret/config store; preserve the existing cloud fallback. Continue Auth/RLS and Inngest acceptance separately. Do not mark production-ready from health endpoints, mocks or documents alone.
 
 ## MOUSE package execution
 
@@ -74,9 +121,20 @@ Every change must update this file or a linked evidence file, identify the branc
 
 ## GitHub inventory reconciliation — 2026-10-01
 
-- Combined open count was 36 because GitHub counts open issues and pull requests together.
-- Open issues: 18; duplicate MOUSE issue families remain classified in the ST3.6 register.
-- Open pull requests after historical cleanup: 11.
-- Draft package PRs: 11 (`MOUSE-001`–`MOUSE-011`).
-- Historical PRs #1, #2, #3, #5, #6, #7 and #8: **CLOSED without merge**; their branches/commits were preserved.
-- MOUSE draft branches are stale against current `main` (53 commits behind; 2–4 commits ahead). They must be rebased/reimplemented from current `main` or closed; they are not completion evidence.
+The live inventory is maintained in
+[ISSUE_PR_HYGIENE.md](docs/governance/st36/ISSUE_PR_HYGIENE.md). At the latest
+check, active issues #53–#63 are assigned to the project owner and the
+`ST3.6 Production Acceptance` milestone; historical issues #42–#52 are closed.
+Open draft PRs #64–#74 are 85 commits behind current `main`; #71 and #72 also
+conflict. They remain unmerged and untouched pending authorized owner
+disposition. PRs #92/#95/#97 await independent review. No issue/PR was assigned,
+closed, rebased, or merged as part of this reconciliation.
+
+## Acceptance and evidence links
+
+- [Acceptance report](ACCEPTANCE_REPORT.md) — historical implementation
+  summary with this current status taking precedence.
+- [Evidence index](docs/evidence/INDEX.md)
+- [Integration evidence](docs/governance/st36/INTEGRATION_EVIDENCE.md)
+- [Final acceptance matrix](docs/governance/st36/FINAL_ACCEPTANCE.md)
+- [Pilot/KPI/finance/release register](docs/governance/st36/PILOT_KPI_FINANCE_RELEASE.md)

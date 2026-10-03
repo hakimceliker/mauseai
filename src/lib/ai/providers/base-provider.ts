@@ -10,8 +10,12 @@ export interface AIResponse {
   role: 'assistant';
   content: string;
   provider: string;
+  model?: string;
   tokens_used?: number;
+  tokens_in?: number;
+  tokens_out?: number;
   cost?: number;
+  cost_basis?: 'provider_rate_estimate' | 'local_api_zero' | 'unknown' | 'mock';
 }
 
 export interface AIProvider {

@@ -15,70 +15,62 @@ interface ExecutionTimelineProps {
 
 export function ExecutionTimeline({ checkpoints }: ExecutionTimelineProps) {
   return (
-    <div className="space-y-4">
+    <div className="execution-timeline">
       {checkpoints.map((checkpoint, index) => {
         const isCompleted = checkpoint.status === 'completed';
         const isCurrent = checkpoint.status === 'current';
 
         return (
-          <div key={checkpoint.number} className="flex gap-4">
-            {/* Timeline line and node */}
-            <div className="flex flex-col items-center">
+          <div key={checkpoint.number} className="execution-step">
+            <div className="execution-rail">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                className={`execution-node ${
                   isCompleted
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                    ? 'completed'
                     : isCurrent
-                    ? 'bg-cyan-500/30 text-cyan-400 border-2 border-cyan-500 animate-pulse'
-                    : 'bg-slate-700/50 text-slate-400 border border-slate-700'
+                    ? 'current'
+                    : 'pending'
                 }`}
               >
                 {isCompleted ? '✓' : checkpoint.number}
               </div>
 
               {index !== checkpoints.length - 1 && (
-                <div
-                  className={`w-1 h-12 mt-2 transition-all duration-300 ${
+                <div className={`execution-line ${
                     isCompleted
-                      ? 'bg-gradient-to-b from-green-500/50 to-slate-700/50'
+                      ? 'completed'
                       : isCurrent
-                      ? 'bg-gradient-to-b from-cyan-500/50 to-slate-700/50'
-                      : 'bg-slate-700/30'
-                  }`}
-                ></div>
+                      ? 'current'
+                      : 'pending'
+                  }`}></div>
               )}
             </div>
 
-            {/* Content */}
-            <div
-              className={`flex-1 pt-1 rounded-xl border transition-all duration-300 ${
+            <div className={`execution-card ${
                 isCompleted
-                  ? 'border-green-500/20 bg-green-500/5'
+                  ? 'completed'
                   : isCurrent
-                  ? 'border-cyan-500/40 bg-cyan-500/10'
-                  : 'border-slate-700/30 bg-slate-800/20'
-              }`}
-            >
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2">
+                  ? 'current'
+                  : 'pending'
+              }`}>
+              <div className="execution-card-body">
+                <div className="execution-card-heading">
                   <div>
-                    <h4
-                      className={`font-semibold text-sm ${
+                    <h4 className={`execution-title ${
                         isCompleted
-                          ? 'text-green-400'
+                          ? 'completed'
                           : isCurrent
-                          ? 'text-cyan-400'
-                          : 'text-slate-300'
-                      }`}
-                    >
+                          ? 'current'
+                          : 'pending'
+                      }`}>
                       {checkpoint.name}
                     </h4>
                     {checkpoint.description && (
-                      <p className="text-xs text-slate-400 mt-1">{checkpoint.description}</p>
+                      <p className="execution-description">{checkpoint.description}</p>
                     )}
                   </div>
                   {checkpoint.timestamp && (
-                    <span className="text-xs text-slate-500 whitespace-nowrap">{checkpoint.timestamp}</span>
+                    <span className="execution-timestamp">{checkpoint.timestamp}</span>
                   )}
                 </div>
               </div>

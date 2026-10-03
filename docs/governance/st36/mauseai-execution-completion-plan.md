@@ -135,7 +135,7 @@ rules, checkpoint schema, audit schema, timeout and rollback semantics.
 **Acceptance:** invalid input, duplicate request, timeout and unauthorized request
 have deterministic results.
 
-### G7 — Auth, tenant isolation and storage
+### P0 technical control — Auth, tenant isolation and storage (supports G7/G8)
 
 **Owner:** Supabase + Codex.  
 **Files:** `supabase/migrations/`, `src/lib/auth/`, `tests/security/`, acceptance runner.  
@@ -145,7 +145,7 @@ cross-tenant read/write rejection, logout, expired token, storage boundary.
 **Acceptance:** redacted A/B evidence with tenant IDs hashed or omitted.  
 **Current state:** `BLOCKED` until approved test credentials exist.
 
-### G8 — Durable execution
+### P0 technical control — Durable execution (supports G7/G8)
 
 **Owner:** Inngest + Codex.  
 **Files:** `src/inngest/`, `src/server/services/checkpoint.service.ts`,
@@ -156,7 +156,7 @@ retry, duplicate event, timeout, failure transition, recovery and rollback.
 redacted task/checkpoint/audit evidence.  
 **Current state:** `BLOCKED` until workflow ID/runtime credential exists.
 
-### G9 — Providers, cost and observability
+### P0 technical control — Providers, cost and observability (supports G7/G8)
 
 **Owner:** Codex + OpenAI/Anthropic/observability owners.  
 **Files:** provider adapters, router, cost ledger, Sentry/Langfuse/PostHog adapters.  
@@ -165,9 +165,13 @@ fallback, missing cloud credential, invalid provider response.
 **Evidence:** provider/model name, route `LOCAL`/`CLOUD`, latency, token count,
 cost and fallback reason; never prompt, PII or key.  
 **Acceptance:** real provider call is redacted and cost/audit records reconcile.  
-**Current state:** `BLOCKED` for real runtime proof.
+For Local AI, use only an approved private tunnel/VPN/gateway; never expose
+Ollama `11434`. In isolated staging, verify Local → existing cloud fallback →
+Local recovery. Preserve the existing cloud provider and credentials.
+**Current state:** `BLOCKED` for real runtime proof; the gateway URL and
+runtime settings are not present in this worktree.
 
-### G10 — Pilot and measurable benefit
+### P2/P3/P7 — Pilot and measurable benefit (supports G9)
 
 **Owner:** product/pilot owner.  
 **Deliverables:** two real scenarios, baseline/post-pilot measurements, success
@@ -176,15 +180,17 @@ rate, error rate, time saved, cost impact, user outcome and acceptance decision.
 alarm threshold and last measurement.  
 **Acceptance:** benefit is measured against baseline, not described qualitatively.
 
-### G11 — Technical publication, legal, sales and support
+### P8 — Release, legal, sales and support (supports separate G10/G11/G12 decisions)
 
 **Owner:** owner/operations/legal.  
 **Deliverables:** release checklist, terms, privacy/data policy, licenses, domain,
 backup/restore, incident response, support runbook, monitoring handoff, internal
 use or sales decision, Stripe sandbox evidence.  
-**Acceptance:** a named operator can deploy, monitor, restore and roll back.
+**Acceptance:** technical publication is a separate G10 decision; sale or
+authorized internal use is a separate G11 decision; legal/support/release
+readiness supplies evidence but does not itself pass either gate.
 
-### G12 — Operating and customer acceptance
+### G12 — Sustainable operation
 
 **Owner:** owner/customer/operations.  
 **Deliverables:** signed acceptance, runbook handover, rollback rehearsal, backup
@@ -218,6 +224,7 @@ present in the approved secret source. It must fail closed with
 | Inngest | sync, trigger, worker, checkpoint, retry, audit | no workflow secret disclosure |
 | OpenAI | redacted successful call, usage and cost | server-side only |
 | Anthropic | redacted successful call, usage and cost | server-side only |
+| Local AI gateway | `provider=local`, `route=LOCAL`, returned `qwen3:8b`; staged cloud fallback and Local recovery | private endpoint in approved secret store only; never expose `11434` or print URL |
 | Stripe | sandbox webhook and ledger reconciliation | no live payment |
 | PostHog | redacted event delivery | no customer PII |
 | Sentry/Langfuse | error/trace correlation and alert | no prompt or secret logging |
@@ -237,26 +244,28 @@ For every open issue/PR:
 
 `ACCEPT` requires all of the following:
 
-- G0–G4 approved;
-- G5–G9 technically verified;
-- two pilot outcomes recorded;
-- finance/KPI records complete;
-- G10 publication decision recorded;
-- G11 legal/support/release readiness recorded;
-- G12 operating acceptance signed;
+- G0–G8 accepted with version/environment-bound evidence;
+- G9 pilot completed with the required pilot evidence and pre-pilot controls;
+- P4 verifier, authorization, duplicate-effect, recovery and rollback controls
+  verified before P2/P3 pilots;
+- G10 technical publication/rollback decision recorded after G0–G9;
+- G11 sale or authorized internal-use decision recorded separately;
+- G12 sustainable-operation acceptance signed separately;
+- finance/KPI, legal/support, recovery and operating evidence accepted by their
+  named owners;
 - main CI and production health still green after the final merge.
 
 Until then the only valid result is `PARTIAL`, `BLOCKED` or `REJECTED`.
 
 ## 8. Current execution record
 
-- **Completed:** PR #88, #89, #90 and #91; CI/CodeQL/health/readiness; local lint,
-  typecheck, 276 tests and build.
-- **Active:** production acceptance evidence collection.
+- **Completed implementation increments:** PR #88, #89, #90, #91, #93, #94 and #96 are recorded in the main history; these are not G-gate acceptance.
+- **Active:** P0 runtime acceptance evidence collection; P0–P9 packages and G0–G12 gates are tracked separately.
 - **Latest evidence:** `docs/evidence/production-acceptance-2026-10-01.md`.
-- **Blocked:** Auth/RLS, tenant isolation, Inngest, real provider, pilot, finance,
-  KPI and G10–G12 evidence.
-- **Next action:** create the smoke-evidence PR, then run G7 with approved test
-  accounts and continue in dependency order.
-- **Completion:** technical merge queue 100%; live acceptance 0/4; overall
+- **Blocked/NOT_RUN:** Auth/RLS, tenant isolation, Inngest, real cloud and local
+  provider calls, P4 verifier/recovery, pilots, finance/KPI and G10–G12.
+- **Next action:** establish approved test accounts/workflow IDs and private
+  gateway access through authorized runtime configuration; run only isolated
+  staging tests, then update the evidence register.
+- **Completion:** no live acceptance claim; overall
   `PARTIAL — NOT PRODUCTION-READY`.

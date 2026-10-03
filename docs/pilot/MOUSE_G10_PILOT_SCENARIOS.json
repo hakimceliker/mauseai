@@ -1,0 +1,40 @@
+{
+  "schema": "mouseai.g10.pilot-scenarios.v1",
+  "as_of": "2026-10-02",
+  "status": "PREPARED_DATA_MISSING",
+  "source_policy": "Repository evidence only; no customer or financial facts are inferred.",
+  "scenarios": [
+    {
+      "id": "PILOT-API-MAINTENANCE",
+      "name": "API maintenance workflow",
+      "source_refs": ["docs/governance/st36/BRANCH_EXECUTION_MAP.md", "docs/governance/st36/MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv"],
+      "customer_or_internal_user": null,
+      "task_definition": null,
+      "pilot_start": null,
+      "pilot_end": null,
+      "baseline_method": null,
+      "mouseai_method": "Scoped API maintenance workflow with test, review, impact, and rollback evidence.",
+      "sample_minimum": null,
+      "acceptance_rubric_version": null,
+      "observed_result": null,
+      "decision": "HOLD_PENDING_PILOT_EVIDENCE",
+      "missing_inputs": ["authorized user or internal owner", "task sample", "dates", "baseline result", "MouseAI result", "quality rubric", "time records", "cost records", "acceptance record"]
+    },
+    {
+      "id": "PILOT-WINDOWS-RUNNER",
+      "name": "Windows computer runner",
+      "source_refs": ["docs/governance/st36/BRANCH_EXECUTION_MAP.md", "docs/governance/st36/MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv"],
+      "customer_or_internal_user": null,
+      "task_definition": null,
+      "pilot_start": null,
+      "pilot_end": null,
+      "baseline_method": null,
+      "mouseai_method": "Two pre-authorized computer tasks with approval, correct-result, and negative-test evidence.",
+      "sample_minimum": null,
+      "acceptance_rubric_version": null,
+      "observed_result": null,
+      "decision": "HOLD_PENDING_PILOT_EVIDENCE",
+      "missing_inputs": ["authorized user or internal owner", "device and environment", "task sample", "dates", "baseline result", "MouseAI result", "quality rubric", "time records", "cost records", "acceptance record"]
+    }
+  ]
+}
