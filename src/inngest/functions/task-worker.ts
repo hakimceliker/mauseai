@@ -47,9 +47,9 @@ interface CheckpointRow {
 
 interface AIResult {
   provider: string;
-  costCents: number;
-  inputTokens: number;
-  outputTokens: number;
+  costCents: number | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
 }
 
 export const taskWorker = inngest.createFunction(
