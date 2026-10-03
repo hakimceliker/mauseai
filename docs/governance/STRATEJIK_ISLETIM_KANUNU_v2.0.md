@@ -18,6 +18,12 @@ Bu kanun her projeyi beş modelle yönetir: iş modeli, finans modeli, yönetim 
 
 **AI modeli:** Görev, izinli girdi, kaynak, model/sağlayıcı, araç yetkisi, bütçe, çıktı şeması, verifier, hafıza, fallback, insan devri ve ölçüm kaydı olmadan AI özelliği kabul edilmez. Başarılı API çağrısı görev başarısı değildir.
 
+## Merkezi davet ve çift onay hükmü
+
+Kullanıcı daveti ile yüksek riskli yetki etkinleştirmesi ayrı işlemlerdir. Geri alınabilir, süreli ve yalnızca `member` başlangıç rolü veren normal davet, bir yetkili `owner` veya `admin` tarafından oluşturulabilir; ikinci iç onay davetin oluşturulmasını bloke etmez. Davet edilen kişi doğrulayıp kabul etmeden üyelik aktifleşmez.
+
+`admin`/`owner`, ödeme, finans, service-role, secret, production, tenantlar arası erişim, RLS/güvenlik veya geri döndürülemez veri yetkisi ancak davet edenden farklı ikinci yetkili tarafından onaylandıktan sonra etkinleşir. Self-approval yasaktır. Davet tokenı tek kullanımlık ve süreli olur; iptal, sona erme, tenant uyuşmazlığı ve bütün onay geçişleri secret içermeyen audit kaydı taşır. Uygulama ayrıntısı `docs/central-invitation-and-approval-contract.md` içindedir.
+
 ## Kapılar ve matematik
 
 İhtiyaç → iş/finans → kapsam → organizasyon → mimari → prototip → uçtan uca geliştirme → kalite/güvenlik → pilot → yayın → satış → sürdürülebilir işletme. Kanıtı olmayan kapı geçmez.

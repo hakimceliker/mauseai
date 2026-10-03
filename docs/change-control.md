@@ -22,6 +22,7 @@ Kullanıcı tarafından gönderilen her metin, öneri veya kod parçası önce t
 - `profiles.id` yerine mevcut `profiles.user_id` kullanıldı.
 - API tenant bilgisi JWT metadata’dan varsayılmadı; RLS korumalı `profiles` kaydından alındı.
 - Service role ve RLS sınırları gevşetilmedi.
+- Merkezi kullanıcı daveti, yüksek riskli rol/yetki etkinleştirmesinden ayrıldı: normal `member` daveti tek yetkiliyle ilerleyebilir; `admin`/`owner`, finans, service-role, production ve tenantlar arası erişim ikinci bağımsız onay ister. Ayrıntı: `docs/central-invitation-and-approval-contract.md`.
 
 ## Durum etiketleri
 
