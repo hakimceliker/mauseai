@@ -64,6 +64,23 @@ export async function acceptInvitation(token: string, acceptingAuthUserId: strin
   return member;
 }
 
+export async function revokeInvitation(tenantId: string, actorId: string, invitationId: string) {
+  const user = await actor(tenantId, actorId);
+  if (!canCreateMemberInvitation(user.role)) throw new ForbiddenError();
+  const db = getSupabaseAdmin();
+  const revokedAt = new Date().toISOString();
+  const { data, error } = await db.from('invitations')
+    .update({ status: 'revoked', revoked_at: revokedAt, updated_at: revokedAt })
+    .eq('id', invitationId).eq('tenant_id', tenantId).eq('status', 'sent')
+    .select('id,status').single();
+  if (error || !data) throw new ConflictError();
+  await db.from('audit_logs').insert({
+    tenant_id: tenantId, action: 'invitation.revoked', entity_type: 'invitation', entity_id: invitationId,
+    actor: actorId, details: {},
+  });
+  return data;
+}
+
 export async function requestPrivilege(tenantId: string, actorId: string, invitationId: string, requestedRole: 'admin' | 'owner') {
   const user = await actor(tenantId, actorId);
   if (!canCreateMemberInvitation(user.role)) throw new ForbiddenError();

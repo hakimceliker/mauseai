@@ -1,13 +1,16 @@
 -- Central invitation contract: reversible member invites are separate from
 -- privileged role/access activation. Raw invitation tokens are never stored.
 ALTER TABLE public.users
-  ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'member';
+  ADD COLUMN IF NOT EXISTS role VARCHAR(20);
 
 ALTER TABLE public.users
   DROP CONSTRAINT IF EXISTS users_role_check;
 
 ALTER TABLE public.users
   ADD CONSTRAINT users_role_check CHECK (role IN ('owner', 'admin', 'member'));
+
+ALTER TABLE public.users
+  ALTER COLUMN role SET DEFAULT 'member';
 
 CREATE INDEX IF NOT EXISTS idx_users_tenant_role
   ON public.users(tenant_id, role);

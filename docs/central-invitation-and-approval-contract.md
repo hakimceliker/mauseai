@@ -73,6 +73,7 @@ SENT → REVOKED | EXPIRED | BLOCKED
 Kod karşılığı artık aşağıdaki yüzeylerde bulunur:
 
 - `POST /api/invitations`: yalnızca `owner/admin` tarafından süreli `member` daveti oluşturur.
+- `DELETE /api/invitations?id=...`: yetkili kişi kabul edilmemiş daveti iptal eder.
 - `POST /api/invitations/accept`: e-posta ve tek kullanımlık token ile üyeliği `member` olarak açar.
 - `POST /api/invitations/:id/privilege`: `admin/owner` yükseltmesi için `SECOND_APPROVAL_REQUIRED` kaydı açar.
 - `POST /api/invitations/approvals/:id`: davet edenden farklı ikinci yetkili onaylarsa rolü etkinleştirir.
@@ -87,6 +88,6 @@ Canlı Supabase migration’ı ve gerçek Auth/RLS acceptance çalıştırılmad
 5. Expired/revoked/token-tenant mismatch davetleri reddedilir.
 6. Her geçişte secret/token içermeyen audit kaydı oluşur.
 7. RLS tenant dışı davet ve approval kayıtlarını göstermez/değiştirmez.
-8. Migration mevcut kullanıcıların sahiplik/rol atamasını insan onayı olmadan yükseltmez.
+8. Migration mevcut kullanıcıların sahiplik/rol atamasını insan onayı olmadan değiştirmez; rolü bilinmeyen eski kayıtlar fail-closed kalır.
 
 Bu belge `docs/change-control.md`, `docs/governance/STRATEJIK_ISLETIM_KANUNU_v2.0.md` ve `docs/governance/MAUSEAI_PROJE_UYGULAMA_EKI_v2.0.md` ile birlikte okunur.
