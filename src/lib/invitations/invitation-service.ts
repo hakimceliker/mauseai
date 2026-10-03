@@ -18,10 +18,14 @@ type InvitationRow = {
 };
 
 async function actor(tenantId: string, actorId: string): Promise<UserRow> {
-  const { data, error } = await getSupabaseAdmin()
-    .from('users').select('id,tenant_id,role,email').eq('id', actorId).eq('tenant_id', tenantId).single();
-  if (error || !data) throw new ForbiddenError();
-  return data as UserRow;
+  const db = getSupabaseAdmin();
+  const byAuth = await db.from('users').select('id,tenant_id,role,email')
+    .eq('auth_user_id', actorId).eq('tenant_id', tenantId).maybeSingle();
+  if (byAuth.data) return byAuth.data as UserRow;
+  const byId = await db.from('users').select('id,tenant_id,role,email')
+    .eq('id', actorId).eq('tenant_id', tenantId).maybeSingle();
+  if (byId.error || !byId.data) throw new ForbiddenError();
+  return byId.data as UserRow;
 }
 
 export async function createMemberInvitation(tenantId: string, actorId: string, email: string) {
@@ -94,7 +98,7 @@ export async function requestPrivilege(tenantId: string, actorId: string, invita
   const db = getSupabaseAdmin();
   const { data: invitation } = await db.from('invitations').select('id,status,tenant_id').eq('id', invitationId).eq('tenant_id', tenantId).single();
   if (!invitation || invitation.status !== 'accepted') throw new ConflictError();
-  const { data, error } = await db.from('privilege_approvals').insert({ tenant_id: tenantId, invitation_id: invitationId, requested_role: requestedRole, requested_by: actorId }).select('id,status,requested_role').single();
+  const { data, error } = await db.from('privilege_approvals').insert({ tenant_id: tenantId, invitation_id: invitationId, requested_role: requestedRole, requested_by: user.id }).select('id,status,requested_role').single();
   if (error || !data) throw new ConflictError();
   return data;
 }
@@ -104,9 +108,9 @@ export async function approvePrivilege(tenantId: string, actorId: string, approv
   const db = getSupabaseAdmin();
   const { data: approval } = await db.from('privilege_approvals').select('*').eq('id', approvalId).eq('tenant_id', tenantId).single();
   if (!approval || approval.status !== 'second_approval_required') throw new NotFoundError();
-  if (!canApprovePrivilege(approval.requested_by, actorId, user.role)) throw new ForbiddenError();
+  if (!canApprovePrivilege(approval.requested_by, user.id, user.role)) throw new ForbiddenError();
   const approvedAt = new Date().toISOString();
-  const { data, error } = await db.from('privilege_approvals').update({ status: 'approved', approved_by: actorId, approved_at: approvedAt }).eq('id', approvalId).eq('status', 'second_approval_required').select('id,status,requested_role').single();
+  const { data, error } = await db.from('privilege_approvals').update({ status: 'approved', approved_by: user.id, approved_at: approvedAt }).eq('id', approvalId).eq('status', 'second_approval_required').select('id,status,requested_role').single();
   if (error || !data) throw new ConflictError();
   const { data: approvalInvitation } = await db.from('privilege_approvals').select('invitation_id').eq('id', approvalId).single();
   if (approvalInvitation) {
