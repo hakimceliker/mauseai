@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible product or engineering defect.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include secrets, credentials, personal data, or customer content. Use a private security advisory for sensitive vulnerabilities."
+  - type: input
+    id: area
+    attributes:
+      label: Affected area
+      description: Route, integration, package, or user workflow.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: "Use synthetic, non-sensitive data."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment and commit
+      description: "Do not paste environment values or tokens."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: Logs, run IDs, screenshots with all identifiers and PII removed.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true

@@ -8,6 +8,67 @@
 > passed”; it does not mean live integration, pilot, customer benefit, finance,
 > or operating acceptance is complete.
 
+## Current evidence snapshot — 2026-10-01
+
+**Decision:** `PARTIAL — NOT PRODUCTION-READY`. This dated snapshot supersedes
+older check counts and status statements in the historical sections below.
+
+- Current `main` is `04256ac21a1c95da957fab501fc87c7acdf4cdd2`; its quality,
+  dependency-audit, secret-scan, Docker, Analyze, and CodeQL checks passed
+  ([CI run 36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789);
+  [CodeQL run 36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754)).
+- PR #96 merged to that main SHA at `2026-10-01T19:32:43Z`; the production
+  deployment `6793405140` is successful on the exact same SHA. Public
+  `/api/health` and `/api/health/ready` returned HTTP 200; current health reports
+  payment `mock`, analytics `console`, notifications `console`, and realtime
+  disconnected. Health does not prove those integrations.
+- A read-only production acceptance probe at `2026-10-01T20:36:15Z`–`20:36:16Z`
+  confirmed health/readiness 200, protected Inngest and anonymous task endpoints
+  401, and `credential_not_configured` for user A. It exited 1 as expected;
+  no authenticated call or task write occurred.
+- PR #92 is already ready for review, with passing required checks and no
+  independent review. PR #95 is already open from
+  `chore/windows-acceptance-wrapper` to `main`. PR #97 head
+  `7e82276967aa6ed2a849f414a98e971098cf7558` has passing required checks and
+  Vercel Preview. All three remain open and `REVIEW_REQUIRED`; none was merged.
+- `main` protection requires a PR, one independent approval including the
+  latest push, strict current status checks, and prohibits force-push/deletion.
+- At `2026-10-01T20:53:04Z`, direct API GETs confirmed active ruleset
+  `main-protection` ID `24329825` and active legacy branch protection. The
+  repository UI's `Unauthorized` response remains unresolved; API protection
+  GETs succeeded. No duplicate ruleset was created.
+- Live Auth/RLS, Inngest execution, provider calls, Stripe/PostHog/
+  Sentry/Langfuse, Realtime isolation, pilots, finance, restore rehearsal, and
+  G10–G12 remain open or `NOT_RUN`. See
+  [`docs/evidence/INDEX.md`](docs/evidence/INDEX.md) and
+  [`docs/governance/st36/FINAL_ACCEPTANCE.md`](docs/governance/st36/FINAL_ACCEPTANCE.md).
+
+## One-time completion instruction — 12-phase checkpoint
+
+| Phase | Status | Completed repository work | Remaining blocker |
+|---|---|---|---|
+| 1. GitHub/PR closure | `PARTIAL` | Live-checked #92/#95/#97, checks, #96 merge/main CI, protection API, and exact production SHA; #95 is the existing requested branch PR | Independent review absent on #92/#95/#97; no merge |
+| 2. Repository governance | `PARTIAL` | CODEOWNERS, PR/issue forms, weekly Dependabot config, main protection verified | Actions allowlist remains `all`; SHA pinning not required; Dependabot config activates after merge |
+| 3. Canonical status/source docs | `PARTIAL` | Status, evidence index, source hashes/sizes, counterpart/mismatch results, 52 task-card evidence fields and acceptance matrix reconciled | Source metadata disagreements await authorized source-owner resolution; unknown task links remain pending |
+| 4. Supabase/Auth/RLS | `BLOCKED` / `NOT_RUN` | Code, migrations, runbook and local coverage inventoried | Approved test identities/tokens absent; A/B login, logout, expiry and cross-tenant live proof |
+| 5. Inngest | `NOT_RUN` | Worker/runbook and required proof fields documented | Approved workflow ID and real trigger/checkpoint/retry/idempotency/rollback run |
+| 6. AI providers | `PARTIAL` | Adapter and mock tests; Local fallback/recovery test coverage | OpenAI/Anthropic/provider credentials and real redacted calls not available |
+| 7. Integrations | `PARTIAL` | Production health/readiness and integration inventory recorded | Stripe sandbox, PostHog, Sentry/Langfuse, Realtime live proof absent |
+| 8. Issue/PR hygiene | `PARTIAL` | Open issues, labeled historical duplicates, stale draft PRs, ownership and 52 task-card evidence fields classified | No issue closed or changed; PR #96 had merged before this snapshot; stale PRs and remaining reviews still need authorized owner action |
+| 9. Pilot/KPI | `BLOCKED` / `DECISION_PENDING` | Blank pilot/KPI evidence fields and acceptance boundaries recorded | Two authorized pilot processes, real baseline/targets, accepted owners and outcomes absent |
+| 10. Finance/operations inputs | `BLOCKED` / `DECISION_PENDING` | 13-week cash-flow template remains blank and required inputs listed | No actual costs, funding, revenue, budget, capacity or downside data supplied |
+| 11. Release/operations acceptance | `PARTIAL` | Production deployment SHA and health checked; release/restore/incident template evidence recorded | No restore/rollback rehearsal, named on-call owner, legal review or support sign-off |
+| 12. Final acceptance | `BLOCKED` | Evidence matrix lists every required item and status | Independent review and multiple live/business gates remain open; no ACCEPT issued |
+
+**Rollback:** revert the PR commit for repository changes. Do not perform a
+production rollback, restore, incident action, payment, or live integration
+test without the authorized operator and required isolated environment.
+
+**Completion percentage:** `NOT MEASURED`. No approved weighting/denominator
+exists for the heterogeneous gates; a percentage would imply unsupported
+completion. The current overall status is exactly
+`PARTIAL — NOT PRODUCTION-READY`.
+
 ## Executive Summary
 
 Mause AI v0.1.0 contains a tested multi-tenant workflow foundation with cost

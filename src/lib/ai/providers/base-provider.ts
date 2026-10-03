@@ -10,6 +10,7 @@ export interface AIResponse {
   role: 'assistant';
   content: string;
   provider: string;
+  model?: string;
   tokens_used?: number;
   tokens_in?: number;
   tokens_out?: number;

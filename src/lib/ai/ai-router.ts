@@ -87,7 +87,7 @@ export class AIRouter {
     console.info(JSON.stringify({
       event: 'ai_provider_selected',
       provider: response.provider,
-      model: response.provider === 'local' ? process.env.LOCAL_AI_MODEL ?? 'qwen3:8b' : undefined,
+      model: response.provider === 'local' ? response.model ?? process.env.LOCAL_AI_MODEL ?? 'qwen3:8b' : undefined,
       route: response.provider === 'local' ? 'LOCAL' : 'CLOUD',
       fallback,
       fallback_reason: fallbackReason,
@@ -116,6 +116,7 @@ export class AIRouter {
 
   private classifyFailure(error: unknown): string {
     if (error instanceof CredentialNotConfiguredError) return 'credential_not_configured';
+    if (error instanceof Error && error.message.includes('invalid_response')) return 'invalid_response';
     if (error instanceof Error && /timeout|network|connect/i.test(error.message)) return 'network_or_timeout';
     return 'provider_error';
   }

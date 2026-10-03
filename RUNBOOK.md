@@ -45,12 +45,18 @@ AI_PROVIDER=mock
 AUTH_PROVIDER=mock
 ```
 
+These mock-provider settings are for local development only. Never deploy
+`AUTH_PROVIDER=mock` or treat a mock AI provider as production acceptance.
+
 ### 3. Start Dev Server
 ```bash
 npm run dev
 ```
 
 ### 4. Test Endpoints
+The header-based examples below are mock-auth-only local examples. They do not
+authenticate against Supabase and must not be used as production evidence.
+
 ```bash
 # Create a task
 curl -X POST http://localhost:3000/api/tasks \
@@ -81,17 +87,9 @@ npm run test:ui  # Interactive UI for test results
 5. Wait for project initialization (2-3 minutes)
 
 ### 2. Run Migrations
-In Supabase dashboard → SQL Editor:
-
-```sql
--- Copy entire content of supabase/migrations/0001_core.sql
--- Run in SQL editor
--- Wait for completion
-
--- Then run 0002_idempotency.sql
-```
-
-Or use Supabase CLI:
+Apply every checked-in migration through the approved deployment process. The
+Supabase CLI command below applies the repository's current migration set;
+do not stop at the historical `0001`/`0002` examples.
 ```bash
 supabase link --project-ref your-project-ref
 supabase db push
@@ -193,9 +191,15 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 INNGEST_EVENT_KEY
-AI_PROVIDER (default: mock)
-AUTH_PROVIDER (default: mock)
+AI_PROVIDER (explicitly select an approved production provider; mock is not acceptance)
+AUTH_PROVIDER=supabase
 ```
+
+Keep `SUPABASE_SERVICE_ROLE_KEY` in server-only secret configuration and never
+expose it through a `NEXT_PUBLIC_` variable. Before production acceptance,
+verify all RLS migrations are applied and complete authorized two-tenant
+positive/negative isolation tests. A successful deployment or health check does
+not satisfy those gates.
 
 #### 4. Deploy
 Click "Deploy" button. Vercel will build and deploy automatically.

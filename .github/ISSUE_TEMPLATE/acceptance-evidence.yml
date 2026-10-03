@@ -1,0 +1,54 @@
+name: Acceptance evidence
+description: Submit evidence for a package, plan item, or gate without claiming more than it proves.
+title: "[Acceptance] "
+body:
+  - type: markdown
+    attributes:
+      value: "Mocks, document counts, health checks, and hashes alone do not pass live or business gates. Do not include secrets or customer data."
+  - type: input
+    id: package-gate
+    attributes:
+      label: P-package, G-gate, PLAN-ID, or control ID
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Evidence status
+      options:
+        - DONE
+        - VERIFIED
+        - PARTIAL
+        - BLOCKED
+        - NOT_RUN
+        - credential_not_configured
+        - DECISION_PENDING
+        - SOURCE_MISMATCH
+        - SOURCE_MISSING
+    validations:
+      required: true
+  - type: input
+    id: commit-environment
+    attributes:
+      label: Commit and environment
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Exact test or run performed
+    validations:
+      required: true
+  - type: textarea
+    id: evidence-links
+    attributes:
+      label: Redacted evidence links and identifiers
+      description: Record run IDs, timestamps, outcomes, and independent verifier; never paste secret values.
+    validations:
+      required: true
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Limitations, missing evidence, and next safe action
+    validations:
+      required: true

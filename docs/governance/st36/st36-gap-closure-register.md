@@ -12,19 +12,19 @@ substitute for a completed gate.
 
 | Gate | Required result | Owner | Evidence required | Status |
 |---|---|---|---|---|
-| G0 | Owner, team, authority and project boundary | User/product owner | Signed project card | BLOCKED — decision needed |
-| G1 | Customer problem and demand validated | Product/sales | Two problem interviews or approved pilot briefs | BLOCKED — data missing |
-| G2 | Five founding models completed | Product/finance | Business, operating, technical, risk and governance records | PARTIAL — templates exist |
-| G3 | Scope, pilot and success contract | Product + pilot owner | Pilot charter with baseline/target/exit criteria | BLOCKED — pilot not run |
-| G4 | Budget and capacity limits | Finance/owner | 13-week cash flow, provider budget, capacity ceiling | BLOCKED — real inputs missing |
-| G5 | Architecture and security review | Codex + reviewer | Threat model, CI, CodeQL, secret scan, RLS design | PARTIAL — code gates green; live proof open |
-| G6 | API/data/workflow contracts | Codex | Contract tests and rollback evidence | PARTIAL |
-| G7 | Auth, tenant isolation and storage boundary | Supabase + Codex | Positive and cross-tenant negative tests | BLOCKED — live tokens absent |
-| G8 | Durable execution | Inngest + Codex | Trigger, worker, checkpoint, retry, idempotency, rollback | BLOCKED — production run absent |
-| G9 | Provider, cost and observability | Codex + providers | Redacted provider call, cost ledger, trace and alert | BLOCKED — runtime credentials/evidence absent |
-| G10 | Pilot and KPI benefit | Product/pilot owner | Two pilot reports with baseline vs outcome | BLOCKED — no real pilot |
-| G11 | Release/legal/support readiness | Owner + operations | Release checklist, terms, backup/restore, incident/support plan | PARTIAL |
-| G12 | Operating/customer acceptance | Owner/customer | Signed acceptance, runbook handover, rollback rehearsal | BLOCKED — not performed |
+| G0 | Project opening | User/product owner | Approved owner, sponsor, risk owner, cost center and start decision | BLOCKED — user decisions pending |
+| G1 | Need | Product/sales | Customer/problem evidence and validated demand | BLOCKED — data missing |
+| G2 | Feasibility | Product/finance/technical | Five founding models, assumptions and feasibility evidence | PARTIAL — templates exist; real inputs/approval missing |
+| G3 | Scope | Product + pilot owner | Scope, baseline, success/exit/stop criteria and pilot charter | BLOCKED — no accepted charter |
+| G4 | Organization | Product owner/finance | Named accountable roles, budget/capacity and authority | BLOCKED — real inputs and owner decisions missing |
+| G5 | Architecture | Codex + reviewer | Architecture, threat model and security design/review | PARTIAL — code/CI evidence exists; live review/proof open |
+| G6 | Prototype | Codex | Accepted prototype with testable end-to-end behavior and evidence | PARTIAL — code exists; acceptance evidence incomplete |
+| G7 | End-to-end development | Codex + service owners | Integrated Auth/tenant, workflow, provider, audit and recovery path | PARTIAL — implementation exists; live end-to-end acceptance not proven |
+| G8 | Quality and security | Codex + reviewer | CI/security tests, verifier, recovery, rollback and redacted evidence | PARTIAL — CI exists; live security and recovery evidence open |
+| G9 | Pilot | Product/pilot owner | Controlled pilot(s), pre-pilot legal/data checks and measured outcome | BLOCKED — no pilot; P4 verifier/recovery controls remain prerequisites |
+| G10 | Technical publication | Owner + technical/operations | G0–G9 evidence, release decision, deployment and rollback proof | BLOCKED — predecessor gates and publication evidence incomplete |
+| G11 | Sale or authorized internal use | Owner + finance/operations | Authorized commercial sale/collection or deliberate internal-use acceptance | BLOCKED — decision/evidence absent |
+| G12 | Sustainable operation | Owner + operations | Operating owner, support, monitoring, continuity, cost/KPI and signed acceptance | BLOCKED — not performed |
 
 ## Financial model — required fields
 
@@ -43,7 +43,7 @@ approved source data; unknown values remain `VERİ YOK`.
 
 ## Pilot acceptance template
 
-Two pilots are required before G10 can close. Use synthetic or approved test
+Two pilots are required before G9 can close. Use synthetic or approved test
 data until a customer explicitly authorizes real data.
 
 | Field | Pilot A | Pilot B |
@@ -115,5 +115,5 @@ record number and reason. No issue/PR is silently deleted.
 6. Define and run two pilot scenarios.
 7. Fill the 13-week financial model and KPI cards from approved data.
 8. Classify/close duplicate issues and stale drafts.
-9. Close G10–G12 only with real pilot, business and operating evidence.
+9. Close G9 only with pilot evidence; make the G10 technical publication, G11 commercial/internal-use, and G12 sustainable-operation decisions separately and only after their prerequisites.
 10. Issue `ACCEPT` or `REJECT`; never infer acceptance from documentation completeness.
