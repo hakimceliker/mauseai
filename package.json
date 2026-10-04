@@ -18,6 +18,9 @@
     "test": "vitest",
     "verify": "npm run lint && npm run typecheck && npm run test -- --run && npm run build",
     "test:ui": "vitest --ui",
+    "setup:credentials": "bash scripts/setup-credentials.sh",
+    "validate:credentials": "ts-node scripts/validate-credentials.ts",
+    "test:phase-ce": "npm run validate:credentials && npm run test -- src/core/testing/",
     "smoke:production": "node scripts/production-smoke.mjs",
     "acceptance:production": "node scripts/production-acceptance.mjs"
   },
