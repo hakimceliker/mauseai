@@ -12,11 +12,11 @@ const SECRET_PATTERNS = {
   apiKey: /api[_-]?key["\s:=]*([a-zA-Z0-9_-]{20,})/gi,
   secret: /secret["\s:=]*([a-zA-Z0-9_-]{20,})/gi,
   password: /password["\s:=]*([^"\s\n]{8,})/gi,
-  token: /token["\s:=]*([a-zA-Z0-9_\-.]{20,})/gi,
-  bearer: /bearer\s+([a-zA-Z0-9_\-.]+)/gi,
+  token: /token["\s:=]*([a-zA-Z0-9_.-]{20,})/gi,
+  bearer: /bearer\s+([a-zA-Z0-9_.-]+)/gi,
   auth: /authorization["\s:=]*([^"\s\n]+)/gi,
   privateKey: /private[_-]?key["\s:=]*([a-zA-Z0-9+/=\n]{50,})/gi,
-  credential: /credential[s]?["\s:=]*([a-zA-Z0-9_\-:]{20,})/gi,
+  credential: /credential[s]?["\s:=]*([a-zA-Z0-9_:-]{20,})/gi,
   awsKey: /AKIA[0-9A-Z]{16}/g,
   jwtToken: /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g,
   githubToken: /ghp_[a-zA-Z0-9_]{36,}/g,
@@ -255,7 +255,7 @@ export class EvidenceValidator {
    * Extract and sanitize URLs from evidence
    */
   extractUrls(content: string): string[] {
-    const urlPattern = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)/g;
+    const urlPattern = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_.+~#?&/=]*)/g;
     const matches = content.match(urlPattern) || [];
     return [...new Set(matches)]; // Remove duplicates
   }
