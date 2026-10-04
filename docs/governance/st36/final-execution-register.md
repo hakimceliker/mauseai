@@ -1,45 +1,74 @@
-# MouseAI ST3.6 — Tek Master Yürütme ve Kapanış Kaydı
+# MauseAI Master Execution Register - Phase A
 
-**Sürüm:** 1.0  
-**Kapsam:** Ana kanun, şartname, kabul planı, kontrol matrisi, diyagram atlası, görev kayıtları, KPI ve finans şablonu  
-**Repo:** `hakimceliker/mauseai`  
-**Yürütme ilkesi:** İşler tek tek dağınık raporlanmaz; bu kayıt tüm işlerin ortak durum kaynağıdır.
+**Document ID:** final-execution-register.md  
+**Version:** 2.0  
+**Phase:** A (Source Mapping & Registry Initialization)  
+**Generated:** 2026-10-04 05:23:57 UTC  
+**Status Owner:** Phase A Execution Harness  
+**Repository:** hakimceliker/mauseai  
+**Execution Principle:** All work is tracked in this single source of truth; no separate phase completion reports are issued without updating this register.
 
-## 1. Kaynakların birleştiği merkez
+## Overview
 
-Bu kayıt aşağıdaki kaynakları tek yürütme görünümünde birleştirir:
+This register is the authoritative tracking document for the MauseAI master execution plan. It consolidates:
 
-- ST3.6 ana kanun ve uygulanabilirlik matrisi
-- MouseAI master şartname
-- Eksikler ve kabul planı
-- Diyagram atlası
-- Ana kayıt ve teslim doğrulama JSON’ları
-- 14 günlük teknik spesifikasyon
-- Ürün/iş/finans/KPI belgeleri
-- Repo’daki migration, API, worker, test ve CI kanıtları
+- Source code repository status (GitHub)
+- Branch-to-issue-to-PR mappings
+- CI/CD pipeline status
+- Test coverage and acceptance gates
+- Evidence file locations
+- Blockers and dependencies
+- Phase transition criteria
 
-Repo kopyaları: `docs/governance/st36/`  
-Kanun: [`storage-and-repository-registry.md`](../../storage-and-repository-registry.md)
+**Registry Sources:**
+- [`PROJECT_STATUS.md`](../../PROJECT_STATUS.md) - Overall project status
+- [`ACCEPTANCE_REPORT.md`](../../ACCEPTANCE_REPORT.md) - Phase acceptance evidence
+- [`BRANCH_EXECUTION_MAP.md`](branch-execution-map.md) - Active branch tracking
+- [`github-module-status-2026-10-04.md`](../../../docs/evidence/github-module-status-2026-10-04.md) - GitHub module snapshot
 
-Faz yürütme sırası ve tikli görev listesi: [`mouseai-master-phase-plan-v1.0.md`](../../mouseai-master-phase-plan-v1.0.md)
+## Main Branch Baseline (Phase A1)
 
-## 2. Genel durum
-
-| Alan | Durum | Kapanış şartı |
+| Property | Value | Evidence |
 |---|---|---|
-| Kod ve mimari | Hazır/CI doğrulandı | Main CI ve PR kanıtı |
-| Güvenlik ve secret politikası | Hazır | Secret scan + insan incelemesi |
-| Repo/branch/depo yönetimi | Kanunlaştırıldı | Kanuna uygun her PR |
-| 377 kontrol | Repo’ya aktarıldı | Sorumlu + kanıt + kabul |
-| G0–G12 kapıları | Beklemede | Her kapının kanıt dosyası |
-| Auth/tenant | Canlı kanıt bekliyor | A/B negatif testleri |
-| Inngest | Canlı run bekliyor | Trigger/worker/checkpoint/audit |
-| AI provider | Canlı credential testi bekliyor | OpenAI + Anthropic redacted test |
-| Storage | Aktif akış yok | PLAN-004B açılmadan kullanılmaz |
-| Ödeme | Sandbox/mock sınırında | Stripe sandbox replay |
-| KPI/finans | Şablon var, veri yok | Baseline + hedef + sahip |
-| Pilotlar | Hazırlık seviyesinde | Gerçek pilot kanıtı |
-| Hukuk/operasyon | Dokümantasyon bekliyor | Yayın ve incident kabulü |
+| **Repository** | hakimceliker/mauseai | GitHub REST API |
+| **Default Branch** | main | git config |
+| **Current SHA** | 04256ac21a1c95da957fab501fc87c7acdf4cdd2 | `git rev-parse origin/main` |
+| **Latest Commit** | Merge pull request #96 from hakimceliker/docs/post-pr94-acceptance-status | `git log -1` |
+| **Commit Date** | 2026-10-03 | GitHub API |
+| **CI Status** | ✅ SUCCESS | GitHub Checks API |
+| **Working Tree** | Clean | `git status` |
+| **Total Commits** | 174 commits on main | `git log --oneline origin/main` |
+
+## System Environment (Phase A2)
+
+| Item | Value | Verified | Evidence |
+|---|---|---|---|
+| **Node.js** | v22.22.0 | ✅ | `node --version` |
+| **npm** | 10.9.4 | ✅ | `npm --version` |
+| **npm audit** | 0 vulnerabilities | ✅ | `npm audit --json` |
+| **Test Files** | 31 test files | ✅ | find command |
+| **Platform** | Linux 6.18.44-fc-v64 | ✅ | uname -a |
+| **Git History** | Full depth (174 commits) | ✅ | git rev-list |
+
+## Open Pull Requests Summary (Phase A1)
+
+| Status | Count | Notes |
+|---|---|---|
+| **REVIEW** | 20 | Ready for code review |
+| **PENDING CI** | 0 | All have run |
+| **BLOCKED** | 1 | PR #99 requires admin action |
+| **DRAFT** | 0 | None |
+| **Total** | 21 | 21 active PRs |
+
+### Top Priority PRs (Phase A Context)
+
+| PR # | Title | Branch | Status | Days Old | Phase Target |
+|---|---|---|---|---|---|
+| #116 | Claude Code agent-tooling setup | claude/agent-tooling-setup-merged | REVIEW | 1 | A |
+| #115 | Central invitation approval flow | codex/mauseai-central-invitation-impl-20261003 | REVIEW | 1 | B |
+| #114 | Merge queue integration (16 PRs) | claude/merge-queue-integration | REVIEW | 2 | B |
+| #113 | Production-ready final checkpoint | feat/production-ready-final | REVIEW | 2 | C |
+| #112 | Production-ready CI pipeline | feat/production-final-pipeline | REVIEW | 2 | C |
 
 ## 3. Uygulama paketleri
 
