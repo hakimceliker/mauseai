@@ -15,7 +15,7 @@ describe("EvidenceValidator", () => {
 
   describe("detectSecrets()", () => {
     it("should detect API keys", () => {
-      const text = 'api_key = "sk_live_51HqLIFAnPaKwVHrW3K6ZD4X9Y2W1E3R5T7U9Q2S4V6X8Z0A"';
+      const text = 'api_key = "sk_live_REDACTED"';
       const secrets = validator.detectSecrets(text);
       expect(secrets.length).toBeGreaterThan(0);
       expect(secrets[0]).toContain("apiKey");
@@ -67,7 +67,7 @@ describe("EvidenceValidator", () => {
   describe("redactSensitiveData()", () => {
     it("should redact API keys", () => {
       const content =
-        'api_key = "sk_live_51HqLIFAnPaKwVHrW3K6ZD4X9Y2W1E3R5T7U9Q2S4V6X8Z0A"';
+        'api_key = "sk_live_REDACTED"';
       const redacted = validator.redactSensitiveData(content);
       expect(redacted).not.toContain("sk_live");
       expect(redacted).toContain("[REDACTED]");
@@ -132,7 +132,7 @@ describe("EvidenceValidator", () => {
         id: "ev-1",
         type: "ci_log",
         content:
-          'Build passed. API_KEY="sk_live_51HqLIFAnPaKwVHrW3K6ZD4X9Y2W1E3R5T7U9Q2S4V6X8Z0A"',
+          'Build passed. API_KEY="sk_live_REDACTED"',
         source: "github-actions",
         timestamp: new Date(),
       };
@@ -275,7 +275,7 @@ describe("EvidenceValidator", () => {
         {
           id: "ev-1",
           type: "ci_log",
-          content: 'CI passed. Secret: sk_live_51HqLIFAnPaKwVHrW3K6ZD4X9Y2W1E3R5T7U9Q2S4V6X8Z0A"',
+          content: 'CI passed. Secret: sk_live_REDACTED"',
           source: "github-actions",
           timestamp: new Date(),
         },

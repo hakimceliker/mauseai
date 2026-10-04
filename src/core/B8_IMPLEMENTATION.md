@@ -171,9 +171,9 @@ import { EvidenceValidator } from '@/core/evidence';
 const validator = new EvidenceValidator();
 
 const secrets = validator.detectSecrets(
-  'Password: sk_live_51HqLIFAnPaKwVHrW3K6ZD4X9Y2W1E3R5T7U9Q2S4V6X8Z0A'
+  'Password: sk_live_REDACTED'
 );
-// Returns: ["apiKey: sk_live_51HqL..."]
+// Returns: ["apiKey: sk_live_REDACTED..."]
 
 const redacted = validator.redactSensitiveData(content);
 // Returns: 'Password: [REDACTED]'
