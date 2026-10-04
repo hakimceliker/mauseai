@@ -3,7 +3,7 @@
  * B10 Phase - Detects and handles tasks that appear idle
  */
 
-import { TaskId, StepId } from '@/types/domain';
+import { TaskId, StepId } from '../../types/domain';
 import { IdleTaskInfo, TaskHealthMetrics } from '../recovery/types';
 import { TaskTimeline } from '../recovery/types';
 

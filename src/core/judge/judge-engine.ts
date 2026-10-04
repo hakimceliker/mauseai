@@ -68,7 +68,7 @@ export class JudgeEngine {
       (criterion) => !criteria[criterion]
     );
 
-    if (autoEscalateCriteria.length > 0) {
+    if (autoEscalateCriteria.length > 0 && status !== "FAIL") {
       status = "ESCALATE";
       escalationReason = `Auto-escalation triggered by: ${autoEscalateCriteria.join(", ")}`;
     }
@@ -173,10 +173,8 @@ export class JudgeEngine {
     context: TaskContext,
     expectedSha?: string
   ): Promise<boolean> {
-    if (!expectedSha) {
-      return !!context.sha && context.sha.length === 40; // Valid git SHA
-    }
-    return context.sha === expectedSha;
+    if (!/^[a-f0-9]{40}$/i.test(context.sha)) return false;
+    return expectedSha === undefined || context.sha === expectedSha;
   }
 
   /**

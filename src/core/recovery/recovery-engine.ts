@@ -3,7 +3,7 @@
  * B10 Phase - Routes errors to appropriate recovery actions
  */
 
-import { TaskId } from '@/types/domain';
+import { TaskId } from '../../types/domain';
 import {
   ErrorClassification,
   RecoveryAction,

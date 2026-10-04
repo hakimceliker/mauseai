@@ -134,7 +134,7 @@ export class EvidenceValidator {
     }
 
     // Also redact email addresses
-    redacted = redacted.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]");
+    redacted = redacted.replace(/(?<![a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]");
 
     // Redact IP addresses
     redacted = redacted.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, "[IP]");
@@ -270,8 +270,8 @@ export class EvidenceValidator {
   } {
     const types = evidence.map((e) => e.type);
 
-    const required = ["ci_log", "test_result"];
-    const optional = ["deployment_log", "review", "approval"];
+    const required: Evidence["type"][] = ["ci_log", "test_result"];
+    const optional: Evidence["type"][] = ["deployment_log", "review", "approval"];
 
     const missing = required.filter((r) => !types.includes(r));
     const hasOptional = optional.filter((o) => types.includes(o));

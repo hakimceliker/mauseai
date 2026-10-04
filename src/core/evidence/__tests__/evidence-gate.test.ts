@@ -3,6 +3,7 @@
  * B8 Phase - Testing evidence validation framework
  */
 
+import { beforeEach, describe, expect, it } from "vitest";
 import { EvidenceGate } from "../evidence-gate";
 import { Evidence } from "../../judge/types";
 

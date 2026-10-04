@@ -3,7 +3,7 @@
  * B10 Phase - Manages conflicting results from multiple agents
  */
 
-import { TaskId, AgentId } from '@/types/domain';
+import { TaskId, AgentId } from '../../types/domain';
 import {
   ConflictType,
   ConflictDetection,

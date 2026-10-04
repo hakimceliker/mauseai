@@ -3,7 +3,7 @@
  * B10 Phase - Detects stuck tasks and coordinates recovery
  */
 
-import { TaskId, StepId, AgentId } from '@/types/domain';
+import { TaskId, StepId, AgentId } from '../../types/domain';
 import {
   StuckTaskDetection,
   BlockageType,

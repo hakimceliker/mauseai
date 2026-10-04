@@ -3,7 +3,7 @@
  * B10 Phase - Error recovery, task monitoring, and result arbitration
  */
 
-import { TaskId, StepId, AgentId, CheckpointId } from '@/types/domain';
+import { TaskId, StepId, AgentId, CheckpointId } from '../../types/domain';
 
 // ============================================================================
 // Recovery Engine Types
