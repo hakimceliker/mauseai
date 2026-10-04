@@ -78,7 +78,9 @@ function checkDirectoryExists(dir: string): boolean {
 function countFilesInDirectory(dir: string): number {
   const fullPath = path.join(process.cwd(), dir);
   if (!fs.existsSync(fullPath)) return 0;
-  const files = execSync(`find ${fullPath} -type f | wc -l`, {
+  // Use proper shell escaping to prevent command injection
+  const escapedPath = fullPath.replace(/'/g, "'\\''");
+  const files = execSync(`find '${escapedPath}' -type f | wc -l`, {
     encoding: 'utf-8',
   }).trim();
   return parseInt(files, 10);

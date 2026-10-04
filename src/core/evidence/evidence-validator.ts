@@ -29,10 +29,10 @@ const SECRET_PATTERNS = {
  * Patterns that are safe to include in evidence
  */
 const SAFE_PATTERNS = {
-  ciLog: /^CI\/CD Build Log/i,
-  testResult: /^Test Results/i,
-  deploymentLog: /^Deployment Log/i,
-  commitLog: /^Commit|git log/i,
+  ciLog: /^CI\/CD Build Log$/i,
+  testResult: /^Test Results$/i,
+  deploymentLog: /^Deployment Log$/i,
+  commitLog: /^(Commit|git log)$/i,
 };
 
 /**

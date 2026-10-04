@@ -79,6 +79,26 @@ function loadEnvLocal(): CredentialsData {
   return data;
 }
 
+function sanitizeHeaders(
+  headers?: Record<string, string>
+): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined;
+  }
+
+  const sanitized: Record<string, string> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    // Only pass through safe headers, don't include authorization with real credentials
+    if (key.toLowerCase() === 'authorization') {
+      // Don't pass sensitive authorization headers in network requests
+      continue;
+    }
+    sanitized[key] = value;
+  }
+
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined;
+}
+
 async function testHttpEndpoint(
   url: string,
   headers?: Record<string, string>
@@ -93,7 +113,10 @@ async function testHttpEndpoint(
       });
     }, 5000);
 
-    const req = client.get(url, { headers, timeout: 5000 }, (res) => {
+    // Sanitize headers to prevent sending sensitive data in network requests
+    const safeHeaders = sanitizeHeaders(headers);
+
+    const req = client.get(url, { headers: safeHeaders, timeout: 5000 }, (res) => {
       clearTimeout(timeout);
       resolve({ statusCode: res.statusCode || 0 });
     });
