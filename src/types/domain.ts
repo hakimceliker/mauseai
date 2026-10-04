@@ -16,6 +16,9 @@ export type WorkflowId = string & { readonly __brand: 'WorkflowId' };
 export type StepId = string & { readonly __brand: 'StepId' };
 export type CheckpointId = string & { readonly __brand: 'CheckpointId' };
 export type AuditEventId = string & { readonly __brand: 'AuditEventId' };
+export type AgentId = string & { readonly __brand: 'AgentId' };
+export type HandoffId = string & { readonly __brand: 'HandoffId' };
+export type EvidenceRef = string & { readonly __brand: 'EvidenceRef' };
 
 // Workflow entity
 export interface Workflow {
@@ -64,6 +67,41 @@ export interface Checkpoint {
   step_id: StepId;
   state: Record<string, unknown>;
   created_at: Date;
+}
+
+// Agent
+export interface Agent {
+  id: AgentId;
+  tenant_id: TenantId;
+  name: string;
+  type: AgentType;
+  description?: string;
+  capabilities: string[];
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// Handoff - inter-agent task transfer
+export interface Handoff {
+  id: HandoffId;
+  tenant_id: TenantId;
+  source_agent_id: AgentId;
+  target_agent_id: AgentId;
+  task_id: TaskId;
+  status: HandoffStatus;
+  result?: HandoffResult;
+  context: Record<string, unknown>;
+  reason: string;
+  output?: Record<string, unknown>;
+  evidence_ref?: EvidenceRef;
+  error?: string;
+  sha: string;
+  schema_version: string;
+  initiated_at: Date;
+  completed_at?: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Audit event
