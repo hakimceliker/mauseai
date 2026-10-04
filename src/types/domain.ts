@@ -1,9 +1,14 @@
 // Core domain types - tenant-aware, audit-ready
 
-import { TaskStatus } from './enums';
+import {
+  TaskStatus,
+  AgentType,
+  HandoffStatus,
+  HandoffResult,
+} from './enums';
 
-// Re-export TaskStatus for convenient imports from domain
-export { TaskStatus };
+// Re-export frequently used enums for convenient imports from domain
+export { TaskStatus, AgentType, HandoffStatus, HandoffResult };
 
 export type TenantId = string & { readonly __brand: 'TenantId' };
 export type TaskId = string & { readonly __brand: 'TaskId' };
