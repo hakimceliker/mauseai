@@ -93,7 +93,20 @@ async function testHttpEndpoint(
       });
     }, 5000);
 
-    const req = client.get(url, { headers, timeout: 5000 }, (res) => {
+    // Sanitize headers - remove sensitive data before sending network request
+    const sanitizedHeaders: Record<string, string> = {};
+    if (headers) {
+      for (const [key, value] of Object.entries(headers)) {
+        // Only include safe header keys, skip authorization and other sensitive headers
+        if (key.toLowerCase() !== 'authorization' &&
+            !key.toLowerCase().includes('token') &&
+            !key.toLowerCase().includes('key')) {
+          sanitizedHeaders[key] = value;
+        }
+      }
+    }
+
+    const req = client.get(url, { headers: sanitizedHeaders, timeout: 5000 }, (res) => {
       clearTimeout(timeout);
       resolve({ statusCode: res.statusCode || 0 });
     });

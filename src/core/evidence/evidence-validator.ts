@@ -32,7 +32,7 @@ const SAFE_PATTERNS = {
   ciLog: /^CI\/CD Build Log/i,
   testResult: /^Test Results/i,
   deploymentLog: /^Deployment Log/i,
-  commitLog: /^Commit|git log/i,
+  commitLog: /^(Commit|git log)$/i,
 };
 
 /**
