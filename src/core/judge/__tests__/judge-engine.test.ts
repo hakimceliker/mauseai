@@ -4,7 +4,7 @@
  */
 
 import { JudgeEngine } from "../judge-engine";
-import { TaskContext, Evidence } from "../types";
+import { TaskContext, Evidence, JudgmentPolicy, JudgmentCriteria } from "../types";
 
 describe("JudgeEngine", () => {
   let engine: JudgeEngine;
@@ -256,12 +256,12 @@ describe("JudgeEngine", () => {
     });
 
     it("should register custom policy", () => {
-      const customPolicy = {
+      const customPolicy: JudgmentPolicy = {
         name: "custom",
         description: "Custom test policy",
-        requiredCriteria: ["branchCorrect", "shaUpdated"],
+        requiredCriteria: ["branchCorrect", "shaUpdated"] as (keyof JudgmentCriteria)[],
         requiresHumanApproval: false,
-        autoEscalate: [] as const,
+        autoEscalate: [],
       };
 
       engine.registerPolicy(customPolicy);

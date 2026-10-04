@@ -167,9 +167,9 @@ export class EvidenceGate {
       default: ["ci_log", "test_result"],
     };
 
-    const required = requiredByType[taskType] || requiredByType.default;
+    const required = (requiredByType[taskType] || requiredByType.default) as string[];
     const types = evidence.map((e) => e.type);
-    const missing = required.filter((r) => !types.includes(r));
+    const missing = required.filter((r) => !types.includes(r as Evidence["type"]));
 
     return {
       complete: missing.length === 0,

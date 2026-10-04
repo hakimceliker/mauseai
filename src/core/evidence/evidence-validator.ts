@@ -270,8 +270,8 @@ export class EvidenceValidator {
   } {
     const types = evidence.map((e) => e.type);
 
-    const required = ["ci_log", "test_result"];
-    const optional = ["deployment_log", "review", "approval"];
+    const required = ["ci_log", "test_result"] as const;
+    const optional = ["deployment_log", "review", "approval"] as const;
 
     const missing = required.filter((r) => !types.includes(r));
     const hasOptional = optional.filter((o) => types.includes(o));

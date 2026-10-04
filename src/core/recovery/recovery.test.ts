@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { TaskId, StepId, AgentId } from '@/types/domain';
+import { TaskId, StepId, AgentId } from '@/src/types/domain';
 import RecoveryEngine from './recovery-engine';
 import { ErrorClassification, RecoveryAction } from './types';
 import Watchdog from '../watchdog/watchdog';
