@@ -127,7 +127,7 @@ describe('Payment Adapter', () => {
 
   describe('Environment Variable Safety', () => {
     it('should not expose API keys in logs by default', async () => {
-      process.env.PAYMENT_API_KEY = 'sk_test_super_secret_key';
+      process.env.PAYMENT_API_KEY = 'sk_test_REDACTED';
       const consoleSpy = vi.spyOn(console, 'log');
 
       const adapter = createPaymentAdapter();
@@ -137,14 +137,14 @@ describe('Payment Adapter', () => {
       const logs = consoleSpy.mock.calls
         .map((call) => call.join(' '))
         .join('\n');
-      expect(logs).not.toContain('sk_test_super_secret_key');
+      expect(logs).not.toContain('sk_test_REDACTED');
 
       consoleSpy.mockRestore();
     });
 
     it('should load API key from environment variable', () => {
       process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
-      process.env.PAYMENT_API_KEY = 'sk_test_valid_key';
+      process.env.PAYMENT_API_KEY = 'sk_test_REDACTED';
       // Should not throw
       expect(() => createPaymentAdapter()).not.toThrow();
     });
@@ -153,7 +153,7 @@ describe('Payment Adapter', () => {
   describe('Stripe Provider', () => {
     it('creates intents, refunds, reads balance, and verifies webhooks', async () => {
       process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
-      process.env.PAYMENT_API_KEY = 'sk_test_key';
+      process.env.PAYMENT_API_KEY = 'sk_test_REDACTED';
       process.env.PAYMENT_WEBHOOK_SECRET = 'whsec_test';
       const fetchMock = vi.fn()
         .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'pi_1', amount: 1200, currency: 'usd', status: 'requires_payment_method', created: 1700000000 }), { status: 200 }))
@@ -180,7 +180,7 @@ describe('Payment Adapter', () => {
   describe('Configuration Validation', () => {
     it('should handle missing PAYMENT_WEBHOOK_SECRET gracefully', () => {
       process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
-      process.env.PAYMENT_API_KEY = 'sk_test_key';
+      process.env.PAYMENT_API_KEY = 'sk_test_REDACTED';
       process.env.PAYMENT_WEBHOOK_SECRET = '';
 
       expect(() => createPaymentAdapter()).not.toThrow();

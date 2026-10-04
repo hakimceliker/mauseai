@@ -11,7 +11,7 @@ describe('Stripe sandbox guard', () => {
   });
   it('rejects live credentials before provider creation', () => {
     process.env.PAYMENT_PROVIDER_TYPE = 'stripe';
-    process.env.PAYMENT_API_KEY = 'sk_live_never-log-this';
+    process.env.PAYMENT_API_KEY = 'sk_live_REDACTED';
     expect(() => createPaymentAdapter()).toThrow('live_mode_not_approved');
   });
 });
