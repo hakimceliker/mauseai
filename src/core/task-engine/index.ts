@@ -12,8 +12,8 @@ export type {
   StatusReport,
 } from "./task-engine";
 
-export { ITaskStore, InMemoryTaskStore, PostgresTaskStore } from "./task-store";
-export type { TaskFilterOptions } from "./task-store";
+export { InMemoryTaskStore, PostgresTaskStore } from "./task-store";
+export type { ITaskStore, TaskFilterOptions } from "./task-store";
 
 export { StateMachine } from "./state-machine";
 export type { TransitionValidation, TransitionGuards } from "./state-machine";

@@ -246,7 +246,7 @@ export class PostgresTaskStore implements ITaskStore {
       throw new Error(`Failed to list tasks: ${error.message}`);
     }
 
-    return (data || []).map((row) => this.mapRowToTask(row));
+    return (data || []).map((row: Record<string, unknown>) => this.mapRowToTask(row));
   }
 
   async deleteTask(taskId: string): Promise<void> {
@@ -297,7 +297,7 @@ export class PostgresTaskStore implements ITaskStore {
       review: row.review as any,
       judge: row.judge as any,
       humanApprovalRequired: row.human_approval_required as boolean,
-      humanApprovalStatus: row.human_approval_status as string,
+      humanApprovalStatus: row.human_approval_status as TaskType["humanApprovalStatus"],
       blockerReason: row.blocker_reason as string | undefined,
       output: row.output as unknown,
       auditTraceId: row.audit_trace_id as string,
