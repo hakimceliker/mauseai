@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Agent tooling guard
+        run: npm run check:agent-tooling
       - name: Install dependencies
         run: npm ci
       - name: Lint
@@ -44,6 +46,12 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Install locked MCP dependencies
+        run: npm ci --ignore-scripts --prefix tools/supabase-mcp
+      - name: Verify MCP binary version
+        run: node tools/supabase-mcp/node_modules/@supabase/mcp-server-supabase/dist/cli.js --version
+      - name: Audit locked MCP dependencies
+        run: npm audit --prefix tools/supabase-mcp --audit-level=high
       - name: npm audit
         run: npm audit --audit-level=high
 

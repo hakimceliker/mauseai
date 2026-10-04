@@ -15,4 +15,4 @@ mauseai uses Inngest (SaaS, no local container) for background functions under `
 4. Add a test mirroring the existing function tests (vitest).
 5. Confirm required env vars (`INNGEST_EVENT_KEY`, and `INNGEST_SIGNING_KEY` if webhook verification is enabled) are documented in `.env.example` if the function needs new config.
 
-Inngest is entirely cloud-hosted here — there's no local Inngest container, so local testing relies on the Inngest dev server (`npx inngest-cli dev`) pointed at the running Next.js app.
+Inngest is entirely cloud-hosted here — there's no local Inngest container, so local testing relies on the Inngest dev server (install a reviewed, exact `inngest-cli` version with a lockfile and invoke its local binary) pointed at the running Next.js app.

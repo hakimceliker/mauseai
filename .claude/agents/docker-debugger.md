@@ -11,5 +11,5 @@ For every "partially working" report:
 2. Check the container's actual environment against `.env.example`: are `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`, `INNGEST_EVENT_KEY` set to real values, or still placeholders?
 3. Check `AUTH_PROVIDER` and `SUPABASE_AUTH_ENABLED` — if `AUTH_PROVIDER=mock` but the app is being accessed expecting real auth, that's a mismatch, not a bug.
 4. Check `PAYMENT_PROVIDER_TYPE`/`NOTIFICATION_TYPE`/other integration env vars — anything left at `mock` degrades silently rather than erroring, which looks like "partially working."
-5. Note there is no `HEALTHCHECK` in the Dockerfile and no orchestration hitting `app/api/health` — so container "looks up" even when a dependency is unreachable; don't trust container status alone.
+5. Note there is no `HEALTHCHECK` in the Dockerfile and no orchestration hitting `/api/health` (implemented in `src/app/api/health/route.ts`) — so container "looks up" even when a dependency is unreachable; don't trust container status alone.
 6. Report concrete findings: which env vars are missing/placeholder, which dependency is unreachable, and whether a docker-compose.yml needs to be written for this to work as the user expects.

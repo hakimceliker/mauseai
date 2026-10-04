@@ -1,0 +1,8 @@
+{
+  "name": "mouseai-supabase-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@supabase/mcp-server-supabase": "0.13.0"
+  }
+}

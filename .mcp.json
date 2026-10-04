@@ -2,9 +2,11 @@
   "mcpServers": {
     "supabase": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server-supabase"],
-      "comment": "Migration, RLS advisor ve log okuma için. Proje kimlik bilgileri (SUPABASE_ACCESS_TOKEN vb.) kendi ortamınızda ayarlanmalı."
+      "command": "node",
+      "args": [
+        "tools/supabase-mcp/node_modules/@supabase/mcp-server-supabase/dist/cli.js"
+      ],
+      "comment": "Önce npm ci --ignore-scripts --prefix tools/supabase-mcp çalıştırın. MCP 0.13.0 ve geçişli bağımlılıklar integrity içeren lockfile ile sabittir. SUPABASE_ACCESS_TOKEN yalnız kendi ortamınızda ayarlanmalı."
     }
   }
 }
