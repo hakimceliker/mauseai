@@ -129,6 +129,8 @@ async function testHttpEndpoint(
     // Declare req variable before use in timeout handler (fix temporal dead zone)
     let req: http.ClientRequest | https.ClientRequest;
     let resolved = false;
+    let bodySize = 0;
+    const maxBodySize = 1024 * 1024; // 1MB limit
 
     const timeout = setTimeout(() => {
       if (!resolved) {
@@ -139,22 +141,25 @@ async function testHttpEndpoint(
     }, 5000);
 
     req = client.get(url, { headers, timeout: 5000 }, (res) => {
-      // Consume response body to prevent socket hang-ups
-      res.on('data', () => {});
+      // Consume response body with size limit to prevent SSRF attacks
+      res.on('data', (chunk) => {
+        bodySize += chunk.length;
+        // Reject oversized responses to prevent resource exhaustion
+        if (bodySize > maxBodySize) {
+          if (!resolved) {
+            resolved = true;
+            req.destroy();
+            clearTimeout(timeout);
+            resolve({ statusCode: 0, error: 'Response body too large (>1MB)' });
+          }
+        }
+      });
 
       res.on('end', () => {
         if (!resolved) {
           resolved = true;
           clearTimeout(timeout);
           resolve({ statusCode: res.statusCode || 0 });
-        }
-      });
-
-      res.on('error', (err) => {
-        if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          resolve({ statusCode: 0, error: err.message });
         }
       });
     });
