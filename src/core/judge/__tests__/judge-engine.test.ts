@@ -3,6 +3,7 @@
  * B8 Phase - Testing 10 criteria validator
  */
 
+import { beforeEach, describe, expect, it } from "vitest";
 import { JudgeEngine } from "../judge-engine";
 import { TaskContext, Evidence, JudgmentPolicy, JudgmentCriteria } from "../types";
 
