@@ -1,10 +1,14 @@
 # PR #118 Fail-Closed Recheck — 2026-10-06
 
-**Repository:** `hakimceliker/mauseai`  
-**Branch:** `pr/final-cleanup-and-signatures`  
-**Verified code head:** `053df6b8e3abee5a130dc5750f1dec4e7407a1ad`  
-**Current evidence head:** `57323f989d1c1774a3465308986683c64e669b24`  
-**PR:** https://github.com/hakimceliker/mauseai/pull/118  
+**Repository:** `hakimceliker/mauseai`
+
+**Branch:** `pr/final-cleanup-and-signatures`
+
+**Verified code head:** `053df6b8e3abee5a130dc5750f1dec4e7407a1ad`
+
+**Current evidence head:** `57323f989d1c1774a3465308986683c64e669b24`
+
+**PR:** https://github.com/hakimceliker/mauseai/pull/118
 
 ## Changes verified
 
