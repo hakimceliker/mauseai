@@ -14,6 +14,7 @@ import * as path from 'path';
 import { execSync } from 'child_process';
 import * as https from 'https';
 import * as http from 'http';
+import { pathToFileURL } from 'node:url';
 
 interface CredentialValidation {
   provider: string;
@@ -81,32 +82,28 @@ function loadEnvLocal(): Record<string, string> {
   return data;
 }
 
-function isAllowedHost(hostname: string): boolean {
-  // Whitelist allowed hosts
-  const allowedHosts = ['localhost', '127.0.0.1', 'supabase.co'];
-  if (allowedHosts.includes(hostname) || hostname.endsWith('.supabase.co')) {
+export function isAllowedHost(hostname: string): boolean {
+  const normalized = hostname.toLowerCase().replace(/\.$/, '');
+
+  // Only the explicitly supported local and Supabase endpoints are reachable.
+  // Unknown domains must fail closed; otherwise this validator becomes an SSRF
+  // primitive even when private RFC1918 addresses are rejected.
+  const allowedHosts = ['localhost', '127.0.0.1', '::1', '[::1]', 'supabase.co'];
+  if (allowedHosts.includes(normalized) || normalized.endsWith('.supabase.co')) {
     return true;
   }
 
-  // Block private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
-  const parts = hostname.split('.');
+  // Reject every other IP literal, including private/link-local/metadata
+  // addresses. The URL parser normalizes bracketed IPv6 hostnames for us.
+  const parts = normalized.split('.');
   if (parts.length === 4) {
     const nums = parts.map((p) => parseInt(p, 10));
-    if (nums.some(isNaN)) {
-      // Not an IP address, likely a domain
-      return true;
+    if (nums.every((part, index) => Number.isInteger(part) && part >= 0 && part <= 255 && String(part) === parts[index])) {
+      return false;
     }
-
-    const [first, second] = nums;
-    // Block 10.0.0.0/8
-    if (first === 10) return false;
-    // Block 172.16.0.0/12
-    if (first === 172 && second >= 16 && second <= 31) return false;
-    // Block 192.168.0.0/16
-    if (first === 192 && second === 168) return false;
   }
 
-  return true;
+  return false;
 }
 
 async function testHttpEndpoint(
@@ -114,20 +111,21 @@ async function testHttpEndpoint(
   headers?: Record<string, string>
 ): Promise<{ statusCode: number; error?: string }> {
   // Validate URL to prevent SSRF attacks
+  let endpoint: URL;
   try {
-    const urlObj = new URL(url);
-    if (!isAllowedHost(urlObj.hostname)) {
-      return { statusCode: 0, error: 'Access to private IP ranges is not allowed' };
+    endpoint = new URL(url);
+    if (!['http:', 'https:'].includes(endpoint.protocol) || !isAllowedHost(endpoint.hostname)) {
+      return { statusCode: 0, error: 'Endpoint host or protocol is not allowlisted' };
     }
   } catch {
     return { statusCode: 0, error: 'Invalid URL format' };
   }
 
   return new Promise((resolve) => {
-    const client = url.startsWith('https') ? https : http;
+    const client = endpoint.protocol === 'https:' ? https : http;
 
     // Declare req variable before use in timeout handler (fix temporal dead zone)
-    let req: http.ClientRequest | https.ClientRequest;
+    let req: http.ClientRequest;
     let resolved = false;
     let bodySize = 0;
     const maxBodySize = 1024 * 1024; // 1MB limit
@@ -140,7 +138,7 @@ async function testHttpEndpoint(
       }
     }, 5000);
 
-    req = client.get(url, { headers, timeout: 5000 }, (res) => {
+    req = client.get(endpoint, { headers, timeout: 5000 }, (res) => {
       // Consume response body with size limit to prevent SSRF attacks
       res.on('data', (chunk) => {
         bodySize += chunk.length;
@@ -164,7 +162,7 @@ async function testHttpEndpoint(
       });
     });
 
-    req.on('error', (err) => {
+    req.on('error', (err: Error) => {
       if (!resolved) {
         resolved = true;
         clearTimeout(timeout);
@@ -530,4 +528,6 @@ async function main() {
   }
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
