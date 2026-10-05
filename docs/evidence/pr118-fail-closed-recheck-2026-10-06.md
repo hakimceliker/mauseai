@@ -2,7 +2,8 @@
 
 **Repository:** `hakimceliker/mauseai`  
 **Branch:** `pr/final-cleanup-and-signatures`  
-**Verified head:** `053df6b8e3abee5a130dc5750f1dec4e7407a1ad`  
+**Verified code head:** `053df6b8e3abee5a130dc5750f1dec4e7407a1ad`  
+**Current evidence head:** `57323f989d1c1774a3465308986683c64e669b24`  
 **PR:** https://github.com/hakimceliker/mauseai/pull/118  
 
 ## Changes verified
@@ -19,9 +20,9 @@
 | Local Vitest | 41 files passed; 571 tests passed; 16 skipped |
 | Local TypeScript check | PASS |
 | EvidenceGate large-content regression | PASS |
-| GitHub CI run 288 | PASS |
-| GitHub CodeQL run 144 | PASS |
-| Vercel status for verified head | PASS |
+| GitHub CI run 289 (`57323f9`) | PASS |
+| GitHub CodeQL run 145 (`57323f9`) | PASS |
+| Vercel status for current evidence head | PASS |
 | Independent maintainer review | **MISSING** |
 | Production/Auth/RLS/Inngest/provider/pilot evidence | **NOT RUN / BLOCKED** |
 
