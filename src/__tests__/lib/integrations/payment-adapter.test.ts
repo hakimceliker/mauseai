@@ -89,6 +89,24 @@ describe('Payment Adapter', () => {
       expect(transaction.createdAt).toBeDefined();
     });
 
+    it('does not log customer or order data in mock payment telemetry', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+      const adapter = createPaymentAdapter();
+      await adapter.processPayment(9999, 'USD', 'customer-sensitive', 'Private order', {
+        orderId: 'order-sensitive',
+        tenantId: 'tenant-sensitive',
+      });
+      await adapter.refund('txn-sensitive', 5000);
+
+      const logs = consoleSpy.mock.calls.flat().join(' ');
+      expect(logs).not.toContain('customer-sensitive');
+      expect(logs).not.toContain('Private order');
+      expect(logs).not.toContain('order-sensitive');
+      expect(logs).not.toContain('tenant-sensitive');
+      expect(logs).not.toContain('txn-sensitive');
+      consoleSpy.mockRestore();
+    });
+
     it('should refund successfully', async () => {
       const adapter = createPaymentAdapter();
       const refund = await adapter.refund('txn_123', 5000);

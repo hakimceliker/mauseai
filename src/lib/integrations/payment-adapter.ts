@@ -33,14 +33,9 @@ class MockPaymentProvider implements IPaymentProvider {
     description?: string,
     metadata?: Record<string, unknown>
   ): Promise<PaymentTransaction> {
-    // Mock implementation logs and returns success
-    console.log('[MOCK] Processing payment', {
-      amount,
-      currency,
-      customerId,
-      description,
-      metadata,
-    });
+    // Keep local mock telemetry non-sensitive: customer IDs, descriptions, and
+    // metadata can contain tenant or user data and must not enter application logs.
+    console.log('[MOCK] Processing payment', { amount, currency });
 
     return {
       id: `mock_txn_${Date.now()}`,
@@ -55,7 +50,8 @@ class MockPaymentProvider implements IPaymentProvider {
   }
 
   async refund(transactionId: string, amount?: number): Promise<RefundResult> {
-    console.log('[MOCK] Processing refund', { transactionId, amount });
+    // Transaction identifiers can be correlated with customer activity; do not log them.
+    console.log('[MOCK] Processing refund');
 
     return {
       refundId: `mock_ref_${Date.now()}`,
