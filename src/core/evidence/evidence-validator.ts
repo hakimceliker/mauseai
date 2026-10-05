@@ -134,7 +134,12 @@ export class EvidenceValidator {
     }
 
     // Also redact email addresses
-    redacted = redacted.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL]");
+    // Bound local/domain segments so a long non-email token cannot trigger
+    // quadratic backtracking during evidence redaction.
+    redacted = redacted.replace(
+      /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[a-zA-Z0-9-]{1,63}(?:\.[a-zA-Z0-9-]{1,63})*\.[a-zA-Z]{2,63}/g,
+      "[EMAIL]"
+    );
 
     // Redact IP addresses
     redacted = redacted.replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, "[IP]");
