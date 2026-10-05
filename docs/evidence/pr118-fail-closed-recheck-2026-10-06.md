@@ -23,6 +23,7 @@
 |---|---|
 | Local Vitest | 41 files passed; 571 tests passed; 16 skipped |
 | Local TypeScript check | PASS |
+| Local `npm run verify` | PASS: lint (0 errors, 75 existing warnings), typecheck, tests, production build |
 | EvidenceGate large-content regression | PASS |
 | GitHub CI run 289 (`57323f9`) | PASS |
 | GitHub CodeQL run 145 (`57323f9`) | PASS |
