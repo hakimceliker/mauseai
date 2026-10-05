@@ -11,7 +11,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync, spawn } from 'child_process';
+import { execSync } from 'child_process';
 import * as https from 'https';
 import * as http from 'http';
 
@@ -418,9 +418,13 @@ function generateReport(
   const allCredentialsConfigured = credentials.every((c) => c.configured);
   const allCredentialsReachable = credentials.every((c) => c.reachable !== false);
   const testSummary =
-    failed === 0 && errors === 0
-      ? `READY: All ${passed} tests passed`
-      : `ISSUES: ${failed} failed, ${errors} errors`;
+    skipped > 0
+      ? `NOT_ACCEPTED: ${skipped} tests skipped; no acceptance decision`
+      : failed > 0 || errors > 0
+        ? `ISSUES: ${failed} failed, ${errors} errors`
+        : passed > 0 && passed === tests.length
+          ? `PASS: All ${passed} tests passed`
+          : 'NOT_ACCEPTED: no executable test evidence was produced';
 
   return {
     timestamp: new Date().toISOString(),
@@ -519,7 +523,7 @@ async function main() {
     saveReportToFile(report);
 
     // Exit with appropriate code
-    process.exit(report.failed > 0 || report.errors > 0 ? 1 : 0);
+    process.exit(report.failed > 0 || report.errors > 0 || report.skipped > 0 ? 1 : 0);
   } catch (error) {
     log(`Fatal error: ${(error as Error).message}`, 'red');
     process.exit(1);
