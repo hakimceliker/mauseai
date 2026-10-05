@@ -324,7 +324,7 @@ function validateCriteria(): ClosureCriterion[] {
         passed = checkFileExists('src/integrations/anthropic.ts');
         evidence = passed ? 'Anthropic integration module found' : 'Missing Anthropic integration';
         break;
-      case 17:
+      case 17: {
         const branches = [
           'claude/phase-b1-contracts',
           'claude/phase-b2-orchestrator',
@@ -342,6 +342,7 @@ function validateCriteria(): ClosureCriterion[] {
         passed = mergedBranches === branches.length;
         evidence = `${mergedBranches}/${branches.length} Phase B branches merged`;
         break;
+      }
       case 18:
         passed = executeValidation('npm run build');
         evidence = passed ? 'Build successful' : 'Build failed';
