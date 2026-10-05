@@ -3,8 +3,11 @@
  * B8 Phase - Testing secret detection and redaction
  */
 
+import { beforeEach, describe, expect, it } from "vitest";
 import { EvidenceValidator } from "../evidence-validator";
 import { Evidence } from "../../judge/types";
+
+const TEST_API_KEY = "sk_live_" + "x".repeat(32);
 
 describe("EvidenceValidator", () => {
   let validator: EvidenceValidator;
@@ -15,7 +18,7 @@ describe("EvidenceValidator", () => {
 
   describe("detectSecrets()", () => {
     it("should detect API keys", () => {
-      const text = 'api_key = "sk_live_REDACTED"';
+      const text = `api_key = "${TEST_API_KEY}"`;
       const secrets = validator.detectSecrets(text);
       expect(secrets.length).toBeGreaterThan(0);
       expect(secrets[0]).toContain("apiKey");
@@ -33,21 +36,21 @@ describe("EvidenceValidator", () => {
         "token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
       const secrets = validator.detectSecrets(text);
       expect(secrets.length).toBeGreaterThan(0);
-      expect(secrets[0]).toContain("jwtToken");
+      expect(secrets.some((secret) => secret.startsWith("jwtToken:"))).toBe(true);
     });
 
     it("should detect GitHub tokens", () => {
       const text = "github_token = ghp_1234567890123456789012345678901234567890";
       const secrets = validator.detectSecrets(text);
       expect(secrets.length).toBeGreaterThan(0);
-      expect(secrets[0]).toContain("githubToken");
+      expect(secrets.some((secret) => secret.startsWith("githubToken:"))).toBe(true);
     });
 
     it("should detect MongoDB URIs", () => {
       const text = "mongodb://user:password@mongodb.example.com:27017/database";
       const secrets = validator.detectSecrets(text);
       expect(secrets.length).toBeGreaterThan(0);
-      expect(secrets[0]).toContain("mongoUri");
+      expect(secrets.some((secret) => secret.startsWith("mongoUri:"))).toBe(true);
     });
 
     it("should detect passwords", () => {
@@ -67,7 +70,7 @@ describe("EvidenceValidator", () => {
   describe("redactSensitiveData()", () => {
     it("should redact API keys", () => {
       const content =
-        'api_key = "sk_live_REDACTED"';
+        `api_key = "${TEST_API_KEY}"`;
       const redacted = validator.redactSensitiveData(content);
       expect(redacted).not.toContain("sk_live");
       expect(redacted).toContain("[REDACTED]");
@@ -132,7 +135,7 @@ describe("EvidenceValidator", () => {
         id: "ev-1",
         type: "ci_log",
         content:
-          'Build passed. API_KEY="sk_live_REDACTED"',
+          `Build passed. API_KEY="${TEST_API_KEY}"`,
         source: "github-actions",
         timestamp: new Date(),
       };
@@ -275,7 +278,7 @@ describe("EvidenceValidator", () => {
         {
           id: "ev-1",
           type: "ci_log",
-          content: 'CI passed. Secret: sk_live_REDACTED"',
+          content: `CI passed. Secret: ${TEST_API_KEY}`,
           source: "github-actions",
           timestamp: new Date(),
         },

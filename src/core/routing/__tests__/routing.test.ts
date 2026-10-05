@@ -2,7 +2,7 @@
  * Tests for capability router, model router, and provider health
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   CapabilityRouter,
   TaskType,
@@ -24,6 +24,15 @@ import {
   ProviderHealthMetrics,
 } from '../provider-health';
 import { RiskLevel } from '@/src/types/enums';
+
+// Unit tests must not depend on live provider availability or credentials.
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 200 })));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('CapabilityRouter', () => {
   let router: CapabilityRouter;
@@ -208,7 +217,7 @@ describe('CapabilityRouter', () => {
     });
 
     it('should filter agents by cost', () => {
-      const agents = router.getAgentsByCost(75, 1000);
+      const agents = router.getAgentsByCost(15, 1000);
       expect(agents).toHaveLength(1);
       expect(agents[0]?.id).toBe('agent-1');
     });

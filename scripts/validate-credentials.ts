@@ -1,9 +1,15 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --experimental-strip-types
+
+// Usage: npm run validate:credentials -- --supabase-url https://<project-ref>.supabase.co
+//        --ollama-url http://127.0.0.1:11434
+// Custom destinations must be explicitly supplied and match .env.local.
+// These probes check reachability only; they never authenticate with API keys.
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
+import { pathToFileURL } from 'url';
 
 interface ValidationResult {
   provider: string;
@@ -11,6 +17,7 @@ interface ValidationResult {
   reachable?: boolean;
   statusCode?: number;
   error?: string;
+  note?: string;
 }
 
 interface CredentialsData {
@@ -79,29 +86,28 @@ function loadEnvLocal(): CredentialsData {
   return data;
 }
 
-function sanitizeHeaders(
-  headers?: Record<string, string>
-): Record<string, string> | undefined {
-  if (!headers) {
-    return undefined;
+// Config files contain secrets and must not supply network request destinations.
+// Custom probes require an explicit CLI URL as well as a matching configured URL.
+export function approvedProbeUrl(provider: 'supabase' | 'ollama', input: string): string {
+  const url = new URL(input);
+  if (url.username || url.password || url.search || url.hash || url.pathname !== '/') {
+    throw new Error('Probe URL must be a bare origin without credentials, query or fragment');
   }
-
-  const sanitized: Record<string, string> = {};
-  for (const [key, value] of Object.entries(headers)) {
-    // Only pass through safe headers, don't include authorization with real credentials
-    if (key.toLowerCase() === 'authorization') {
-      // Don't pass sensitive authorization headers in network requests
-      continue;
+  if (provider === 'supabase') {
+    if (url.protocol !== 'https:' || url.port || !/^[a-z0-9]{20}\.supabase\.co$/.test(url.hostname)) {
+      throw new Error('Supabase probe requires an HTTPS project origin under supabase.co');
     }
-    sanitized[key] = value;
+    return url.origin;
   }
-
-  return Object.keys(sanitized).length > 0 ? sanitized : undefined;
+  if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
+    || !['11434', '8080'].includes(url.port)) {
+    throw new Error('Ollama probe requires a loopback origin on port 11434 or 8080');
+  }
+  return `${url.origin}/api/tags`;
 }
 
 async function testHttpEndpoint(
-  url: string,
-  headers?: Record<string, string>
+  url: string
 ): Promise<{ statusCode: number; error?: string }> {
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
@@ -113,25 +119,24 @@ async function testHttpEndpoint(
       });
     }, 5000);
 
-    // Sanitize headers to prevent sending sensitive data in network requests
-    const safeHeaders = sanitizeHeaders(headers);
-
-    const req = client.get(url, { headers: safeHeaders, timeout: 5000 }, (res) => {
+    // No credential headers, body, or automatic redirect following.
+    const req = client.get(url, { timeout: 5000 }, (res) => {
+      res.resume();
       clearTimeout(timeout);
       resolve({ statusCode: res.statusCode || 0 });
     });
 
-    req.on('error', (err) => {
+    req.on('error', () => {
       clearTimeout(timeout);
       resolve({
         statusCode: 0,
-        error: err.message,
+        error: 'Network request failed',
       });
     });
   });
 }
 
-async function validateSupabase(data: CredentialsData): Promise<ValidationResult> {
+export async function validateSupabase(data: CredentialsData, explicitUrl?: string): Promise<ValidationResult> {
   if (!data.supabaseUrl || !data.supabaseAnonKey) {
     return {
       provider: 'Supabase',
@@ -140,11 +145,18 @@ async function validateSupabase(data: CredentialsData): Promise<ValidationResult
   }
 
   try {
-    const result = await testHttpEndpoint(data.supabaseUrl);
+    if (!explicitUrl) {
+      return { provider: 'Supabase', configured: true, note: 'Reachability not checked; supply --supabase-url with the configured project origin' };
+    }
+    const probeUrl = approvedProbeUrl('supabase', explicitUrl);
+    if (new URL(data.supabaseUrl).href !== new URL(probeUrl).href) {
+      throw new Error('Explicit Supabase origin does not match configuration');
+    }
+    const result = await testHttpEndpoint(probeUrl);
     return {
       provider: 'Supabase',
       configured: true,
-      reachable: result.statusCode > 0 && result.statusCode < 500,
+      reachable: (result.statusCode >= 200 && result.statusCode < 300) || (result.statusCode >= 400 && result.statusCode < 500),
       statusCode: result.statusCode,
       error: result.error,
     };
@@ -168,9 +180,7 @@ async function validateInngest(data: CredentialsData): Promise<ValidationResult>
 
   try {
     // Inngest API endpoint for health check
-    const result = await testHttpEndpoint('https://api.inngest.com/health', {
-      authorization: `Bearer ${data.inngestKey}`,
-    });
+    const result = await testHttpEndpoint('https://api.inngest.com/health');
 
     return {
       provider: 'Inngest',
@@ -199,9 +209,7 @@ async function validateOpenAI(data: CredentialsData): Promise<ValidationResult> 
 
   try {
     // Test with a lightweight endpoint
-    const result = await testHttpEndpoint('https://api.openai.com/v1/models', {
-      authorization: `Bearer ${data.openaiKey}`,
-    });
+    const result = await testHttpEndpoint('https://api.openai.com/v1/models');
 
     return {
       provider: 'OpenAI',
@@ -234,12 +242,12 @@ async function validateAnthropic(data: CredentialsData): Promise<ValidationResul
   return {
     provider: 'Anthropic',
     configured: true,
-    reachable: isValidFormat,
+    note: isValidFormat ? 'Key format checked locally; reachability and authentication not checked' : undefined,
     error: isValidFormat ? undefined : 'Invalid API key format',
   };
 }
 
-async function validateOllama(data: CredentialsData): Promise<ValidationResult> {
+export async function validateOllama(data: CredentialsData, explicitUrl?: string): Promise<ValidationResult> {
   if (!data.ollamaUrl) {
     return {
       provider: 'Ollama (Local AI)',
@@ -248,7 +256,14 @@ async function validateOllama(data: CredentialsData): Promise<ValidationResult> 
   }
 
   try {
-    const result = await testHttpEndpoint(`${data.ollamaUrl}/api/tags`);
+    if (!explicitUrl) {
+      return { provider: 'Ollama (Local AI)', configured: true, note: 'Reachability not checked; supply --ollama-url with the configured loopback origin' };
+    }
+    const probeUrl = approvedProbeUrl('ollama', explicitUrl);
+    if (new URL(data.ollamaUrl).href !== new URL(explicitUrl).href) {
+      throw new Error('Explicit Ollama origin does not match configuration');
+    }
+    const result = await testHttpEndpoint(probeUrl);
 
     return {
       provider: 'Ollama (Local AI)',
@@ -273,14 +288,22 @@ async function main() {
 
   const data = loadEnvLocal();
   const results: ValidationResult[] = [];
+  const args = process.argv.slice(2);
+  function option(name: string): string | undefined {
+    const index = args.indexOf(name);
+    if (index < 0) return undefined;
+    const value = args[index + 1];
+    if (!value || value.startsWith('--')) throw new Error(`Missing value for ${name}`);
+    return value;
+  }
 
   // Run all validations in parallel
   const [supabase, inngest, openai, anthropic, ollama] = await Promise.all([
-    validateSupabase(data),
+    validateSupabase(data, option('--supabase-url')),
     validateInngest(data),
     validateOpenAI(data),
     validateAnthropic(data),
-    validateOllama(data),
+    validateOllama(data, option('--ollama-url')),
   ]);
 
   results.push(supabase, inngest, openai, anthropic, ollama);
@@ -295,7 +318,10 @@ async function main() {
     } else {
       allConfigured = true;
 
-      if (result.reachable) {
+      if (result.reachable === undefined && !result.error) {
+        allReachable = false;
+        log(`○ ${result.provider}: ${result.note}`, 'yellow');
+      } else if (result.reachable) {
         const statusMsg = result.statusCode ? ` (${result.statusCode})` : '';
         log(`✓ ${result.provider}: reachable${statusMsg}`, 'green');
       } else {
@@ -316,6 +342,7 @@ async function main() {
       configured: r.configured,
       reachable: r.reachable ?? null,
       statusCode: r.statusCode ?? null,
+      note: r.note ?? null,
     })),
     summary: {
       anyConfigured: allConfigured,
@@ -326,10 +353,10 @@ async function main() {
   console.log(JSON.stringify(summary, null, 2));
 
   if (allConfigured && allReachable) {
-    log('All validated credentials are reachable!', 'green');
+    log('Configured endpoints are reachable; API key authentication was not tested.', 'green');
     process.exit(0);
   } else if (allConfigured && !allReachable) {
-    log('Some credentials are not reachable. Check your network and API keys.', 'red');
+    log('Reachability checks failed or remain incomplete; see provider results.', 'red');
     process.exit(1);
   } else {
     log('Validation complete. Some providers not configured.', 'yellow');
@@ -337,7 +364,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  log(`Validation error: ${err.message}`, 'red');
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch(() => {
+    log('Validation failed; check configuration and probe arguments.', 'red');
+    process.exit(1);
+  });
+}

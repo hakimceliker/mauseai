@@ -159,7 +159,7 @@ export class EvidenceGate {
     complete: boolean;
     missing: string[];
   } {
-    const requiredByType: Record<string, string[]> = {
+    const requiredByType: Record<string, Evidence["type"][]> = {
       deployment: ["ci_log", "test_result", "deployment_log"],
       security: ["ci_log", "test_result", "review"],
       feature: ["ci_log", "test_result"],
