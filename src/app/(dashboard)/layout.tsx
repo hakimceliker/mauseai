@@ -15,7 +15,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Link href="/operations#reports" className="mouseai-nav-link"><span className="mouseai-nav-glyph">R</span>Raporlar</Link>
           <Link href="/operations#settings" className="mouseai-nav-link"><span className="mouseai-nav-glyph">S</span>Ayarlar</Link>
         </nav>
-        <div className="mouseai-sidebar-footer"><strong>Daha fazlasını başarmaya hazır mısın?</strong><div className="mouseai-progress"><span style={{ width: '72%' }} /></div><small>Bu ay 342 görev tamamlandı</small></div>
+        <div className="mouseai-sidebar-footer"><strong>Çalışma alanın hazır.</strong><small>Gerçek görev ve kabul kanıtları oluşturuldukça burada görünecek.</small></div>
       </aside>
       <div className="mouseai-content">
         <header className="mouseai-topbar">

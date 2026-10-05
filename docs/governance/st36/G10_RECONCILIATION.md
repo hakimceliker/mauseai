@@ -11,7 +11,7 @@
 |---|---|---|
 | [`docs/pilot/MOUSE_G10_PILOT_CHARTER.md`](../../pilot/MOUSE_G10_PILOT_CHARTER.md) | Two pilot scenarios, paired baseline method, evidence and decision states | Measurement design; no observed result |
 | [`docs/pilot/MOUSE_G10_PILOT_SCENARIOS.json`](../../pilot/MOUSE_G10_PILOT_SCENARIOS.json) | Machine-readable scenario register | Customer, dates, samples and results are null |
-| [`docs/kpi/MOUSE_G10_KPI_CARDS.json`](../../kpi/MOUSE_G10_KPI_CARDS.json) | Eight atomic KPI cards and missing-data behavior | Baseline, target, owner, window are null |
+| [`docs/kpi/MOUSE_G10_KPI_CARDS.json`](../../kpi/MOUSE_G10_KPI_CARDS.json) | Nine atomic KPI cards and missing-data behavior | Baseline, target, owner, window are null |
 | [`docs/finance/MOUSE_G10_FINANCE_MODEL.md`](../../finance/MOUSE_G10_FINANCE_MODEL.md) | Financial model contract and scenario rules | No forecast amounts or financing conclusion |
 | [`docs/finance/MOUSE_G10_13_WEEK_CASH.csv`](../../finance/MOUSE_G10_13_WEEK_CASH.csv) | 13-week cash input table | All weeks require inputs |
 
@@ -30,7 +30,7 @@
 ## Validation outcome
 
 Structural validation must confirm that the JSON files parse, both scenario IDs are
-present, eight KPI cards are present, and the cash table has exactly 13 weeks. The
+present, nine KPI cards are present, and the cash table has exactly 13 weeks. The
 expected result is `STRUCTURE_VALID / G10_NOT_ACCEPTED` until pilot and finance
 inputs are supplied.
 
@@ -42,4 +42,3 @@ inputs are supplied.
 4. currency, price/package assumptions, cost ledger, opening cash, collections, and
    financing evidence;
 5. independent review and acceptance record.
-
