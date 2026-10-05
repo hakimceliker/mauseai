@@ -3,8 +3,9 @@
  * B8 Phase - Testing 10 criteria validator
  */
 
+import { describe, it, expect, beforeEach } from 'vitest';
 import { JudgeEngine } from "../judge-engine";
-import { TaskContext, Evidence } from "../types";
+import { TaskContext, Evidence, JudgmentCriteria, JudgmentPolicy } from "../types";
 
 describe("JudgeEngine", () => {
   let engine: JudgeEngine;
@@ -259,9 +260,9 @@ describe("JudgeEngine", () => {
       const customPolicy = {
         name: "custom",
         description: "Custom test policy",
-        requiredCriteria: ["branchCorrect", "shaUpdated"],
+        requiredCriteria: ["branchCorrect", "shaUpdated"] as unknown as (keyof JudgmentCriteria)[],
         requiresHumanApproval: false,
-        autoEscalate: [] as const,
+        autoEscalate: [],
       };
 
       engine.registerPolicy(customPolicy);

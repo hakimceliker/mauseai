@@ -268,7 +268,7 @@ export class EvidenceValidator {
     missing: string[];
     hasOptional: string[];
   } {
-    const types = evidence.map((e) => e.type);
+    const types = evidence.map((e) => e.type as string);
 
     const required = ["ci_log", "test_result"];
     const optional = ["deployment_log", "review", "approval"];

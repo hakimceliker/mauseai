@@ -168,7 +168,7 @@ export class EvidenceGate {
     };
 
     const required = requiredByType[taskType] || requiredByType.default;
-    const types = evidence.map((e) => e.type);
+    const types = evidence.map((e) => e.type as string);
     const missing = required.filter((r) => !types.includes(r));
 
     return {

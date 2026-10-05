@@ -3,6 +3,7 @@
  * B8 Phase - Testing secret detection and redaction
  */
 
+import { describe, it, expect, beforeEach } from 'vitest';
 import { EvidenceValidator } from "../evidence-validator";
 import { Evidence } from "../../judge/types";
 
