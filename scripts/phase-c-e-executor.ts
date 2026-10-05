@@ -81,25 +81,90 @@ function loadEnvLocal(): Record<string, string> {
   return data;
 }
 
+function isAllowedHost(hostname: string): boolean {
+  // Whitelist allowed hosts
+  const allowedHosts = ['localhost', '127.0.0.1', 'supabase.co'];
+  if (allowedHosts.includes(hostname) || hostname.endsWith('.supabase.co')) {
+    return true;
+  }
+
+  // Block private IP ranges (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+  const parts = hostname.split('.');
+  if (parts.length === 4) {
+    const nums = parts.map((p) => parseInt(p, 10));
+    if (nums.some(isNaN)) {
+      // Not an IP address, likely a domain
+      return true;
+    }
+
+    const [first, second] = nums;
+    // Block 10.0.0.0/8
+    if (first === 10) return false;
+    // Block 172.16.0.0/12
+    if (first === 172 && second >= 16 && second <= 31) return false;
+    // Block 192.168.0.0/16
+    if (first === 192 && second === 168) return false;
+  }
+
+  return true;
+}
+
 async function testHttpEndpoint(
   url: string,
   headers?: Record<string, string>
 ): Promise<{ statusCode: number; error?: string }> {
+  // Validate URL to prevent SSRF attacks
+  try {
+    const urlObj = new URL(url);
+    if (!isAllowedHost(urlObj.hostname)) {
+      return { statusCode: 0, error: 'Access to private IP ranges is not allowed' };
+    }
+  } catch {
+    return { statusCode: 0, error: 'Invalid URL format' };
+  }
+
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
+
+    // Declare req variable before use in timeout handler (fix temporal dead zone)
+    let req: http.ClientRequest | https.ClientRequest;
+    let resolved = false;
+
     const timeout = setTimeout(() => {
-      req.destroy();
-      resolve({ statusCode: 0, error: 'Request timeout (>5s)' });
+      if (!resolved) {
+        resolved = true;
+        req.destroy();
+        resolve({ statusCode: 0, error: 'Request timeout (>5s)' });
+      }
     }, 5000);
 
-    const req = client.get(url, { headers, timeout: 5000 }, (res) => {
-      clearTimeout(timeout);
-      resolve({ statusCode: res.statusCode || 0 });
+    req = client.get(url, { headers, timeout: 5000 }, (res) => {
+      // Consume response body to prevent socket hang-ups
+      res.on('data', () => {});
+
+      res.on('end', () => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({ statusCode: res.statusCode || 0 });
+        }
+      });
+
+      res.on('error', (err) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          resolve({ statusCode: 0, error: err.message });
+        }
+      });
     });
 
     req.on('error', (err) => {
-      clearTimeout(timeout);
-      resolve({ statusCode: 0, error: err.message });
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve({ statusCode: 0, error: err.message });
+      }
     });
   });
 }
