@@ -23,31 +23,49 @@ export class SupabaseAuth {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !anonKey || !token) return null;
 
-    const response = await fetch(`${url}/auth/v1/user`, {
-      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    });
+    const timeoutMs = Math.min(15_000, Math.max(500, Number(process.env.SUPABASE_AUTH_TIMEOUT_MS ?? 5_000)));
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(`${url}/auth/v1/user`, {
+        headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timeout);
+    }
     if (!response.ok) return null;
-    const user = (await response.json()) as {
+    let user: {
       id?: string;
       email?: string;
       app_metadata?: { tenant_id?: string };
       user_metadata?: { tenant_id?: string };
     };
+    try {
+      user = await response.json() as typeof user;
+    } catch {
+      return null;
+    }
     if (!user.id) return null;
 
-    const claimTenant = user.app_metadata?.tenant_id ?? user.user_metadata?.tenant_id;
-    if (claimTenant) return { id: user.id, email: user.email, tenant_id: claimTenant };
-
     // Tenant membership is authoritative in the server-side users table.
+    // JWT metadata may be stale or incomplete and is never sufficient by itself.
     const admin = getSupabaseAdminClient();
-    const { data: profile, error } = await admin
-      .from('users')
-      .select('tenant_id')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-    if (error || !profile?.tenant_id) return null;
-    return { id: user.id, email: user.email, tenant_id: profile.tenant_id };
+    try {
+      const { data: profile, error } = await admin
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
+      if (error || !profile?.tenant_id) return null;
+      return { id: user.id, email: user.email, tenant_id: profile.tenant_id };
+    } catch {
+      return null;
+    }
   }
 
   /**

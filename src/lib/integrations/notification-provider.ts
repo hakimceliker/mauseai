@@ -319,11 +319,22 @@ class SlackNotificationProvider implements INotificationProvider {
 export function createNotificationAdapter(): INotificationProvider {
   const notificationType = (process.env.NOTIFICATION_TYPE || 'console').toLowerCase();
 
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (notificationType === 'console' || notificationType === 'multi' ||
+      !['email', 'slack'].includes(notificationType))
+  ) {
+    throw new Error('credential_not_configured:NOTIFICATION_TYPE');
+  }
+
   switch (notificationType) {
     case 'email': {
       const emailKey = process.env.RESEND_API_KEY || process.env.EMAIL_PROVIDER_KEY;
       const emailFrom = process.env.EMAIL_FROM || '';
       if (!emailKey || !emailFrom) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('credential_not_configured:RESEND_API_KEY_OR_EMAIL_FROM');
+        }
         console.error(
           'Email notifications selected but RESEND_API_KEY or EMAIL_FROM is not set. ' +
           'Configure the approved secret store (never commit credentials)'
@@ -335,6 +346,9 @@ export function createNotificationAdapter(): INotificationProvider {
     case 'slack': {
       const slackUrl = process.env.SLACK_WEBHOOK_URL;
       if (!slackUrl) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('credential_not_configured:SLACK_WEBHOOK_URL');
+        }
         console.error('Slack notifications selected but SLACK_WEBHOOK_URL not set');
       }
       return new SlackNotificationProvider(slackUrl || '');

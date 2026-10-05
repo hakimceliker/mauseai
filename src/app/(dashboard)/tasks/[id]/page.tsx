@@ -41,22 +41,11 @@ export default function TaskWorkflowPage({ params }: { params: Promise<{ id: str
     return { number: index + 1, name: checkpoint.step_id, status: status === 'completed' ? 'completed' as const : status === 'running' ? 'current' as const : 'pending' as const, description: String(checkpoint.state.message ?? checkpoint.state.result ?? ''), timestamp: new Date(checkpoint.created_at).toLocaleString('tr-TR') };
   });
 
-  if (loading) return <div className="rounded-xl border border-slate-200 bg-white p-8 text-slate-500">Görev yükleniyor…</div>;
-  if (error || !task) return <div className="space-y-4"><Link href="/operations" className="text-blue-600">← Operasyon paneline dön</Link><div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-800">{error ?? 'Görev bulunamadı.'}</div></div>;
+  if (loading) return <div className="surface-section">Görev yükleniyor…</div>;
+  if (error || !task) return <div className="task-detail-page"><Link href="/operations" className="text-blue-600">← Çalışma alanına dön</Link><div className="inline-alert">{error ?? 'Görev bulunamadı.'}</div></div>;
 
   const title = String(task.input.name ?? task.input.title ?? `Görev ${task.id.slice(0, 8)}`);
   return (
-    <div className="space-y-8">
-      <div><Link href="/operations" className="text-sm text-blue-600">← Operasyon paneline dön</Link><h1 className="mt-3 text-3xl font-bold text-slate-900">{title}</h1><p className="text-slate-500">Görev ID: {task.id}</p></div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5"><div className="text-xs text-slate-500">Durum</div><div className="mt-2 font-semibold text-slate-900">{label(task.status)}</div></div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5"><div className="text-xs text-slate-500">İş akışı</div><div className="mt-2 break-all font-semibold text-slate-900">{task.workflow_id}</div></div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5"><div className="text-xs text-slate-500">Checkpoint</div><div className="mt-2 font-semibold text-slate-900">{checkpoints.length}</div></div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5"><div className="text-xs text-slate-500">Gerçek maliyet</div><div className="mt-2 font-semibold text-slate-900">{task.cost_actual === undefined ? 'Bekleniyor' : `$${task.cost_actual.toFixed(4)}`}</div></div>
-      </div>
-      {task.error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">{task.error}</div>}
-      <section className="rounded-xl border border-slate-200 bg-white p-6"><h2 className="mb-4 text-xl font-bold text-slate-900">Yürütme zaman çizelgesi</h2>{timeline.length ? <ExecutionTimeline checkpoints={timeline} /> : <p className="text-slate-500">Henüz checkpoint oluşmadı. Inngest worker başladığında burada görünecek.</p>}</section>
-      <section className="rounded-xl border border-slate-200 bg-white p-6"><h2 className="mb-3 text-xl font-bold text-slate-900">Çıktı</h2><pre className="overflow-auto rounded-lg bg-slate-50 p-4 text-sm text-slate-700">{task.output ? JSON.stringify(task.output, null, 2) : 'Henüz çıktı yok.'}</pre></section>
-    </div>
+    <div className="task-detail-page"><Link href="/operations" className="back-link">← Çalışma alanına dön</Link><div className="task-detail-heading"><div><p className="eyebrow">Görev yürütme</p><h1>{title}</h1><p>Görev ID: {task.id}</p></div><span className="status-pill status-info">{label(task.status)}</span></div><div className="task-metrics"><div><small>Durum</small><strong>{label(task.status)}</strong></div><div><small>İş akışı</small><strong>{task.workflow_id}</strong></div><div><small>Checkpoint</small><strong>{checkpoints.length}</strong></div><div><small>Gerçek maliyet</small><strong>{task.cost_actual === undefined ? 'Bekleniyor' : `$${task.cost_actual.toFixed(4)}`}</strong></div></div>{task.error && <div className="inline-alert">{task.error}</div>}<section className="surface-section task-detail-section"><div className="section-heading"><div><h2>Yürütme zaman çizelgesi</h2><p>MouseAI’nin görevi hangi adımlardan geçirdiğini görün.</p></div><span className="status-pill status-info">Canlı kayıt</span></div>{timeline.length ? <ExecutionTimeline checkpoints={timeline} /> : <p className="empty-state">Henüz checkpoint oluşmadı. Inngest worker başladığında burada görünecek.</p>}</section><section className="surface-section task-detail-section"><div className="section-heading"><div><h2>Çıktı</h2><p>Doğrulanmış sonuç ve teslim kayıtları.</p></div></div><pre className="output-json">{task.output ? JSON.stringify(task.output, null, 2) : 'Henüz çıktı yok.'}</pre></section></div>
   );
 }

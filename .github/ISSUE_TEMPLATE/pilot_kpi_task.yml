@@ -1,0 +1,35 @@
+name: Pilot / KPI task
+description: Define a pilot task with measurable baseline and outcome.
+title: "[Pilot/KPI]: "
+labels: ["type:operations"]
+body:
+  - type: input
+    id: owner
+    attributes:
+      label: Accountable owner
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem and pilot scope
+    validations:
+      required: true
+  - type: textarea
+    id: measures
+    attributes:
+      label: Baseline, target, measurement method, and time window
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Data approval, privacy, and stop conditions
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Results, acceptance decision, and evidence links
+    validations:
+      required: true

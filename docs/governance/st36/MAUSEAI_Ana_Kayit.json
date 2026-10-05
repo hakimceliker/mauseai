@@ -6,7 +6,112 @@
   "project_code": "MOUSE",
   "law_alias": "MAU",
   "repo": "hakimceliker/mauseai",
+  "latest_repository_verification": {
+    "verified_at_utc": "2026-10-01T20:16:21Z",
+    "main_commit": "04256ac21a1c95da957fab501fc87c7acdf4cdd2",
+    "latest_production_deployment": {
+      "id": "6793405140",
+      "commit": "04256ac21a1c95da957fab501fc87c7acdf4cdd2",
+      "status": "success",
+      "created_at_utc": "2026-10-01T19:33:31Z"
+    },
+    "main_ci": {
+      "run_id": "36915074789",
+      "quality": "PASS",
+      "dependency_audit": "PASS",
+      "secret_scan": "PASS",
+      "docker": "PASS",
+      "codeql_run_id": "36915074754",
+      "codeql": "PASS"
+    },
+    "production_smoke": {
+      "health": "PASS",
+      "health_http_status": 200,
+      "database": "ready",
+      "readiness": "PASS",
+      "readiness_http_status": 200,
+      "ready": true
+    },
+    "open_pull_requests": [
+      {
+        "number": 92,
+        "commit": "7c8d2fbe23548ffdd26060a9f9114e7a8efb30d9",
+        "ci_run_id": "36916795522",
+        "codeql_run_id": "36916795401",
+        "checks": "PASS",
+        "review": "BLOCKED: independent maintainer review required"
+      },
+      {
+        "number": 95,
+        "commit": "2fe1b005e010f69d371f54c32c7497bd32cba769",
+        "ci_run_id": "36918029643",
+        "codeql_run_id": "36918029766",
+        "checks": "PASS",
+        "review": "BLOCKED: independent maintainer review required"
+      },
+      {
+        "number": 97,
+        "commit": "c9c0ebc3ea411269f53d1413dd26ff94ac3a4746",
+        "checks": "PASS at prior head; rerun required after governance changes",
+        "review": "BLOCKED: independent maintainer review required"
+      }
+    ],
+    "overall_acceptance": "PARTIAL — NOT PRODUCTION-READY",
+    "evidence_index": "docs/evidence/README.md"
+  },
+  "latest_repository_controls_verification": {
+    "verified_at_utc": "2026-10-01T20:26:52Z",
+    "ruleset": "main-protection",
+    "enforcement": "active",
+    "required_approvals": 1,
+    "required_checks": [
+      "quality",
+      "CodeQL",
+      "secret-scan",
+      "dependency-audit",
+      "docker",
+      "Vercel"
+    ],
+    "force_push": "blocked",
+    "branch_deletion": "blocked",
+    "actions_default_workflow_permissions": "read",
+    "actions_can_approve_pull_request_reviews": false,
+    "codeql_security_events_write_only": true,
+    "private_vulnerability_reporting": "enabled",
+    "independent_maintainer": "BLOCKED: only the PR author is a direct collaborator"
+  },
   "runtime_verified": false,
+  "current_execution_snapshot": {
+    "verified_at_utc": "2026-10-04T17:56:45Z",
+    "working_branch": "chore/g10-pilot-finance-reconcile",
+    "working_tree_base_sha": "d9632b3",
+    "working_tree_base_full_sha": "d9632b3ec984147959f9de7c69c0bcce9e225b9e",
+    "uncommitted_path_count": 62,
+    "overall_acceptance": "PARTIAL — NOT PRODUCTION-READY",
+    "local_verification": {
+      "evidence_validator": "PASS: 13 gates, 4 sources",
+      "verify": "PASS: 44 test files, 336 passed, 16 skipped, lint, typecheck, build at 2026-10-04T17:56:45Z",
+      "npm_audit_high": "PASS: 0 vulnerabilities",
+      "docker": "PASS: local image mouseai-acceptance-local:current",
+      "docker_image_sha256": "2e23c1fb418fa9d1d39bebfff061585a86e069147991878420ad769ba1e49757",
+      "production_deploy": "NOT_RUN",
+      "production_acceptance_runner": "FAIL_CLOSED: credential_not_configured:SMOKE_BASE_URL",
+      "g10": "STRUCTURE_VALID; NOT_ACCEPTED_PENDING_PILOT_KPI_FINANCE_EVIDENCE"
+    },
+    "consolidation_pr": {
+      "number": 114,
+      "branch": "claude/merge-queue-integration",
+      "base": "main",
+      "head_short_sha": "39a097b",
+      "head_sha": "39a097b6ac08b13f77d17ecc86b9e1dea5f47d28",
+      "base_sha": "04256ac21a1c95da957fab501fc87c7acdf4cdd2",
+      "state": "OPEN",
+      "review": "BLOCKED: independent maintainer review required",
+      "merge": "NOT_MERGED",
+      "live_acceptance": "NOT_RUN / credential_not_configured"
+    },
+    "source_sync_note": "Local verification is newer than the PR description; local results are not GitHub CI evidence until the changes are committed, pushed, and rerun through required checks."
+  },
   "sources": [
     {
       "id": "SRC-01",
@@ -36,104 +141,104 @@
   "gates": [
     {
       "id": "G0",
-      "name": "Proje açılışı",
-      "status": "BEKLEMEDE",
+      "name": "Project opening and ownership",
+      "status": "NOT_RUN",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G1",
-      "name": "İhtiyaç",
-      "status": "BEKLEMEDE",
+      "name": "Need and customer problem",
+      "status": "NOT_RUN",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G2",
-      "name": "Fizibilite",
-      "status": "BEKLEMEDE",
+      "name": "Feasibility and founding models",
+      "status": "PARTIAL",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G3",
-      "name": "Kapsam",
-      "status": "BEKLEMEDE",
+      "name": "Scope, pilot and success contract",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G4",
-      "name": "Organizasyon",
-      "status": "BEKLEMEDE",
+      "name": "Organization, budget and capacity",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G5",
-      "name": "Mimari",
-      "status": "BEKLEMEDE",
+      "name": "Architecture and security",
+      "status": "PARTIAL",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G6",
-      "name": "Prototip",
-      "status": "BEKLEMEDE",
+      "name": "API, data and workflow contracts",
+      "status": "PARTIAL",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G7",
-      "name": "Uçtan uca geliştirme",
-      "status": "BEKLEMEDE",
+      "name": "End-to-end implementation",
+      "status": "PARTIAL",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G8",
-      "name": "Kalite ve güvenlik",
-      "status": "BEKLEMEDE",
+      "name": "Quality and security acceptance",
+      "status": "PARTIAL",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G9",
-      "name": "Pilot",
-      "status": "BEKLEMEDE",
+      "name": "Real pilot and measurable benefit",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G10",
-      "name": "Teknik yayın",
-      "status": "BEKLEMEDE",
+      "name": "Technical publication",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G11",
-      "name": "Satış veya yetkili iç kullanım",
-      "status": "BEKLEMEDE",
+      "name": "Commercial or authorised internal use",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null
     },
     {
       "id": "G12",
-      "name": "Sürdürülebilir işletme",
-      "status": "BEKLEMEDE",
+      "name": "Sustainable operating acceptance",
+      "status": "BLOCKED",
       "evidence": null,
       "acceptor": null,
       "accepted_at": null

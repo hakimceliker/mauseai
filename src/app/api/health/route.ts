@@ -34,6 +34,9 @@ export async function GET() {
   // Gather integration health status
   const integrations: HealthStatus['integrations'] = {};
   let database: NonNullable<HealthStatus['database']> = { status: 'error' };
+  const paymentProvider = process.env.PAYMENT_PROVIDER_TYPE?.trim() || 'not_configured';
+  const notificationType = process.env.NOTIFICATION_TYPE?.trim() || 'not_configured';
+  const analyticsType = process.env.ANALYTICS_TYPE?.trim() || 'not_configured';
 
   const missingDatabaseEnv = missingSupabaseRuntimeEnv();
   if (missingDatabaseEnv.length > 0) {
@@ -61,12 +64,12 @@ export async function GET() {
     getPaymentAdapter();
     integrations.payment = {
       status: 'ready',
-      provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
+      provider: paymentProvider,
     };
   } catch {
     integrations.payment = {
       status: 'error',
-      provider: process.env.PAYMENT_PROVIDER_TYPE || 'mock',
+      provider: paymentProvider,
     };
   }
 
@@ -75,12 +78,12 @@ export async function GET() {
     const isHealthy = await notificationAdapter.isHealthy();
     integrations.notifications = {
       status: isHealthy ? 'ready' : 'degraded',
-      type: process.env.NOTIFICATION_TYPE || 'console',
+      type: notificationType,
     };
   } catch {
     integrations.notifications = {
       status: 'error',
-      type: process.env.NOTIFICATION_TYPE || 'console',
+      type: notificationType,
     };
   }
 
@@ -89,12 +92,12 @@ export async function GET() {
     const isHealthy = await analyticsAdapter.isHealthy();
     integrations.analytics = {
       status: isHealthy ? 'ready' : 'degraded',
-      type: process.env.ANALYTICS_TYPE || 'console',
+      type: analyticsType,
     };
   } catch {
     integrations.analytics = {
       status: 'error',
-      type: process.env.ANALYTICS_TYPE || 'console',
+      type: analyticsType,
     };
   }
 

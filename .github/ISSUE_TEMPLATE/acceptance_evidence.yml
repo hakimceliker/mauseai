@@ -1,0 +1,48 @@
+name: Acceptance evidence
+description: Record an auditable technical or production acceptance result.
+title: "[Acceptance]: "
+labels: ["type:process"]
+body:
+  - type: input
+    id: gate
+    attributes:
+      label: Gate or acceptance criterion
+      placeholder: G0-G12 / PLAN-004 / PLAN-005
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit and PR
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment and verification date (UTC)
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Commands, run IDs, and CI links
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - PASS
+        - FAIL
+        - PARTIAL
+        - NOT_RUN
+        - BLOCKED
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence, rollback, and remaining risks
+    validations:
+      required: true

@@ -26,6 +26,10 @@ export class AIRouter {
             : 'openai'
         : 'mock');
 
+    if (process.env.NODE_ENV === 'production' && aiProvider === 'mock') {
+      throw new CredentialNotConfiguredError('ai', 'AI_PROVIDER');
+    }
+
     switch (aiProvider) {
       case 'gpt':
       case 'openai':
@@ -36,8 +40,13 @@ export class AIRouter {
         this.provider = new AnthropicProvider();
         break;
       case 'mock':
-      default:
         // Default to GPT mock for 'mock' provider
+        this.provider = new MockGPTProvider();
+        break;
+      default:
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(`AI_PROVIDER_UNSUPPORTED:${aiProvider}`);
+        }
         this.provider = new MockGPTProvider();
         break;
     }

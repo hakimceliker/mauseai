@@ -249,6 +249,10 @@ export function createPaymentAdapter(): IPaymentProvider {
   const apiKey = process.env.PAYMENT_API_KEY || '';
   const webhookSecret = process.env.PAYMENT_WEBHOOK_SECRET || '';
 
+  if (process.env.NODE_ENV === 'production' && (providerType === 'mock' || providerType === 'null')) {
+    throw new CredentialNotConfiguredError('PAYMENT_PROVIDER_TYPE');
+  }
+
   switch (providerType) {
     case 'stripe':
       if (!apiKey) {
@@ -266,6 +270,9 @@ export function createPaymentAdapter(): IPaymentProvider {
     case 'mock':
     case 'null':
     default:
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(`PAYMENT_PROVIDER_UNSUPPORTED:${providerType}`);
+      }
       // Default to mock for development
       if (providerType !== 'mock' && providerType !== 'null') {
         console.warn(

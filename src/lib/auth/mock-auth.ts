@@ -43,13 +43,18 @@ export function requireAuth(request: NextRequest): AuthContext {
   return auth;
 }
 
+/** Resolve the effective provider once for auth and route decisions. */
+export function resolveAuthProvider(): string {
+  const configuredProvider = (process.env.AUTH_PROVIDER ?? '').toLowerCase();
+  return configuredProvider || (process.env.NODE_ENV === 'production' ? 'supabase' : 'mock');
+}
+
 /**
  * Production-aware auth boundary. Mock headers remain available only when
  * AUTH_PROVIDER=mock, preserving local tests without weakening production.
  */
 export async function requireAuthAsync(request: NextRequest): Promise<AuthContext> {
-  const configuredProvider = (process.env.AUTH_PROVIDER ?? '').toLowerCase();
-  const authProvider = configuredProvider || (process.env.NODE_ENV === 'production' ? 'supabase' : 'mock');
+  const authProvider = resolveAuthProvider();
   if (process.env.NODE_ENV === 'production' && authProvider === 'mock') {
     throw new AuthError();
   }

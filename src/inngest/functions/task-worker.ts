@@ -66,6 +66,7 @@ export const taskWorker = inngest.createFunction(
       tenantId: string;
       stepId: string;
     };
+    const traceId = `task:${taskId}:step:${stepId}`;
     const supabase = getSupabaseAdminClient();
 
     const task = (await step.run("load-task", async () => {
@@ -126,6 +127,7 @@ export const taskWorker = inngest.createFunction(
           tenantId,
           taskId,
           stepId,
+          traceId,
           provider: aiData.provider,
           costCents: aiData.costCents,
           inputTokens: aiData.inputTokens,
@@ -176,6 +178,7 @@ export const taskWorker = inngest.createFunction(
           action: "step.completed",
           resourceType: "step",
           resourceId: stepId,
+          traceId,
           costCents: aiData.costCents,
           payload: { provider: aiData.provider },
         }),
@@ -198,6 +201,7 @@ export const taskWorker = inngest.createFunction(
         resource_type: "step",
         resource_id: stepId,
         payload: {
+          traceId,
           errorCode: (error as { code?: string })?.code ?? "UNKNOWN",
           message: normalizedError.message,
         },

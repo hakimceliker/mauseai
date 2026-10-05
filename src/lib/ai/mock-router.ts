@@ -1,4 +1,5 @@
 import type { AIRequest, AIResult, AIProviderName } from "./types";
+import { CredentialNotConfiguredError } from './providers/base-provider';
 
 export function chooseMockProvider(riskLevel: string): AIProviderName {
   return riskLevel === "L3" || riskLevel === "L4" ? "mock-claude" : "mock-gpt";
@@ -24,7 +25,12 @@ export async function routeMockAI(request: AIRequest): Promise<AIResult> {
 
 export async function routeAI(request: AIRequest): Promise<AIResult> {
   const configuredProvider = (process.env.AI_PROVIDER ?? 'mock').toLowerCase();
-  if (configuredProvider === 'mock') return routeMockAI(request);
+  if (configuredProvider === 'mock') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new CredentialNotConfiguredError('ai', 'AI_PROVIDER');
+    }
+    return routeMockAI(request);
+  }
 
   const { AIRouter } = await import('./ai-router');
   const response = await AIRouter.execute([

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync, resolveAuthProvider } from '@/src/lib/auth/mock-auth';
 import { LiveTaskService } from '@/src/lib/services/live-task-service';
 import { inngest } from '@/src/inngest/client';
 import { CreateTaskRequestSchema } from '@/src/lib/schemas/api-requests';
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (
       approvalState === 'approved' &&
-      (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() !== 'mock'
+      resolveAuthProvider() !== 'mock'
     ) {
       await inngest.send({
         name: 'task.execute',

@@ -3,42 +3,27 @@ import Link from 'next/link';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="mouseai-light min-h-screen bg-white text-slate-900">
-      <div className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/operations" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                M
-              </div>
-              <span className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">MouseAI</span>
-            </Link>
-            <div className="flex gap-6 ml-4">
-              <Link
-                href="/operations"
-                className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium"
-              >
-                İşlem Paneli
-              </Link>
-              <Link
-                href="/tasks/new"
-                className="text-slate-600 hover:text-blue-600 transition-colors text-sm font-medium"
-              >
-                Yeni Görev
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-xs text-emerald-700">Sistemler çevrimiçi</span>
-            </div>
-          </div>
+    <div className="mouseai-shell">
+      <aside className="mouseai-sidebar" aria-label="Ana navigasyon">
+        <Link href="/operations" className="mouseai-brand"><span className="mouseai-brand-mark">M</span><span>MouseAI</span></Link>
+        <nav className="mouseai-nav">
+          <Link href="/operations" className="mouseai-nav-link mouseai-nav-link-active"><span className="mouseai-nav-glyph">W</span>Çalışma Alanı</Link>
+          <Link href="/tasks/new" className="mouseai-nav-link"><span className="mouseai-nav-glyph">T</span>Görevler</Link>
+          <Link href="/operations#ai-team" className="mouseai-nav-link"><span className="mouseai-nav-glyph">A</span>AI Ekibim</Link>
+          <Link href="/operations#knowledge" className="mouseai-nav-link"><span className="mouseai-nav-glyph">K</span>Bilgi Kaynakları</Link>
+          <Link href="/operations#integrations" className="mouseai-nav-link"><span className="mouseai-nav-glyph">I</span>Entegrasyonlar</Link>
+          <Link href="/operations#reports" className="mouseai-nav-link"><span className="mouseai-nav-glyph">R</span>Raporlar</Link>
+          <Link href="/operations#settings" className="mouseai-nav-link"><span className="mouseai-nav-glyph">S</span>Ayarlar</Link>
         </nav>
+        <div className="mouseai-sidebar-footer"><strong>Çalışma alanın hazır.</strong><small>Gerçek görev ve kabul kanıtları oluşturuldukça burada görünecek.</small></div>
+      </aside>
+      <div className="mouseai-content">
+        <header className="mouseai-topbar">
+          <div className="mouseai-search" role="search"><span>⌕</span><input aria-label="Ara" placeholder="Her yerde ara..." /></div>
+          <div className="mouseai-userbar"><button className="mouseai-icon-button" aria-label="Bildirimler">!</button><span className="mouseai-avatar">DK</span><span className="mouseai-user-name">Deniz Karaca</span><span className="mouseai-chevron">⌄</span></div>
+        </header>
+        <main className="mouseai-main">{children}</main>
       </div>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
     </div>
   );
 }

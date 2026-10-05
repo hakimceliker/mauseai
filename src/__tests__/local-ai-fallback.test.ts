@@ -51,6 +51,29 @@ describe('local-first AI routing', () => {
     expect(fetchMock.mock.calls[1]?.[0]).toBe('https://api.openai.com/v1/chat/completions');
   });
 
+  it('falls back when local returns an empty response', async () => {
+    process.env.AI_PROVIDER = 'openai';
+    process.env.OPENAI_API_KEY = 'test-only-placeholder';
+    process.env.LOCAL_AI_ENABLED = 'true';
+    process.env.LOCAL_AI_BASE_URL = 'https://local-gateway.test';
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        choices: [{ message: { content: '   ' } }],
+        usage: { prompt_tokens: 2, completion_tokens: 0 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        choices: [{ message: { content: 'cloud response after invalid local output' } }],
+        usage: { prompt_tokens: 3, completion_tokens: 5 },
+      }), { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const response = await new AIRouter().call(messages);
+
+    expect(response.provider).toBe('openai');
+    expect(response.content).toBe('cloud response after invalid local output');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('uses cloud directly when local routing is disabled', async () => {
     process.env.AI_PROVIDER = 'openai';
     process.env.OPENAI_API_KEY = 'test-only-placeholder';

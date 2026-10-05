@@ -9,6 +9,7 @@ export async function writeAudit(params: {
   action: string;
   resourceType: string;
   resourceId?: string;
+  traceId?: string;
   payload?: Record<string, unknown>;
   costCents?: number;
   riskLevel?: string;
@@ -23,7 +24,10 @@ export async function writeAudit(params: {
     action: params.action,
     resource_type: params.resourceType,
     resource_id: params.resourceId ?? null,
-    payload: params.payload ?? {},
+    payload: {
+      ...(params.traceId ? { traceId: params.traceId } : {}),
+      ...(params.payload ?? {}),
+    },
     cost_cents: params.costCents ?? null,
     risk_level: params.riskLevel ?? null,
   });
