@@ -11,7 +11,6 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
 
 interface IntegrationTest {
   id: number;
@@ -184,37 +183,17 @@ async function executeIntegrationTests(): Promise<TestExecution[]> {
   log('', 'cyan');
 
   for (const test of allTests) {
-    const startTime = Date.now();
-
-    try {
-      // Simulate test execution - in real scenario, this would run actual vitest suite
-      // For now, mark most as SKIP since test infrastructure is being built
-      const testExecuted = Math.random() > 0.7; // Simulate 30% execution rate
-      let status: TestExecution['status'] = 'SKIP';
-
-      if (testExecuted) {
-        // Simulate test result
-        const testPassed = Math.random() > 0.1; // 90% pass rate for executed tests
-        status = testPassed ? 'PASS' : 'FAIL';
-      }
-
-      results.push({
-        testId: test.id,
-        phase: `Phase ${test.phase}`,
-        name: test.name,
-        status,
-        duration: Date.now() - startTime,
-      });
-    } catch (err) {
-      results.push({
-        testId: test.id,
-        phase: `Phase ${test.phase}`,
-        name: test.name,
-        status: 'FAIL',
-        duration: Date.now() - startTime,
-        error: (err as Error).message,
-      });
-    }
+    // Never synthesize a test result. Until a real executable harness is wired
+    // to each scenario, the only honest state is BLOCKED and no PASS may be
+    // used for Phase K acceptance.
+    results.push({
+      testId: test.id,
+      phase: `Phase ${test.phase}`,
+      name: test.name,
+      status: 'BLOCKED',
+      duration: 0,
+      evidence: 'executable_harness_not_configured',
+    });
 
     // Progress indicator
     const percentage = ((results.length / allTests.length) * 100).toFixed(0);
@@ -240,9 +219,15 @@ function generateReport(results: TestExecution[]): ExecutionReport {
     .map((r) => `${r.phase} Test ${r.testId}: ${r.name}`);
 
   const summary =
-    failed === 0 && blocked === 0
-      ? `SUCCESS: ${passed} tests passed, system ready for Phase K closure`
-      : `ISSUES: ${failed} failed, ${blocked} blocked - investigation required`;
+    blocked > 0
+      ? `NOT_ACCEPTED: ${blocked} scenarios blocked because the executable harness is not configured`
+      : failed > 0
+        ? `FAIL: ${failed} scenarios failed - investigation required`
+        : skipped > 0
+          ? `NOT_ACCEPTED: ${skipped} scenarios skipped - no acceptance decision`
+          : passed > 0 && passed === results.length
+            ? `PASS: ${passed} scenarios executed and passed`
+            : 'NOT_ACCEPTED: no executable scenario evidence was produced';
 
   return {
     timestamp: new Date().toISOString(),
@@ -323,7 +308,7 @@ async function main() {
     saveReportToFile(report);
 
     // Exit with appropriate code
-    process.exit(report.failed > 0 || report.blocked > 0 ? 1 : 0);
+    process.exit(report.failed > 0 || report.blocked > 0 || report.skipped > 0 ? 1 : 0);
   } catch (error) {
     log(`Fatal error: ${(error as Error).message}`, 'red');
     process.exit(1);
