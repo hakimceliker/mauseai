@@ -78,12 +78,18 @@ function checkDirectoryExists(dir: string): boolean {
 function countFilesInDirectory(dir: string): number {
   const fullPath = path.join(process.cwd(), dir);
   if (!fs.existsSync(fullPath)) return 0;
-  // Use proper shell escaping to prevent command injection
-  const escapedPath = fullPath.replace(/'/g, "'\\''");
-  const files = execSync(`find '${escapedPath}' -type f | wc -l`, {
-    encoding: 'utf-8',
-  }).trim();
-  return parseInt(files, 10);
+  let count = 0;
+  const pending = [fullPath];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (!current) continue;
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const entryPath = path.join(current, entry.name);
+      if (entry.isDirectory()) pending.push(entryPath);
+      else if (entry.isFile()) count += 1;
+    }
+  }
+  return count;
 }
 
 function validatePhaseB(): ValidationResult {
