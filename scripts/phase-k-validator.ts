@@ -151,7 +151,7 @@ function validateMainBranch(): ValidationResult {
   }
 
   try {
-    const workingTreeClean = execSync('git diff-index --quiet HEAD --', {
+    execSync('git diff-index --quiet HEAD --', {
       stdio: 'pipe',
     });
     checks.push({
@@ -186,13 +186,11 @@ function validateTypeScript(): ValidationResult {
       passed: true,
       details: 'Build successful',
     });
-  } catch (error: unknown) {
-    // Build errors are expected due to test file configurations
-    // Check for actual source compilation issues
+  } catch {
     checks.push({
       name: 'Next.js build',
-      passed: true,
-      details: 'Build configuration present',
+      passed: false,
+      details: 'Build failed; inspect the build log before accepting Phase K.',
     });
   }
 
