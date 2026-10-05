@@ -36,3 +36,10 @@ prove independent review, merge, production deployment, live Auth/RLS or
 tenant isolation, Inngest runtime evidence, real provider/observability
 delivery, pilot/KPI/finance acceptance, or G10–G12 closure. The canonical
 acceptance therefore remains `PARTIAL — NOT PRODUCTION-READY`.
+
+## Additional local safety checks
+
+- `npm audit --audit-level=high`: PASS — 0 vulnerabilities.
+- `git diff --check`: PASS — no whitespace errors; only expected Windows
+  LF/CRLF normalization warnings were reported for pre-existing worktree
+  files.
