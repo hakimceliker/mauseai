@@ -5,6 +5,43 @@
 **Repo:** `hakimceliker/mauseai`  
 **Yürütme ilkesi:** İşler tek tek dağınık raporlanmaz; bu kayıt tüm işlerin ortak durum kaynağıdır.
 
+## Kanonik kaynak ve runtime zinciri
+
+```text
+GitHub Source of Truth
+↕
+GitLab Secondary CI / private pipeline / mirror-backup
+↕
+Forgejo local/private mirror + DR + local CI
+↕
+Windows/Docker local runtime
+↕
+Ollama/Qwen local-first
+↕
+NVIDIA NIM / OpenAI / Claude / Cloudflare fallback/scale
+↕
+Doctor / Observability / Watchdog / Recovery
+↕
+Judge / Evidence / Audit / Human Approval
+```
+
+GitLab, Forgejo ve yerel sonuçlar yardımcı kanıttır. Her sonuç kanonik GitHub
+branch/SHA ile uzlaştırılana kadar `REVIEW`, `STALE` veya `BLOCKED` kalır; hiçbir
+yardımcı ortam tek başına merge, production kabulü veya `CLOSED` üretemez.
+
+## Güncel yürütme özeti — 2026-10-01 20:16 UTC
+
+| Task | Owner | Branch | PR | Commit | Test | CI | Evidence | Status | Blocker | Next |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Current main and production reconciliation | GPT/Codex | `main` | #96 merged | `04256ac21a1c95da957fab501fc87c7acdf4cdd2` | Health and readiness HTTP 200 | Main quality, audit, secret scan, Docker, CodeQL PASS | [`docs/evidence/README.md`](../../evidence/README.md) | VERIFIED (technical/health only) | Live acceptance gates remain | Add independent maintainer; review #92 and #95 |
+| Local-first AI routing and cost telemetry | GPT/Codex | `codex/mauseai-local-ai-security-20261001` | #92 open | `7c8d2fbe23548ffdd26060a9f9114e7a8efb30d9` | Local zero API cost and cloud fallback tests in CI | CI and CodeQL PASS | [PR #92](https://github.com/hakimceliker/mauseai/pull/92) | READY_FOR_REVIEW | No independent reviewer | Review, then merge if all gates remain green |
+| Workspace design and acceptance tooling | GPT/Codex | `chore/windows-acceptance-wrapper` | #95 open | `2fe1b005e010f69d371f54c32c7497bd32cba769` | CI suite PASS | CI and CodeQL PASS | [PR #95](https://github.com/hakimceliker/mauseai/pull/95) | READY_FOR_REVIEW | No independent reviewer | Review, then merge if all gates remain green |
+| Consolidated merge candidate | Claude/Codex | `claude/merge-queue-integration` | #114 open | `39a097b` | Consolidates PRs #92–#111; live gates remain NOT_RUN | Captured GitHub checks successful; independent approval not recorded | [PR #114](https://github.com/hakimceliker/mauseai/pull/114) | REVIEW | Independent maintainer review required; not merged | Review, rerun required checks after any head update, then merge only if protection permits |
+| Repository governance controls | GPT/Codex | `chore/repository-governance-controls` → `hakimceliker-mouseai-kanun-uyarlamasi` | #97 open | New commit pending | YAML/JSON/config and diff validation | CI reruns after update | [PR #97](https://github.com/hakimceliker/mauseai/pull/97); evidence index | IN_PROGRESS | Independent review required | Integrate changes, then await checks and independent review |
+| Live Auth/RLS and Inngest acceptance | Product owner + Supabase + Inngest | — | — | — | NOT_RUN | — | PLAN-004/005 runbooks | BLOCKED | Approved test credentials and workflow ID | Run only with approved test identities |
+
+Production-ready remains **NOT ACCEPTED**. A green health endpoint or CI run does not prove Auth/RLS, tenant isolation, live workflow, provider, pilot, finance, or operating acceptance.
+
 ## 1. Kaynakların birleştiği merkez
 
 Bu kayıt aşağıdaki kaynakları tek yürütme görünümünde birleştirir:
@@ -126,18 +163,15 @@ G12: operasyon + müşteri kabulü
 
 Final kabul yalnızca bütün ilgili kapılar için kanıt bulunduğunda verilir. Eksik credential veya çalıştırılmamış test `NOT_RUN`, `BLOCKED` veya `credential_not_configured` olarak kalır.
 
-## 7. Şu an yapılacak tek sıra
+## 7. Sonraki yürütme sırası
 
-1. PR #83 CI ve insan review kapanışı.
-2. PLAN-004 Auth/tenant canlı testi.
-3. PLAN-004B Storage karar/test kapısı.
-4. PLAN-005 Inngest canlı workflow.
-5. PLAN-006 gerçek provider testi.
-6. PLAN-007 audit/cost uzlaştırması.
-7. P1–P4 uygulamalı pilotlar.
-8. P5–P8 ürün, finans, hukuk ve işletme kabulü.
-9. G0–G12 final kanıt tablosu.
-10. Production acceptance veya açıkça REJECT kararı.
+1. Add an independent maintainer; do not bypass the required review.
+2. Review PRs #92 and #95; merge only after approval and all required checks are green.
+3. Merge the governance-controls PR only after its review and checks pass.
+4. After each merge, verify main CI, CodeQL, secret scan, Docker, dependency audit, Vercel deployment, health and readiness.
+5. Execute PLAN-004 Auth/tenant tests and PLAN-005 Inngest acceptance with approved credentials/workflow IDs.
+6. Complete provider/integration, pilot/KPI, finance, backup/restore, rollback, legal and operational evidence.
+7. Evaluate G0–G12; retain `PARTIAL — NOT PRODUCTION-READY` until all required evidence and human acceptance exist.
 
 ## 8. Raporlama standardı
 
@@ -166,3 +200,22 @@ Bu dosya güncellenmeden ayrı parça “tamamlandı” raporu verilmez.
 | Gerçek AI provider testi | credential_not_configured | OpenAI/Anthropic runtime credential kanıta alınmadı |
 
 Bu kayıt secret, token, parola veya ham production response içermez. Auth profil eşlemesi tamamlanmış olsa da canlı API/RLS ve Inngest kabul kapıları kanıtlanmadan production kabulü verilmez.
+
+## 10. Current main and production evidence — 2026-10-01 20:16 UTC
+
+- `main`: `04256ac21a1c95da957fab501fc87c7acdf4cdd2`, merged via PR #96.
+- Main CI `36915074789`: `quality`, `dependency-audit`, `secret-scan`, and `docker` all passed.
+- Main CodeQL `36915074754`: passed.
+- Vercel production deployment `6793405140`: success for the current main commit.
+- Production health at `20:16:21 UTC`: HTTP 200, `healthy`, database `ready`.
+- Production readiness: HTTP 200, `ready: true`.
+- PR #92 and #95 each have passing CI/security/preview checks but remain open pending independent review; PR #97 is also open and review-gated.
+- Seven duplicate issues are closed; canonical issues #53–#63 have owner and milestone. Stale draft PRs #64–#74 are closed with branches preserved.
+- The full row-oriented evidence index is [`../../evidence/README.md`](../../evidence/README.md).
+
+## 11. Repository settings re-verification — 2026-10-01 20:26 UTC
+
+- `main-protection` is active with one required approval and all six required checks; force-push and branch deletion are blocked.
+- Actions default token permissions are read-only, PR approval is disabled, and `security-events: write` is limited to CodeQL.
+- Private vulnerability reporting is enabled.
+- Only the PR author is a direct collaborator, so independent review and merges remain blocked.

@@ -8,6 +8,34 @@
 > passed”; it does not mean live integration, pilot, customer benefit, finance,
 > or operating acceptance is complete.
 
+## Current execution note — 2026-10-04 20:52 +03
+
+The current GitHub consolidation candidate is [PR #114](https://github.com/hakimceliker/mauseai/pull/114),
+which remains open and requires an independent maintainer review. The local
+worktree has since added fail-closed production provider boundaries and
+canonical evidence checks, verified with 44 test files, 336 passed tests, 16
+skips, lint, typecheck, and build. These changes are not merged or deployed.
+G0–G12 live acceptance remains `PARTIAL — NOT PRODUCTION-READY`; no pilot,
+finance, customer, or operating acceptance is claimed.
+
+The verification chain was rerun at `2026-10-04T20:52:39+03:00`: canonical
+evidence validation passed (13 gates / 4 sources), lint, typecheck, 44 test
+files (336 passed / 16 skipped), and production build passed. The high-severity
+dependency audit reported zero vulnerabilities and `git diff --check` passed.
+This is local evidence only; it does not change PR review, merge, deployment,
+credential, or live acceptance state.
+
+## Latest repository and production verification — 2026-10-01 20:16 UTC
+
+- Current `main`: `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96).
+- Main quality, dependency audit, secret scan, Docker, CodeQL, and Vercel production deployment passed; exact run links are in [`docs/evidence/README.md`](docs/evidence/README.md).
+- Production `/api/health`: HTTP 200, `healthy`, database `ready` at `2026-10-01 20:16:21 UTC`.
+- Production `/api/health/ready`: HTTP 200, `ready: true`.
+- PRs #92 and #95 remain open pending independent maintainer review; PR #97 is the active governance/source-reconciliation PR and also requires independent review. Passing CI does not mean merged or accepted.
+- Seven duplicate issues were closed with canonical issue links; stale draft package PRs #64–#74 were closed while preserving their branches. Eleven canonical package issues are assigned and grouped under `ST3.6 Production Acceptance`.
+- Live Auth/RLS tenant isolation, Inngest execution, real provider calls, integrations, pilots, finance, and operational acceptance remain unverified.
+- **Decision: `PARTIAL — NOT PRODUCTION-READY`.** Health and CI results do not close live acceptance gates.
+
 ## Executive Summary
 
 Mause AI v0.1.0 contains a tested multi-tenant workflow foundation with cost
@@ -425,7 +453,7 @@ npm run lint       # 0 errors
 6. Add: Multi-region replication for HA
 7. Add: Advanced policy engine rules
 
-## Conclusion - UPDATED 2026-09-26
+## Conclusion - reconciled 2026-10-01
 
 Mause AI v0.1.0 has a solid underlying architecture and local test evidence. The implementation is not equivalent to live production acceptance.
 
@@ -443,17 +471,17 @@ Acceptance remains conditional on the live and business gates listed above. No
 production approval is granted by this document.
 
 **What Needs to Happen Next:**
-1. Execute the canonical production acceptance runbooks
-2. Record redacted integration and pilot evidence
-3. Complete finance/KPI/G0-G12 records
-4. Classify and close duplicate GitHub issues/PRs
-5. Reconcile this report against the merged main commit
+1. Add an independent repository maintainer and obtain required reviews for PRs #92 and #95.
+2. Merge only after their review and required CI gates pass; then refresh the production deployment and smoke evidence.
+3. Execute Auth/RLS, tenant-isolation and Inngest acceptance with approved test credentials and workflow identifiers.
+4. Record redacted provider, integration, pilot, KPI, finance and operational evidence.
+5. Keep issue/PR inventory and canonical status records reconciled to the latest main commit.
 
 ---
 
-**Report Date**: 2026-09-26 (UPDATED WITH HONEST FINDINGS)
-**Previous Claims**: 19 test suites, ✅ APPROVED
-**Actual Findings**: 7 test files (38 tests), ⚠️ CI FAILING
-**Code Quality**: TypeScript strict ✅, ESLint clean ✅, Build OK ✅
-**CI Status**: BROKEN ❌ (Missing scripts)
-**Blockers**: 3 critical items requiring fixes before production
+**Report Date**: 2026-10-01 (reconciled to current main and production evidence)
+**Historical local test counts**: The 2026-09-26 figures above are historical and are not the current CI result.
+**Current main CI**: PASS — quality, dependency audit, secret scan, Docker, and CodeQL (see evidence index).
+**Current production smoke**: PASS — health and readiness endpoints; this is not full production acceptance.
+**Open PRs**: #92 and #95 have passing CI but remain unmerged pending independent maintainer review.
+**Blockers**: Live Auth/RLS, Inngest, provider/integration, pilot, finance, and operational evidence remains incomplete.

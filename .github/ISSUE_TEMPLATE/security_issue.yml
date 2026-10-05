@@ -1,0 +1,33 @@
+name: Security issue (non-sensitive)
+description: Track security hardening that is safe to discuss publicly.
+title: "[Security]: "
+labels: ["type:infrastructure"]
+body:
+  - type: markdown
+    attributes:
+      value: For an exploitable or undisclosed vulnerability, use the private vulnerability reporting link instead of this public form.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Security control or hardening gap
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and affected boundary
+      description: Do not include exploit instructions, credentials, or customer data.
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Proposed mitigation and verification
+    validations:
+      required: true
+  - type: input
+    id: evidence
+    attributes:
+      label: Redacted evidence or private advisory reference
+    validations:
+      required: false

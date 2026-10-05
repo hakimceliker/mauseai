@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync, resolveAuthProvider } from '@/src/lib/auth/mock-auth';
 import { LiveTaskService } from '@/src/lib/services/live-task-service';
 import * as Domain from '@/src/types/domain';
 import {
@@ -30,7 +30,7 @@ export async function GET(
       throw new NotFoundError({ resource: 'task', id });
     }
 
-    const checkpoints = (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() === 'mock'
+    const checkpoints = resolveAuthProvider() === 'mock'
       ? []
       : await CheckpointRepository.getTaskCheckpoints(task.id);
 

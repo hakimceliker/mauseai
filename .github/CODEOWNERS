@@ -1,0 +1,8 @@
+# Current repository owner; add an independent maintainer when one is granted access.
+* @hakimceliker
+
+/src/lib/auth/ @hakimceliker
+/src/lib/ai/ @hakimceliker
+/src/inngest/ @hakimceliker
+/supabase/ @hakimceliker
+/.github/ @hakimceliker

@@ -1,0 +1,44 @@
+name: Production incident
+description: Record and coordinate a production-impacting incident.
+title: "[Incident]: "
+labels: ["type:operations"]
+body:
+  - type: markdown
+    attributes:
+      value: Never include secrets, tokens, raw customer data, or unredacted provider output.
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - SEV-1 critical outage or active security incident
+        - SEV-2 major customer-facing degradation
+        - SEV-3 limited impact or workaround available
+        - SEV-4 minor issue
+    validations:
+      required: true
+  - type: input
+    id: started
+    attributes:
+      label: Started at (UTC)
+      placeholder: YYYY-MM-DDTHH:MM:SSZ
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Customer and service impact
+    validations:
+      required: true
+  - type: textarea
+    id: response
+    attributes:
+      label: Detection, mitigation, and rollback
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted logs, deployment, and follow-up evidence
+    validations:
+      required: true

@@ -72,6 +72,33 @@ describe('/api/health', () => {
       expect(data.integrations.notifications.type).toBeDefined();
       expect(data.integrations.analytics.type).toBeDefined();
     });
+
+    it('labels unset provider configuration without implying a mock or console runtime', async () => {
+      const saved = {
+        payment: process.env.PAYMENT_PROVIDER_TYPE,
+        notifications: process.env.NOTIFICATION_TYPE,
+        analytics: process.env.ANALYTICS_TYPE,
+      };
+      delete process.env.PAYMENT_PROVIDER_TYPE;
+      delete process.env.NOTIFICATION_TYPE;
+      delete process.env.ANALYTICS_TYPE;
+
+      try {
+        const response = await GET();
+        const data = await response.json();
+
+        expect(data.integrations.payment.provider).toBe('not_configured');
+        expect(data.integrations.notifications.type).toBe('not_configured');
+        expect(data.integrations.analytics.type).toBe('not_configured');
+      } finally {
+        if (saved.payment === undefined) delete process.env.PAYMENT_PROVIDER_TYPE;
+        else process.env.PAYMENT_PROVIDER_TYPE = saved.payment;
+        if (saved.notifications === undefined) delete process.env.NOTIFICATION_TYPE;
+        else process.env.NOTIFICATION_TYPE = saved.notifications;
+        if (saved.analytics === undefined) delete process.env.ANALYTICS_TYPE;
+        else process.env.ANALYTICS_TYPE = saved.analytics;
+      }
+    });
   });
 
   describe('HEAD /api/health', () => {

@@ -3,9 +3,67 @@
 **Repository:** `hakimceliker/mauseai`  
 **Default branch:** `main`  
 **Status owner:** GPT/Codex (code, CI, technical evidence)  
-**Last verified:** 2026-10-01
+**Last verified:** 2026-10-04 17:52 UTC (local evidence and GitHub PR snapshot; local re-verification at 20:52 +03)
 
-**Main commit:** `e7f1e34` (PR #94 merged; post-merge CI and CodeQL passed)
+**Repository controls re-verified:** 2026-10-01 20:26 UTC (ruleset, Actions permissions, private vulnerability reporting, collaborators)
+
+## Current execution snapshot — 2026-10-04
+
+GitHub remains the source of truth. PR #114 (`claude/merge-queue-integration`)
+is open as a consolidation candidate for PRs #92–#111. The current evidence
+snapshot also records PRs #112–#116; their checks/review status must be read at
+their exact current heads before any acceptance decision. PR #114 still
+requires an independent maintainer approval before merge. Its live acceptance
+gates remain `NOT_RUN`/`credential_not_configured`; no deployment or human
+acceptance is inferred. The local worktree additionally contains unpublished
+fail-closed provider guards and evidence controls; these are not merged into
+`main` and do not change production status.
+
+| Current evidence | Result |
+|---|---|
+| `npm run evidence:validate` | PASS — 13 gates, 4 sources; runtime verification false |
+| `npm run evidence:g10` | STRUCTURE_VALID; acceptance pending pilot/KPI/finance evidence |
+| `npm run verify` | PASS — evidence validator, lint, typecheck, 44 test files/336 passed/16 skipped, build |
+| `npm audit --audit-level=high` | PASS — 0 vulnerabilities |
+| Local Docker acceptance image | PASS — Docker Desktop 29.8.0; `mouseai-acceptance-local:current` built and started locally; credential-free `/api/health` returned expected HTTP 503 with `credential_not_configured`, `/api/health/ready` returned `503 {\"ready\":false}`; no registry push/deploy |
+| Current PR queue | PR #114 REVIEW; PRs #112–#116 tracked in the evidence snapshot; no independent maintainer approval recorded |
+| GitHub API collection | PARTIAL — rate limit interrupted per-PR rechecks after six PRs; unverified PRs remain `NOT_RECHECKED`, not PASS |
+| Production acceptance | NOT_RUN / BLOCKED — approved live credentials and workflow identity absent |
+| Overall | `PARTIAL — NOT PRODUCTION-READY` |
+
+### Current live PR evidence
+
+| PR | Head | GitHub state | Evidence interpretation |
+|---:|---|---|---|
+| #114 | `39a097b6ac08b13f77d17ecc86b9e1dea5f47d28` | OPEN; 68 commits; independent review required | Consolidation candidate; not merged or production-accepted |
+| #115 | `5686a1e` | DRAFT; 4 commits; no reviews | Preview/local verification only; live Auth/RLS acceptance pending |
+| #116 | `d071206` | OPEN; 3 commits; no reviews | Preview deployment only; not production acceptance |
+| #113 | `9f5241d` | OPEN; 1 commit; no reviews | Preview deployment only; production credentials/runtime testing pending |
+
+This section is a current snapshot; the dated execution ledger below remains
+historical and is not overwritten.
+
+## Current GitHub and production snapshot — 2026-10-01 20:16 UTC
+
+| Field | Verified value |
+|---|---|
+| Current `main` | `04256ac21a1c95da957fab501fc87c7acdf4cdd2` (PR #96 merge) |
+| Latest production deployment | Vercel deployment `6793405140`, commit `04256ac21a1c95da957fab501fc87c7acdf4cdd2`, success at `2026-10-01 19:33:31 UTC` |
+| Production health/readiness | `/api/health` HTTP 200, `healthy`, database `ready` at `20:16:21 UTC`; `/api/health/ready` HTTP 200, `ready: true` |
+| Main CI | Run [36915074789](https://github.com/hakimceliker/mauseai/actions/runs/36915074789): quality, dependency audit, secret scan, Docker passed |
+| Main CodeQL | Run [36915074754](https://github.com/hakimceliker/mauseai/actions/runs/36915074754): passed |
+| Open PR #92 | Head `7c8d2fbe23548ffdd26060a9f9114e7a8efb30d9`; CI [36916795522](https://github.com/hakimceliker/mauseai/actions/runs/36916795522) and CodeQL [36916795401](https://github.com/hakimceliker/mauseai/actions/runs/36916795401) passed; independent review pending |
+| Open PR #95 | Head `2fe1b005e010f69d371f54c32c7497bd32cba769`; CI [36918029643](https://github.com/hakimceliker/mauseai/actions/runs/36918029643) and CodeQL [36918029766](https://github.com/hakimceliker/mauseai/actions/runs/36918029766) passed; independent review pending |
+| Open PR #97 | Governance/source reconciliation and Local AI fallback hardening; current governance controls are being added to this same PR to avoid competing status-record changes; independent review pending |
+| `main-protection` ruleset | Active; PR plus one approval required; `quality`, `CodeQL`, `secret-scan`, `dependency-audit`, `docker`, and `Vercel` required; force-push and deletion blocked |
+| Private vulnerability reporting | Enabled; verified through the GitHub repository security API |
+| Open blockers | Only the PR author is a repository collaborator; no independent maintainer can review/approve #92, #95, or #97. Live acceptance credentials and pilot/business evidence remain unavailable. |
+| Responsible | GPT/Codex for repository, CI and technical evidence; product owner for approvals and live test credentials |
+| Next operation | Add an independent maintainer, obtain review for #92/#95, then merge only after all gates pass; validate production after each merge |
+
+See [`docs/evidence/README.md`](docs/evidence/README.md) for the evidence index. The snapshot above supersedes older commit references in the historical execution ledger below.
+
+**Main commit (historical snapshot):** `e7f1e34` (PR #94 merge; superseded by PR #96)
 
 ## Status vocabulary
 
@@ -20,6 +78,8 @@
 **Overall:** `PARTIAL — NOT PRODUCTION-READY`
 
 Code and CI gates are healthy. Production acceptance is intentionally withheld until live Auth/RLS tenant isolation and Inngest workflow evidence are recorded with non-secret test credentials. Missing credentials are reported as `credential_not_configured`; no secret value is stored here.
+
+The health endpoint now reports unset payment, notification, and analytics configuration as `not_configured` instead of implying `mock`/`console` runtime providers. This is a diagnostic-accuracy improvement; it does not constitute live provider acceptance.
 
 ## Execution ledger — 2026-10-01
 
@@ -75,8 +135,9 @@ Every change must update this file or a linked evidence file, identify the branc
 ## GitHub inventory reconciliation — 2026-10-01
 
 - Combined open count was 36 because GitHub counts open issues and pull requests together.
-- Open issues: 18; duplicate MOUSE issue families remain classified in the ST3.6 register.
-- Open pull requests after historical cleanup: 11.
-- Draft package PRs: 11 (`MOUSE-001`–`MOUSE-011`).
+- Open canonical issues: 11 (`#53`–`#63`), assigned to `hakimceliker` and milestone `ST3.6 Production Acceptance`.
+- Duplicate issues `#42`, `#43`, `#45`, `#49`–`#52` are closed with duplicate labels and links to canonical issues `#53`, `#54`, `#56`, `#60`–`#63`.
+- Open PRs: #92, #95, and #97; all require independent maintainer review.
+- Stale draft package PRs #64–#74 are closed; their branches and commits are preserved, and none counts as completion evidence.
 - Historical PRs #1, #2, #3, #5, #6, #7 and #8: **CLOSED without merge**; their branches/commits were preserved.
 - MOUSE draft branches are stale against current `main` (53 commits behind; 2–4 commits ahead). They must be rebased/reimplemented from current `main` or closed; they are not completion evidence.

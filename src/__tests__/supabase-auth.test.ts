@@ -1,8 +1,20 @@
 import { describe, expect, it, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { AuthError } from '@/src/lib/errors/api-error-handler';
-import { requireAuthAsync } from '@/src/lib/auth/mock-auth';
+import { requireAuthAsync, resolveAuthProvider } from '@/src/lib/auth/mock-auth';
 import { SupabaseAuth } from '@/src/lib/auth/supabase-auth';
+
+vi.mock('@/src/lib/supabase/admin', () => ({
+  getSupabaseAdminClient: vi.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { tenant_id: 'tenant-from-membership' }, error: null }),
+        })),
+      })),
+    })),
+  })),
+}));
 
 describe('Supabase production auth boundary', () => {
   const originalProvider = process.env.AUTH_PROVIDER;
@@ -12,6 +24,7 @@ describe('Supabase production auth boundary', () => {
   afterEach(() => {
     process.env.AUTH_PROVIDER = originalProvider;
     vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
     process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = originalAnon;
   });
@@ -43,5 +56,36 @@ describe('Supabase production auth boundary', () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     await expect(SupabaseAuth.verifyToken('redacted-test-token')).resolves.toBeNull();
+  });
+
+  it('fails closed when the Supabase Auth network call fails', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network unavailable')));
+
+    await expect(SupabaseAuth.verifyToken('redacted-test-token')).resolves.toBeNull();
+  });
+
+  it('uses server-side tenant membership instead of trusting JWT tenant metadata', async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: 'auth-user-1',
+      email: 'user@example.test',
+      app_metadata: { tenant_id: 'tenant-from-jwt' },
+    }), { status: 200, headers: { 'content-type': 'application/json' } })));
+
+    await expect(SupabaseAuth.verifyToken('redacted-test-token')).resolves.toEqual({
+      id: 'auth-user-1',
+      email: 'user@example.test',
+      tenant_id: 'tenant-from-membership',
+    });
+  });
+
+  it('uses Supabase as the production default across route decisions', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    delete process.env.AUTH_PROVIDER;
+
+    expect(resolveAuthProvider()).toBe('supabase');
   });
 });

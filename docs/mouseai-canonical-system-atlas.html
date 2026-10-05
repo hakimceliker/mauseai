@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MouseAI — Kanonik Sistem Atlası</title>
+  <style>
+    :root{--ink:#102033;--muted:#5c6b7a;--line:#cbd7e3;--blue:#1769e0;--cyan:#08a6c8;--green:#16834b;--amber:#a66a00;--red:#b42318;--bg:#f7fafc;--card:#fff}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+    main{max-width:1500px;margin:auto;padding:32px} h1{font-size:36px;line-height:1.1;margin:0 0 8px} h2{margin-top:38px;border-bottom:2px solid var(--line);padding-bottom:8px} h3{margin:0 0 8px;font-size:17px} p{margin:7px 0;color:var(--muted)} code{background:#edf3f8;padding:2px 5px;border-radius:4px}
+    .meta,.legend,.grid,.flow,.gates{display:grid;gap:12px}.meta{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:22px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px #1020330b}.label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .status{display:inline-flex;align-items:center;gap:6px;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700}.done{background:#e5f6ec;color:var(--green)}.partial{background:#fff3d6;color:var(--amber)}.blocked{background:#fde8e7;color:var(--red)}.info{background:#e6f0ff;color:#1757a6}
+    .flow{grid-template-columns:repeat(7,1fr);align-items:stretch}.flow .card{position:relative}.flow .card:not(:last-child)::after{content:'→';position:absolute;right:-18px;top:42%;font-size:24px;color:var(--blue);z-index:2}.layer{border-left:5px solid var(--blue)}.security{border-left-color:var(--red)}.data{border-left-color:var(--cyan)}.ops{border-left-color:var(--green)}
+    .grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}.gates{grid-template-columns:repeat(4,1fr)}.gate{border-top:5px solid var(--line)}.gate.done{border-top-color:var(--green)}.gate.partial{border-top-color:#e4a11b}.gate.blocked{border-top-color:var(--red)}
+    .arrow{font-size:24px;text-align:center;color:var(--blue);padding:7px}.small{font-size:13px}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;white-space:pre-wrap;background:#102033;color:#eaf3fb;border-radius:10px;padding:16px;overflow:auto}.notice{border-left:5px solid var(--amber);background:#fff8e8;padding:14px;border-radius:8px}.footer{margin-top:42px;color:var(--muted);font-size:13px}
+    @media(max-width:1050px){.flow{grid-template-columns:repeat(2,1fr)}.flow .card:not(:last-child)::after{content:'↓';right:48%;top:auto;bottom:-22px}.gates{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){main{padding:18px}h1{font-size:28px}.flow,.gates{grid-template-columns:1fr}.flow .card:not(:last-child)::after{content:'↓';right:48%;bottom:-22px}}
+    @media print{body{background:#fff}.card{box-shadow:none;break-inside:avoid}main{max-width:none;padding:12px}.flow{grid-template-columns:repeat(4,1fr)}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="label">Kanonik repo / ST3.6 / Sistem atlası</div>
+    <h1>MouseAI — A’dan Z’ye Sistem ve Kanun Diyagramı</h1>
+    <p>Bu atlas; ürün mimarisini, çalışma kanunlarını, görev sahipliğini, repo değişiklik zincirini ve üretim kabul kapılarını tek görünümde birleştirir.</p>
+    <div class="meta">
+      <div class="card"><div class="label">Repo</div><strong>hakimceliker/mauseai</strong><p><code>main</code> değişiklikleri yalnızca PR ile alır.</p></div>
+      <div class="card"><div class="label">Son kayıtlı main</div><strong>04256ac</strong><p>PR #96 sonrası doğrulanmış teknik temel.</p></div>
+      <div class="card"><div class="label">Genel kabul</div><strong class="status partial">PARTIAL — NOT PRODUCTION-READY</strong><p>Canlı kanıt ve işletme kapıları açık.</p></div>
+      <div class="card"><div class="label">Güvenlik ilkesi</div><strong>Secret yok / fail-closed</strong><p>Eksik credential: <code>credential_not_configured</code>.</p></div>
+    </div>
+  </header>
+
+  <h2>1. Uçtan uca çalışma akışı</h2>
+  <div class="flow">
+    <div class="card layer"><h3>İnsan hedefi</h3><p>Kullanıcı hedefi, tenant, rol, bütçe ve risk seviyesi.</p><span class="status info">INPUT</span></div>
+    <div class="card layer"><h3>Next.js / API</h3><p>Auth, schema, tenant ve approval-first kontrolü.</p><span class="status done">CODE</span></div>
+    <div class="card data"><h3>Supabase</h3><p>Auth, profiles, tenants, tasks, workflows, audit ve RLS.</p><span class="status partial">LIVE GATE</span></div>
+    <div class="card layer"><h3>Inngest</h3><p><code>task.execute</code>, worker, retry, checkpoint ve idempotency.</p><span class="status partial">LIVE GATE</span></div>
+    <div class="card layer"><h3>AI Router</h3><p>Local-first; başarısızsa OpenAI/Anthropic fallback.</p><span class="status partial">PROVIDER GATE</span></div>
+    <div class="card security"><h3>Verifier / Policy</h3><p>Risk, bütçe, tool izni, approval, rollback ve deny-by-default.</p><span class="status done">GUARD</span></div>
+    <div class="card ops"><h3>Audit / KPI / UI</h3><p>Durum, maliyet, trace, pilot ölçümü ve işletme kabulü.</p><span class="status partial">ACCEPTANCE</span></div>
+  </div>
+
+  <h2>2. Katmanlı mimari</h2>
+  <div class="grid">
+    <div class="card layer"><h3>Sunum</h3><p>Dashboard, tasks, operations, login, reset-password, approval UI.</p><p class="small">Mock veri production metriği gibi gösterilmez.</p></div>
+    <div class="card layer"><h3>API ve sözleşmeler</h3><p>Task, conversation, offer, timeline, health, readiness, Inngest ve Stripe webhook rotaları.</p><p class="small">Zod/typed contract, hata durumları ve idempotency anahtarı.</p></div>
+    <div class="card data"><h3>Kalıcı veri</h3><p>Tenant kapsamlı PostgreSQL tabloları, migration, deny-by-default RLS, profile-to-tenant eşleşmesi.</p><p class="small">Service role istemciye çıkmaz.</p></div>
+    <div class="card layer"><h3>Yürütme</h3><p>Inngest durable workflow; her adım checkpoint ve audit yazar; retry sınırlandırılır.</p><p class="small">Kalıcı hata <code>FAILED/BLOCKED</code>.</p></div>
+    <div class="card security"><h3>Güvenlik</h3><p>Auth, RLS, tenant isolation, secret policy, CodeQL, secret scan, SSRF/injection ve log redaction.</p></div>
+    <div class="card ops"><h3>Gözlemleme</h3><p>Sentry hata, Langfuse trace, PostHog event; provider, model, latency, token ve tahmini maliyet.</p></div>
+  </div>
+
+  <h2>3. Kanunlar — değişmez çalışma sözleşmeleri</h2>
+  <div class="grid">
+    <div class="card"><h3>Repo kanunu</h3><p>Tek kanonik repo: <code>hakimceliker/mauseai</code>. Başka kopyaya özellik eklenmez; kullanıcı değişiklikleri korunur.</p></div>
+    <div class="card"><h3>Branch/PR kanunu</h3><p>Her değişiklik ayrı branch → test → review → CI → evidence → PR → merge. Main’e doğrudan push yok.</p></div>
+    <div class="card"><h3>Secret kanunu</h3><p>Secret sohbete, source’a, issue’ya, loga veya evidence’a yazılmaz. Yoksa sistem fail-closed olur.</p></div>
+    <div class="card"><h3>Tenant kanunu</h3><p>Her veri erişimi authenticated tenant ve RLS ile sınırlandırılır. Çapraz tenant erişimi reddedilir.</p></div>
+    <div class="card"><h3>Approval-first</h3><p>Yüksek riskli işlem, ödeme, silme ve dış sistem yazımı insan onayı olmadan çalışmaz.</p></div>
+    <div class="card"><h3>Local-first / cloud-fallback</h3><p>Local AI denenir; endpoint, timeout, tunnel veya model hatasında cloud provider sessiz fallback olur.</p></div>
+    <div class="card"><h3>Gerçek veri kanunu</h3><p>Gerçek piyasa/müşteri/finans verisi mock ile temsil edilmez. Pilot ve KPI kanıtı olmadan kabul verilmez.</p></div>
+    <div class="card"><h3>Kanıt kanunu</h3><p>Branch’te kalan iş tamamlanmış sayılmaz. Main commit, test, CI ve redacted evidence olmadan gate kapanmaz.</p></div>
+  </div>
+
+  <h2>4. Sahiplik ve teslim zinciri</h2>
+  <div class="grid">
+    <div class="card"><h3>GPT/Codex</h3><p>Kod, migration, API, test, CI, teknik doküman, evidence ve rollback notu.</p></div>
+    <div class="card"><h3>Bağımsız reviewer</h3><p>Mimari, güvenlik, tenant/RLS, secret, retry/idempotency ve test incelemesi. Review merge yetkisi yerine geçmez.</p></div>
+    <div class="card"><h3>Kullanıcı / ürün sahibi</h3><p>G0 sponsor, risk sahibi, bütçe, credential kaynağı, hukuki/ticari ve pilot kararları.</p></div>
+    <div class="card"><h3>Supabase / Vercel / Inngest</h3><p>Auth-RLS-storage / deployment-env / durable execution-checkpoint kanıtları.</p></div>
+    <div class="card"><h3>AI sağlayıcıları</h3><p>OpenAI/Anthropic runtime, fallback, token ve maliyet kanıtı.</p></div>
+    <div class="card"><h3>Stripe / telemetry</h3><p>Stripe sandbox; PostHog event; Sentry hata; Langfuse trace. Gerçek ödeme yok.</p></div>
+  </div>
+  <div class="mono">Issue → branch → kod/doküman/migration → test → security review → PR → CI → commit → redacted evidence → kabul sahibi/tarih → merge → main/production doğrulaması</div>
+
+  <h2>5. Fazlar ve kapılar</h2>
+  <div class="gates">
+    <div class="card gate partial"><h3>G0–G2</h3><p>Proje açılışı, ihtiyaç, fizibilite, sponsor, risk sahibi, maliyet merkezi.</p><span class="status partial">DECISION_PENDING</span></div>
+    <div class="card gate partial"><h3>G3–G6</h3><p>Kapsam, organizasyon, mimari, prototip, güvenlik ve tasarım.</p><span class="status done">TECHNICAL BASE</span></div>
+    <div class="card gate partial"><h3>G7–G9</h3><p>Auth/RLS/tenant, Inngest workflow, provider, cost ve observability.</p><span class="status partial">LIVE EVIDENCE</span></div>
+    <div class="card gate blocked"><h3>G10–G12</h3><p>Pilot/KPI/finans, yayın/hukuk/rollback, işletme ve müşteri kabulü.</p><span class="status blocked">BLOCKED</span></div>
+  </div>
+  <div class="arrow">G0 → G1 → G2 → G3 → G4 → G5 → G6 → G7 → G8 → G9 → G10 → G11 → G12</div>
+
+  <h2>6. Entegrasyon kabul matrisi</h2>
+  <div class="grid">
+    <div class="card"><h3>Supabase</h3><p>Auth A/B, iki tenant, kendi verisini görme, çapraz tenant 403/RLS reddi, logout, token expiry.</p><span class="status blocked">credential_not_configured</span></div>
+    <div class="card"><h3>Vercel</h3><p>Production commit eşleşmesi, environment isimleri, deploy, rollback, health/readiness.</p><span class="status done">HEALTH VERIFIED</span></div>
+    <div class="card"><h3>Inngest</h3><p>Sync, trigger, worker, checkpoint, audit, retry, idempotency, rollback, FAILED/BLOCKED.</p><span class="status blocked">NOT_RUN</span></div>
+    <div class="card"><h3>OpenAI / Anthropic</h3><p>Gerçek çağrı, timeout/fallback, token/maliyet, hassas log redaction.</p><span class="status blocked">NOT_RUN</span></div>
+    <div class="card"><h3>Stripe</h3><p>Sandbox payment intent, webhook replay, wallet ledger ve refund sınırı.</p><span class="status partial">SANDBOX ONLY</span></div>
+    <div class="card"><h3>PostHog / Sentry / Langfuse</h3><p>Event, error ve trace kanıtı; prompt/secret/kişisel veri redaction.</p><span class="status blocked">NOT_RUN</span></div>
+  </div>
+
+  <h2>7. Kabul karar ağacı</h2>
+  <div class="card">
+    <div class="mono">Kod + migration + test başarılı mı?
+  Hayır → düzelt → tekrar test
+  Evet
+    ↓
+PR review + CI + CodeQL + secret scan + Docker başarılı mı?
+  Hayır → PR BLOCKED
+  Evet
+    ↓
+Main’e merge edildi mi?
+  Hayır → tamamlanmış sayılmaz
+  Evet
+    ↓
+Production health/readiness başarılı mı?
+  Hayır → release REJECT
+  Evet
+    ↓
+Auth/RLS + tenant + Inngest + provider + audit kanıtı var mı?
+  Hayır → PARTIAL / NOT PRODUCTION-READY
+  Evet
+    ↓
+Pilot + KPI + finans + hukuk + operasyon kabulü var mı?
+  Hayır → G10–G12 açık
+  Evet → PRODUCTION ACCEPTED</div>
+  </div>
+
+  <h2>8. Sonraki yürütme sırası</h2>
+  <div class="grid">
+    <div class="card"><h3>1 — Repo uzlaştırma</h3><p>PR/branch/commit/evidence kayıtlarını main ile eşleştir; bağımsız review olmadan merge etme.</p></div>
+    <div class="card"><h3>2 — G0</h3><p>Sponsor, operasyon risk sahibi, maliyet merkezi ve başlangıç kararını kayda al.</p></div>
+    <div class="card"><h3>3 — G7</h3><p>Onaylı test hesaplarıyla Auth, tenant ve RLS negatif testlerini çalıştır.</p></div>
+    <div class="card"><h3>4 — G8/G9</h3><p>Inngest canlı akışı ve provider/maliyet/observability kanıtlarını topla.</p></div>
+    <div class="card"><h3>5 — G10</h3><p>İki pilot senaryosu, baseline, fayda, hata oranı, KPI ve finans ölçümünü kaydet.</p></div>
+    <div class="card"><h3>6 — G11/G12</h3><p>Yayın, rollback, hukuk, destek, operasyon ve müşteri kabulünü imzalı kanıtla kapat.</p></div>
+  </div>
+
+  <div class="notice"><strong>Mevcut karar:</strong> Teknik temel, CI ve health doğrulandı. Gerçek Auth/RLS, Inngest, provider, pilot, KPI, finans ve işletme kanıtları olmadan MouseAI production-ready veya “görev tamamlandı” ilan edilmez.</div>
+  <div class="footer">Kaynak kayıtlar: <code>PROJECT_STATUS.md</code>, <code>ACCEPTANCE_REPORT.md</code>, <code>docs/governance/st36/</code>, <code>docs/central-execution-and-handoff-plan.md</code>, <code>docs/storage-and-repository-registry.md</code>. Son atlas üretimi: 2026-10-02.</div>
+</main>
+</body>
+</html>

@@ -29,4 +29,11 @@ describe('Supabase migration security gates', () => {
     expect(sql).not.toMatch(/sk_(?:live|test)_[A-Za-z0-9]/i);
     expect(sql).not.toMatch(/service_role\s*[:=]\s*['"][^'"]+['"]/i);
   });
+
+  it('defines the cost ledger required by the server cost service', () => {
+    expect(sql).toMatch(/CREATE TABLE IF NOT EXISTS public\.cost_events/i);
+    expect(sql).toMatch(/cost_events_task_trace_unique/i);
+    expect(sql).toMatch(/ALTER TABLE public\.cost_events ENABLE ROW LEVEL SECURITY/i);
+    expect(sql).toMatch(/CREATE POLICY cost_events_tenant_write ON public\.cost_events/i);
+  });
 });

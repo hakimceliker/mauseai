@@ -12,6 +12,32 @@ Bu klasör, 1 Ekim 2026 tarihli ST3.6 uyarlama paketinin MouseAI repo içindeki 
 - 13 haftalık nakit girdisi
 - 50 kaynak bölüm ve 19 diyagram
 
+## Kanonik çalışma topolojisi
+
+```text
+GitHub Source of Truth
+↕
+GitLab Secondary CI / private pipeline / mirror-backup
+↕
+Forgejo local/private mirror + DR + local CI
+↕
+Windows/Docker local runtime
+↕
+Ollama/Qwen local-first
+↕
+NVIDIA NIM / OpenAI / Claude / Cloudflare fallback/scale
+↕
+Doctor / Observability / Watchdog / Recovery
+↕
+Judge / Evidence / Audit / Human Approval
+```
+
+GitHub tek kanonik kaynak ve nihai SHA otoritesidir. GitLab, Forgejo ve yerel
+ortamlar yardımcı CI, mirror, DR veya geliştirme katmanıdır. Bu katmanlarda
+üretilen sonuçlar GitHub branch/commit/SHA ile eşleştirilmeden `PASS`, `CLOSED`
+veya production kabulü sayılamaz. Aynalama source mutation, force-push, silme
+ve geri yazma yapmaz.
+
 ## Geçerli durum
 
 - `runtime_verified: false`
@@ -35,3 +61,6 @@ PLAN-005 için uygulanacak kabul sırası: [Inngest production workflow kabul ru
 PLAN-006/007 için uygulanacak kabul sırası: [Provider ve maliyet kabul runbook'u](plan-006-007-provider-cost-runbook.md).
 
 Tüm ST3.6 kapsamının tek birleşik durumu: [Final execution register](final-execution-register.md).
+
+G0–G12 kimlik, durum eşleme, deployment/SHA ve kapanış koşullarının tek kanonik
+kontratı: [Evidence register gate](EVIDENCE_REGISTER_GATE.md).

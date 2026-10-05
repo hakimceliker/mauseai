@@ -16,6 +16,26 @@ const pollDelayMs = Number(process.env.SMOKE_POLL_DELAY_MS || 5000);
 const evidenceFile = process.env.SMOKE_EVIDENCE_FILE || '';
 const results = [];
 
+function evidenceSafeBaseUrl(value) {
+  try {
+    const url = new URL(value);
+    return `${url.origin}${url.pathname}`.replace(/\/$/, '');
+  } catch {
+    return '[invalid_base_url]';
+  }
+}
+
+async function persistEvidence() {
+  if (!evidenceFile) return;
+  const fs = await import('node:fs/promises');
+  await fs.writeFile(evidenceFile, `${JSON.stringify({
+    baseUrl: evidenceSafeBaseUrl(baseUrl),
+    generatedAt: new Date().toISOString(),
+    results,
+  }, null, 2)}\n`, 'utf8');
+  console.log(`evidence_file: written (${evidenceFile})`);
+}
+
 function record(name, status, detail) {
   const item = { name, status, detail };
   results.push(item);
@@ -53,7 +73,8 @@ async function pollTask(taskId, token) {
 }
 
 if (!baseUrl) {
-  console.error('configuration_missing:SMOKE_BASE_URL');
+  record('configuration', 'FAIL', 'credential_not_configured:SMOKE_BASE_URL');
+  await persistEvidence();
   process.exit(2);
 }
 
@@ -117,9 +138,5 @@ if (configured('user_a_credential', tokenA)) {
 }
 
 const failed = results.filter((item) => item.status === 'FAIL').length;
-if (evidenceFile) {
-  const fs = await import('node:fs/promises');
-  await fs.writeFile(evidenceFile, `${JSON.stringify({ baseUrl, generatedAt: new Date().toISOString(), results }, null, 2)}\n`, 'utf8');
-  console.log(`evidence_file: written (${evidenceFile})`);
-}
+await persistEvidence();
 process.exitCode = failed ? 1 : 0;

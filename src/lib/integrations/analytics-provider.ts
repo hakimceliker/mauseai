@@ -301,11 +301,25 @@ export function createAnalyticsAdapter(): IAnalyticsProvider {
   const analyticsType = (process.env.ANALYTICS_TYPE || 'console').toLowerCase();
   const apiKey = process.env.ANALYTICS_API_KEY || '';
 
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (analyticsType === 'console' || analyticsType === 'amplitude' ||
+      !['posthog', 'mixpanel', 'segment'].includes(analyticsType))
+  ) {
+    throw new Error('credential_not_configured:ANALYTICS_TYPE');
+  }
+
   switch (analyticsType) {
     case 'posthog':
+      if (process.env.NODE_ENV === 'production' && !process.env.POSTHOG_KEY) {
+        throw new Error('credential_not_configured:POSTHOG_KEY');
+      }
       return new PostHogAnalyticsProvider(process.env.POSTHOG_KEY || '');
     case 'mixpanel':
       if (!apiKey) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('credential_not_configured:ANALYTICS_API_KEY');
+        }
         console.warn(
           'Mixpanel analytics selected but ANALYTICS_API_KEY not set. ' +
           'Add to .env.local (never commit to git)'
@@ -315,6 +329,9 @@ export function createAnalyticsAdapter(): IAnalyticsProvider {
 
     case 'segment':
       if (!apiKey) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error('credential_not_configured:ANALYTICS_API_KEY');
+        }
         console.warn(
           'Segment analytics selected but ANALYTICS_API_KEY not set. ' +
           'Add to .env.local (never commit to git)'

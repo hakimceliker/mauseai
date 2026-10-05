@@ -1,6 +1,7 @@
 import * as Domain from '@/src/types/domain';
 import { TaskRepository } from '@/src/lib/db/task-repository';
 import { TaskService } from '@/src/lib/services/task-service';
+import { resolveAuthProvider } from '@/src/lib/auth/mock-auth';
 
 /**
  * Runtime boundary for task persistence. Production uses the tenant-scoped
@@ -9,7 +10,7 @@ import { TaskService } from '@/src/lib/services/task-service';
  */
 export class LiveTaskService {
   private static useDatabase() {
-    return (process.env.AUTH_PROVIDER ?? 'mock').toLowerCase() !== 'mock';
+    return resolveAuthProvider() !== 'mock';
   }
 
   static async createTask(
