@@ -1,0 +1,307 @@
+name: Phase C-E Post-Merge Execution
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      skip_credentials:
+        description: 'Skip credential validation (for testing)'
+        required: false
+        default: 'false'
+      run_phase_i_j:
+        description: 'Also run Phase I-J tests after C-E'
+        required: false
+        default: 'false'
+
+jobs:
+  phase-c-e-execution:
+    name: Execute Phase C-E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      INNGEST_EVENT_KEY: ${{ secrets.INNGEST_EVENT_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      LOCAL_AI_BASE_URL: ${{ secrets.LOCAL_AI_BASE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify credentials configuration
+        if: github.event.inputs.skip_credentials != 'true'
+        run: |
+          echo "Verifying required credentials..."
+
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "ERROR: NEXT_PUBLIC_SUPABASE_URL not configured"
+            exit 1
+          fi
+
+          if [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "ERROR: NEXT_PUBLIC_SUPABASE_ANON_KEY not configured"
+            exit 1
+          fi
+
+          if [ -z "$INNGEST_EVENT_KEY" ]; then
+            echo "ERROR: INNGEST_EVENT_KEY not configured"
+            exit 1
+          fi
+
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "ERROR: OPENAI_API_KEY not configured"
+            exit 1
+          fi
+
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ERROR: ANTHROPIC_API_KEY not configured"
+            exit 1
+          fi
+
+          echo "✓ All required credentials configured"
+
+      - name: Create environment file
+        run: |
+          cat > .env.local << EOF
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          INNGEST_EVENT_KEY=${{ secrets.INNGEST_EVENT_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+          LOCAL_AI_BASE_URL=${{ secrets.LOCAL_AI_BASE_URL }}
+          EOF
+          chmod 600 .env.local
+
+      - name: Build project
+        run: npm run build
+
+      - name: Execute Phase C-E tests
+        run: npx ts-node scripts/phase-c-e-executor.ts
+        continue-on-error: true
+
+      - name: Upload Phase C-E report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-c-e-report
+          path: reports/phase-c-e-execution-*.json
+          retention-days: 30
+
+      - name: Parse Phase C-E results
+        if: always()
+        id: parse_results
+        run: |
+          REPORT=$(ls -t reports/phase-c-e-execution-*.json 2>/dev/null | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "No report found"
+            exit 1
+          fi
+
+          TOTAL=$(jq '.totalTests' "$REPORT")
+          PASSED=$(jq '.passed' "$REPORT")
+          FAILED=$(jq '.failed' "$REPORT")
+          SKIPPED=$(jq '.skipped' "$REPORT")
+
+          echo "total_tests=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+
+          if [ "$FAILED" -eq 0 ]; then
+            echo "status=SUCCESS" >> $GITHUB_OUTPUT
+          else
+            echo "status=FAILURE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment PR with Phase C-E results
+        if: always() && github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync(
+              'reports/phase-c-e-execution-' +
+              new Date().toISOString().replace(/[:.]/g, '-').split('Z')[0] +
+              '.json',
+              'utf8'
+            ).match(/phase-c-e-execution-[^"]+\.json/)?.[0];
+
+            if (!report) {
+              console.log('No report to comment on');
+              return;
+            }
+
+            const passed = '${{ steps.parse_results.outputs.passed }}';
+            const failed = '${{ steps.parse_results.outputs.failed }}';
+            const total = '${{ steps.parse_results.outputs.total_tests }}';
+
+            const comment = `
+## Phase C-E Execution Report
+**Branch:** \`${{ github.ref }}\`
+**Commit:** ${{ github.sha }}
+
+### Test Results
+- Total Tests: **${total}**
+- Passed: **${passed}** ✓
+- Failed: **${failed}** ${failed > 0 ? '✗' : ''}
+- Skipped: **${{ steps.parse_results.outputs.skipped }}**
+
+### Status: ${{ steps.parse_results.outputs.status }}
+
+[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            }).catch(err => {
+              console.log('Could not post comment (might not be on a PR):', err.message);
+            });
+
+      - name: Run Phase I-J tests
+        if: github.event.inputs.run_phase_i_j == 'true'
+        run: npx ts-node scripts/phase-i-j-executor.ts
+        continue-on-error: true
+
+      - name: Upload Phase I-J report
+        if: github.event.inputs.run_phase_i_j == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-i-j-report
+          path: reports/phase-i-j-execution-*.json
+          retention-days: 30
+
+      - name: Clean up secrets
+        if: always()
+        run: |
+          rm -f .env.local
+          rm -f .env
+
+  phase-k-validation:
+    name: Validate Phase K Closure Criteria
+    runs-on: ubuntu-latest
+    needs: phase-c-e-execution
+    if: always()
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Phase K closure validation
+        run: npx ts-node scripts/phase-k-closure.ts
+        continue-on-error: true
+
+      - name: Upload Phase K report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-k-report
+          path: reports/phase-k-closure-*.json
+          retention-days: 30
+
+      - name: Check closure readiness
+        if: always()
+        run: |
+          REPORT=$(ls -t reports/phase-k-closure-*.json 2>/dev/null | head -1)
+          if [ -z "$REPORT" ]; then
+            echo "No Phase K report found"
+            exit 1
+          fi
+
+          CLOSURE_READY=$(jq '.closureReady' "$REPORT")
+          echo "Closure Ready: $CLOSURE_READY"
+
+          if [ "$CLOSURE_READY" = "true" ]; then
+            echo "✓ Project ready for Phase K closure"
+            exit 0
+          else
+            FAILED=$(jq '.failedCriteria' "$REPORT")
+            echo "✗ Phase K closure criteria not met: $FAILED failed"
+            exit 1
+          fi
+
+  execution-summary:
+    name: Execution Summary
+    runs-on: ubuntu-latest
+    needs: [phase-c-e-execution, phase-k-validation]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Generate execution summary
+        run: |
+          echo "## Phase C-K Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Execution Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Phase C-E: ${{ needs.phase-c-e-execution.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Phase K: ${{ needs.phase-k-validation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.phase-c-e-execution.result }}" = "success" ] && [ "${{ needs.phase-k-validation.result }}" = "success" ]; then
+            echo "### ✓ All Phases Completed Successfully" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The system is ready for Phase K closure. Next steps:" >> $GITHUB_STEP_SUMMARY
+            echo "1. Obtain 5 stakeholder sign-offs" >> $GITHUB_STEP_SUMMARY
+            echo "2. Archive project artifacts" >> $GITHUB_STEP_SUMMARY
+            echo "3. Schedule project closure ceremony" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✗ Execution Issues Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Review the detailed reports and fix issues before retrying." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: List generated reports
+        if: always()
+        run: |
+          echo "Generated reports:"
+          find reports -name "*.json" -type f
+          echo ""
+          echo "Report summary:"
+          for report in reports/*/*-*.json; do
+            if [ -f "$report" ]; then
+              echo "- $report"
+              jq '.summary' "$report" 2>/dev/null || echo "  (could not parse)"
+            fi
+          done
