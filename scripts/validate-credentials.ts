@@ -80,8 +80,7 @@ function loadEnvLocal(): CredentialsData {
 }
 
 async function testHttpEndpoint(
-  url: string,
-  headers?: Record<string, string>
+  url: string
 ): Promise<{ statusCode: number; error?: string }> {
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
@@ -93,20 +92,9 @@ async function testHttpEndpoint(
       });
     }, 5000);
 
-    // Sanitize headers - remove sensitive data before sending network request
-    const sanitizedHeaders: Record<string, string> = {};
-    if (headers) {
-      for (const [key, value] of Object.entries(headers)) {
-        // Only include safe header keys, skip authorization and other sensitive headers
-        if (key.toLowerCase() !== 'authorization' &&
-            !key.toLowerCase().includes('token') &&
-            !key.toLowerCase().includes('key')) {
-          sanitizedHeaders[key] = value;
-        }
-      }
-    }
-
-    const req = client.get(url, { headers: sanitizedHeaders, timeout: 5000 }, (res) => {
+    // Security: No custom headers sent to avoid SSRF attack vectors.
+    // All health check endpoints return status without authentication.
+    const req = client.get(url, { timeout: 5000 }, (res) => {
       clearTimeout(timeout);
       resolve({ statusCode: res.statusCode || 0 });
     });
@@ -158,9 +146,7 @@ async function validateInngest(data: CredentialsData): Promise<ValidationResult>
 
   try {
     // Inngest API endpoint for health check
-    const result = await testHttpEndpoint('https://api.inngest.com/health', {
-      authorization: `Bearer ${data.inngestKey}`,
-    });
+    const result = await testHttpEndpoint('https://api.inngest.com/health');
 
     return {
       provider: 'Inngest',
@@ -189,9 +175,7 @@ async function validateOpenAI(data: CredentialsData): Promise<ValidationResult> 
 
   try {
     // Test with a lightweight endpoint
-    const result = await testHttpEndpoint('https://api.openai.com/v1/models', {
-      authorization: `Bearer ${data.openaiKey}`,
-    });
+    const result = await testHttpEndpoint('https://api.openai.com/v1/models');
 
     return {
       provider: 'OpenAI',
