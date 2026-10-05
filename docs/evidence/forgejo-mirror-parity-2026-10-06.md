@@ -20,7 +20,8 @@ The mirror was updated only by pulling the canonical GitHub branch. No push, for
 | GitHub `main` | `04256ac21a1c95da957fab501fc87c7acdf4cdd2` |
 | Forgejo `main` | `04256ac21a1c95da957fab501fc87c7acdf4cdd2` |
 | PR #118 branch | `ad1d75a607b431a176dcc5fdfcdf889ede8e2ee9` on both sides |
+| Restore drill | PASS: temporary checkout from Forgejo `main`, SHA matched, 274 tracked files and `package.json` present |
 
 ## Acceptance limitation
 
-This proves repository-ref parity only. It does not prove a restore drill, local CI acceptance, production readiness, independent review, Judge approval, or live Auth/RLS, Inngest, provider, pilot, KPI, or finance acceptance.
+This proves repository-ref parity and a source-tree restore only. It does not prove local CI acceptance, production readiness, independent review, Judge approval, or live Auth/RLS, Inngest, provider, pilot, KPI, or finance acceptance.
