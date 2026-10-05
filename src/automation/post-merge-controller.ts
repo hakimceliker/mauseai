@@ -45,7 +45,7 @@ export interface PostMergeResult {
 
 export interface PhaseExecutionSummary {
   phase: string;
-  status: "success" | "failure" | "partial" | "skipped";
+  status: "success" | "failure" | "partial" | "skipped" | "blocked";
   duration_ms: number;
   testsPassed?: number;
   testsFailed?: number;
