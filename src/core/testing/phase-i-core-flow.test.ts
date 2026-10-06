@@ -32,6 +32,16 @@ import {
 } from "@/src/core/contracts/handoff-contract";
 import { createEvidence } from "@/src/core/contracts/evidence-contract";
 import {
+  PermissionEngine,
+  PermissionLevel,
+  ToolCategory,
+} from "@/src/core/permissions/permission-engine";
+import { ToolAllowlist } from "@/src/core/permissions/tool-allowlist";
+import {
+  ApprovalAuditSystem,
+  AuditEventType,
+} from "@/src/core/approval/approval-audit";
+import {
   createTask,
   EvidenceType,
   TaskStatus,
@@ -383,5 +393,78 @@ describe("Phase I - implemented core integration scenarios", () => {
     expect(summary.actualCost).toEqual({ tokens: 250, usd: 0.25 });
     expect(summary.completedDependencies).toBe(1);
     expect(context.auditTrail.some(entry => entry.action === "cost_recorded")).toBe(true);
+  });
+
+  it("scenario 21: permission engine denies unknown agents and tools by default", () => {
+    const engine = new PermissionEngine();
+    const request = {
+      agentId: "unknown-agent", toolId: "deploy", operation: "deploy",
+      timestamp: new Date(),
+    };
+
+    const result = engine.checkPermission(request);
+    expect(result.allowed).toBe(false);
+    expect(result.reason).toBe("AGENT_NOT_FOUND");
+
+    engine.registerAgent("agent-1", "Executor", PermissionLevel.ADMIN, ["other-tool"]);
+    const missingTool = engine.checkPermission({ ...request, agentId: "agent-1" });
+    expect(missingTool.allowed).toBe(false);
+    expect(missingTool.reason).toBe("TOOL_NOT_FOUND");
+  });
+
+  it("scenario 22: permission engine enforces tool allowlists and permission levels", () => {
+    const engine = new PermissionEngine();
+    engine.registerTool({
+      toolId: "write-file", toolName: "Write file", category: ToolCategory.FILE_SYSTEM,
+      requiredLevel: PermissionLevel.WRITE, requiresApproval: false,
+      riskLevel: "MEDIUM", description: "write a workspace file",
+    });
+    engine.registerAgent("reader", "Reader", PermissionLevel.READ, ["write-file"]);
+    engine.registerAgent("writer", "Writer", PermissionLevel.WRITE, ["write-file"]);
+
+    const base = { toolId: "write-file", operation: "write", timestamp: new Date() };
+    const denied = engine.checkPermission({ ...base, agentId: "reader" });
+    const allowed = engine.checkPermission({ ...base, agentId: "writer" });
+
+    expect(denied.allowed).toBe(false);
+    expect(denied.reason).toBe("INSUFFICIENT_PERMISSION_LEVEL");
+    expect(allowed.allowed).toBe(true);
+    expect(engine.getAuditLogs({ toolId: "write-file" })).toHaveLength(2);
+  });
+
+  it("scenario 23: tool allowlist grants and revokes access explicitly", () => {
+    const allowlist = new ToolAllowlist();
+    allowlist.createAllowlist("agent-1", "Executor tools", PermissionLevel.WRITE);
+    expect(allowlist.isToolAllowed("agent-1", "git-push")).toBe(false);
+
+    allowlist.grantToolAccess("agent-1", "git-push", "admin", "approved task scope");
+    expect(allowlist.isToolAllowed("agent-1", "git-push")).toBe(true);
+    allowlist.revokeToolAccess("agent-1", "git-push", "admin", "scope ended");
+    expect(allowlist.isToolAllowed("agent-1", "git-push")).toBe(false);
+  });
+
+  it("scenario 24: critical operations remain fail-closed until human approval", () => {
+    const approvals = new HumanApprovalSystem();
+    const request = approvals.requestApproval(
+      OperationType.SECRET_CREATE, "agent-1", "secret", "op-secret", "rotate credential"
+    );
+
+    expect(request.status).toBe("PENDING");
+    expect(() => approvals.enforceApproval(request.id)).toThrow("not approved");
+    approvals.reject(request.id, "human-reviewer", "not authorized for this window");
+    expect(approvals.getApprovalRequest(request.id)?.status).toBe("REJECTED");
+    expect(() => approvals.enforceApproval(request.id)).toThrow("not approved");
+  });
+
+  it("scenario 25: approval audit chain detects tampering", () => {
+    const audit = new ApprovalAuditSystem();
+    audit.recordEvent("approval-1", AuditEventType.APPROVAL_REQUESTED, "agent-1");
+    audit.recordEvent("approval-1", AuditEventType.APPROVAL_APPROVED, "human-1");
+    const intact = audit.getAllEntries();
+
+    expect(audit.verifyChainIntegrity(intact)).toBe(true);
+    const tampered = intact.map(entry => ({ ...entry }));
+    tampered[1]!.previousHash = "tampered";
+    expect(audit.verifyChainIntegrity(tampered)).toBe(false);
   });
 });

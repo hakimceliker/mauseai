@@ -44,7 +44,10 @@ export class ApprovalAuditSystem {
   }
 
   verifyChainIntegrity(entries: ApprovalAuditEntry[]): boolean {
-    return entries.length > 0 && entries[0].previousHash === 'genesis';
+    if (entries.length === 0 || entries[0].previousHash !== 'genesis') return false;
+    return entries.every((entry, index) =>
+      index === 0 || entry.previousHash === entries[index - 1]?.hash
+    );
   }
 
   getAllEntries(): ApprovalAuditEntry[] {

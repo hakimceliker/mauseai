@@ -75,13 +75,55 @@ export class PermissionEngine extends EventEmitter {
         auditLogId: `audit-${Date.now()}`,
       };
     }
+    const agentLevel = this.permissionRank(agent.level);
+    const requiredLevel = this.permissionRank(tool.requiredLevel);
+    if (!Array.isArray(agent.tools) || !agent.tools.includes(request.toolId)) {
+      return {
+        allowed: false,
+        reason: 'TOOL_NOT_ALLOWED',
+        requiresApproval: tool.requiresApproval,
+        riskLevel: tool.riskLevel,
+        auditLogId: this.recordAudit(request, 'TOOL_NOT_ALLOWED'),
+      };
+    }
+    if (agentLevel < requiredLevel) {
+      return {
+        allowed: false,
+        reason: 'INSUFFICIENT_PERMISSION_LEVEL',
+        requiresApproval: tool.requiresApproval,
+        riskLevel: tool.riskLevel,
+        auditLogId: this.recordAudit(request, 'INSUFFICIENT_PERMISSION_LEVEL'),
+      };
+    }
     return {
       allowed: true,
       reason: 'PERMISSION_GRANTED',
       requiresApproval: tool.requiresApproval,
       riskLevel: tool.riskLevel,
-      auditLogId: `audit-${Date.now()}`,
+      auditLogId: this.recordAudit(request, 'PERMISSION_GRANTED'),
     };
+  }
+
+  private permissionRank(level: PermissionLevel): number {
+    return {
+      [PermissionLevel.NONE]: 0,
+      [PermissionLevel.READ]: 1,
+      [PermissionLevel.WRITE]: 2,
+      [PermissionLevel.ADMIN]: 3,
+    }[level];
+  }
+
+  private recordAudit(request: PermissionCheckRequest, result: string): string {
+    const auditLogId = `audit-${Date.now()}-${this.auditLogs.length}`;
+    this.auditLogs.push({
+      id: auditLogId,
+      agentId: request.agentId,
+      toolId: request.toolId,
+      operation: request.operation,
+      result,
+      timestamp: request.timestamp,
+    });
+    return auditLogId;
   }
 
   registerAgent(agentId: string, name: string, level: PermissionLevel, tools: string[]): void {
@@ -92,8 +134,12 @@ export class PermissionEngine extends EventEmitter {
     this.toolRegistry.set(tool.toolId, tool);
   }
 
-  getAuditLogs(filter?: any): any[] {
-    return this.auditLogs;
+  getAuditLogs(filter?: { agentId?: string; toolId?: string }): any[] {
+    if (!filter) return this.auditLogs.slice();
+    return this.auditLogs.filter((entry) =>
+      (!filter.agentId || entry.agentId === filter.agentId) &&
+      (!filter.toolId || entry.toolId === filter.toolId)
+    );
   }
 }
 

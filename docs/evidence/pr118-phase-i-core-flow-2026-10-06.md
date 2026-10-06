@@ -1,9 +1,9 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `49c6813` (`test: extend Phase I handoff coverage through scenario twenty`)
-- Verification scope: Phase I scenarios 1–20
+- Verified code commit: `PENDING` (this evidence is updated in the same change)
+- Verification scope: Phase I scenarios 1–25
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
-- Result: **20/20 passed**
+- Result: **25/25 passed**
 
 Implemented runtime coverage:
 
@@ -27,6 +27,11 @@ Implemented runtime coverage:
 18. Handoff failure safety: failure results require an explicit reason.
 19. Execution context gate: incomplete dependencies prevent closure until evidence and independent review are present.
 20. Execution context continuity: trace identity, cost accounting, dependency state, and audit entries survive handoff work.
+21. Permission fail-closed baseline: unknown agents and tools are denied.
+22. Permission enforcement: tool allowlists and required permission levels are enforced and audited.
+23. Tool allowlist lifecycle: explicit grant and revoke operations control access.
+24. Critical approval gate: secret operations remain denied after pending or rejected human approval.
+25. Approval audit integrity: chained approval events detect tampering.
 
 Full local verification after this change:
 
@@ -36,4 +41,4 @@ Full local verification after this change:
 - Vitest: 43 files, 591 passed, 16 skipped
 - Next production build: PASS
 
-Remaining acceptance scope is intentionally open: Phase I scenarios 21–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.
+Remaining acceptance scope is intentionally open: Phase I scenarios 26–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.
