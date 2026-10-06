@@ -243,11 +243,16 @@ export class ModelRouter {
     const latencyScore = this.scoreLatency(model, constraints);
 
     // Weighted score
-    const score =
+    let score =
       capabilityMatch * 0.35 +
       healthScore * 0.30 +
       costEfficiency * 0.20 +
       latencyScore * 0.15;
+
+    // Apply local preference bonus if requested
+    if (constraints.preferLocal && model.isLocal) {
+      score += 0.15; // Add 15% bonus for local models when preferLocal is true
+    }
 
     return {
       model,
