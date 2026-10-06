@@ -22,6 +22,15 @@ import {
 } from "@/src/core/routing/model-router";
 import { HealthStatus, ProviderHealth } from "@/src/core/routing/provider-health";
 import { RiskLevel } from "@/src/types/enums";
+import { ExecutionContext } from "@/src/core/orchestrator/execution-context";
+import {
+  createHandoff,
+  HandoffResult,
+  validateHandoffNotCircular,
+  validateHandoffResult,
+  validateHandoffSafe,
+} from "@/src/core/contracts/handoff-contract";
+import { createEvidence } from "@/src/core/contracts/evidence-contract";
 import {
   createTask,
   EvidenceType,
@@ -292,5 +301,87 @@ describe("Phase I - implemented core integration scenarios", () => {
     expect(metrics?.status).toBe(HealthStatus.DOWN);
     expect(health.getProviderReadiness(ModelProvider.OPENAI)).toBe(0);
     expect(health.getHealthyProviders()).not.toContain(ModelProvider.OPENAI);
+  });
+
+  it("scenario 16: creates a valid inter-agent handoff with immutable routing facts", () => {
+    const handoff = createHandoff({
+      sourceAgent: "planner",
+      targetAgent: "executor",
+      taskId: crypto.randomUUID(),
+      context: { tenantId: "tenant-a", input: "redacted" },
+      reason: "Execution capability is required",
+      sha,
+      handoffResult: HandoffResult.SUCCESS,
+      resultReason: "Accepted by executor",
+    });
+
+    expect(validateHandoffSafe(handoff).success).toBe(true);
+    expect(validateHandoffNotCircular(handoff)).toBe(true);
+    expect(validateHandoffResult(handoff)).toBe(true);
+    expect(handoff.schemaVersion).toBe("1.0.0");
+  });
+
+  it("scenario 17: rejects circular self-handoff", () => {
+    const handoff = createHandoff({
+      sourceAgent: "executor", targetAgent: "executor",
+      taskId: crypto.randomUUID(), context: {}, reason: "invalid self route",
+      sha, handoffResult: HandoffResult.FAILURE, resultReason: "self route",
+    });
+
+    expect(() => validateHandoffNotCircular(handoff)).toThrow("Circular handoff");
+  });
+
+  it("scenario 18: rejects failed handoffs without a result reason", () => {
+    const handoff = createHandoff({
+      sourceAgent: "planner", targetAgent: "executor",
+      taskId: crypto.randomUUID(), context: {}, reason: "provider unavailable",
+      sha, handoffResult: HandoffResult.FAILURE, resultReason: "temporary failure",
+    });
+
+    const invalid = { ...handoff, resultReason: "" };
+    expect(() => validateHandoffResult(invalid)).toThrow("resultReason");
+  });
+
+  it("scenario 19: execution context blocks closure until dependencies and review evidence exist", () => {
+    const context = new ExecutionContext(
+      crypto.randomUUID(), "executor", { tokens: 10, usd: 0.01 }, "EXECUTE"
+    );
+    context.dependencies = ["dependency-1"];
+    context.setState(TaskStatus.BLOCKED);
+
+    expect(context.isDependenciesComplete()).toBe(false);
+    expect(context.isReadyForClosure()).toBe(false);
+    expect(context.getBlockers()).toContain("DEPENDENCIES_INCOMPLETE: 0/1 dependencies complete");
+
+    context.markDependencyComplete("dependency-1");
+    context.addEvidence(createEvidence({
+      taskId: context.taskId, type: EvidenceType.TEST_RESULT,
+      filePath: "evidence/handoff-test.json", sha, metadata: { passed: 1 }, redacted: false,
+    }));
+    context.addReview({
+      reviewer: "independent-reviewer", status: "APPROVED",
+      comment: "Context evidence verified", timestamp: new Date().toISOString(),
+    });
+
+    expect(context.isDependenciesComplete()).toBe(true);
+    expect(context.getSummary().evidenceCount).toBe(1);
+    expect(context.getSummary().reviewCount).toBe(1);
+    expect(context.auditTrail.length).toBeGreaterThan(0);
+  });
+
+  it("scenario 20: execution context preserves trace and cost evidence across handoff work", () => {
+    const context = new ExecutionContext(
+      crypto.randomUUID(), "executor", { tokens: 100, usd: 0.1 }, "HANDOFF"
+    );
+    const initialTrace = context.traceId;
+
+    context.addCost({ tokens: 250, usd: 0.25 });
+    context.markDependencyComplete("handoff-dependency");
+    const summary = context.getSummary();
+
+    expect(summary.traceId).toBe(initialTrace);
+    expect(summary.actualCost).toEqual({ tokens: 250, usd: 0.25 });
+    expect(summary.completedDependencies).toBe(1);
+    expect(context.auditTrail.some(entry => entry.action === "cost_recorded")).toBe(true);
   });
 });

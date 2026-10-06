@@ -1,9 +1,9 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `d54faf5` (`test: extend Phase I routing coverage through scenario fifteen`)
-- Verification scope: Phase I scenarios 1–15
+- Verified code commit: `PENDING` (this evidence is updated in the same change)
+- Verification scope: Phase I scenarios 1–20
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
-- Result: **15/15 passed**
+- Result: **20/20 passed**
 
 Implemented runtime coverage:
 
@@ -22,6 +22,11 @@ Implemented runtime coverage:
 13. Local-first model routing: the local provider is preferred when routing has no bound agent model.
 14. Model fallback constraints: fallback selection respects cost, latency, token, and zero-cost local execution constraints.
 15. Provider health gate: three consecutive failures transition a provider to DOWN and readiness zero.
+16. Handoff contract: valid inter-agent transfer preserves routing facts, SHA, schema version, and result validation.
+17. Handoff safety: circular self-handoff is rejected.
+18. Handoff failure safety: failure results require an explicit reason.
+19. Execution context gate: incomplete dependencies prevent closure until evidence and independent review are present.
+20. Execution context continuity: trace identity, cost accounting, dependency state, and audit entries survive handoff work.
 
 Full local verification after this change:
 
@@ -31,4 +36,4 @@ Full local verification after this change:
 - Vitest: 43 files, 591 passed, 16 skipped
 - Next production build: PASS
 
-Remaining acceptance scope is intentionally open: Phase I scenarios 16–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.
+Remaining acceptance scope is intentionally open: Phase I scenarios 21–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.
