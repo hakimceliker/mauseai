@@ -178,7 +178,7 @@ export async function runPostMergeController(
 
         phases_executed.push({
           phase: "F",
-          status: phaseResult.status,
+          status: phaseResult.status === "blocked" ? "failure" : phaseResult.status,
           duration_ms: Date.now() - phaseStartTime,
           testsPassed: phaseResult.passedCount,
           testsFailed: phaseResult.failedCount,
@@ -264,7 +264,7 @@ export async function runPostMergeController(
 
         phases_executed.push({
           phase: "K",
-          status: phaseResult.status,
+          status: phaseResult.status === "blocked" ? "failure" : phaseResult.status,
           duration_ms: Date.now() - phaseStartTime,
           timestamp: new Date(),
         });
