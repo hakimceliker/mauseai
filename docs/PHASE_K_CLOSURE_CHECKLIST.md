@@ -497,9 +497,9 @@ grep -r "api_key\|password\|secret\|token" docs/evidence/ 2>/dev/null | grep -v 
 - Evidence: `docs/PHASE_K_CLOSURE_CHECKLIST.md`
 
 #### 2. All Tests Passing ✓
-- 77 integration tests: 100% pass rate
-- 39 red-team scenarios: 100% pass rate
-- Regression tests: 100% pass rate
+- Historical integration-test claim; verify current evidence before closure
+- 19/39 red-team scenario IDs covered locally; 20 remain blocked
+- Regression status must be tied to the current commit and live CI evidence
 - Evidence: Test result JSONs in evidence/
 
 #### 3. Code Quality Standards Met ✓
@@ -709,7 +709,7 @@ else
 fi
 
 if [ "$red_team_tests" -gt 0 ]; then
-  echo "✓ Red-team scenarios: 39/39 passed"
+  echo "⚠ Red-team scenarios: 19/39 scenario IDs covered locally; 20 blocked"
 else
   echo "✗ Red-team scenarios incomplete"
   exit 1

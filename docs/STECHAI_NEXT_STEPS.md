@@ -651,8 +651,7 @@ npm run test:integration -- --verbose --coverage
 npm run test:red-team -- --comprehensive
 
 # Expected output:
-# ✓ 39 scenarios passed
-# No critical vulnerabilities
+# Current evidence: 19/39 scenario IDs covered locally; 20 remain blocked pending live/infrastructure/human evidence.
 ```
 
 ### Collect Evidence
@@ -716,13 +715,13 @@ All items must show ✓ (green):
 ✓ Phases A-B-C-E-F-G-H-I-J complete
 ✓ CI/CD pipeline all green
 ✓ 77 integration tests pass
-✓ 39 red-team scenarios pass
-✓ All 20 closure criteria met
-✓ KPIs within thresholds
-✓ 5 stakeholder sign-offs collected
-✓ Evidence sanitized & verified
-✓ GitHub PR approved & merged
-✓ Credentials validated
+⚠ 19/39 red-team scenario IDs covered locally; 20 blocked
+⚠ All 20 closure criteria must be verified; not currently closed
+⚠ KPIs require real pilot evidence
+⚠ Stakeholder sign-offs are pending
+⚠ Evidence requires current live validation
+⚠ GitHub PR approval/merge are pending
+⚠ Credentials require authorized live validation
 ```
 
 ### If Any Check Fails
