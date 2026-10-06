@@ -6,6 +6,9 @@ import { AgentRegistry } from "@/src/core/agents/agent-registry";
 import { RecoveryEngine } from "@/src/core/recovery/recovery-engine";
 import { ErrorClassification, RecoveryAction } from "@/src/core/recovery/types";
 import { Watchdog } from "@/src/core/watchdog/watchdog";
+import { JudgeEngine } from "@/src/core/judge/judge-engine";
+import { EvidenceValidator } from "@/src/core/evidence/evidence-validator";
+import { HumanApprovalSystem, OperationType } from "@/src/core/approval/human-approval";
 import {
   createTask,
   EvidenceType,
@@ -117,5 +120,72 @@ describe("Phase I - implemented core integration scenarios", () => {
     expect(selected).toBeDefined();
     expect(selected.id).not.toBe(task.assignedAgent);
     expect(selected.capability.length).toBeGreaterThan(0);
+  });
+
+  it("scenario 6: rejects self-review and accepts an independent reviewer", async () => {
+    const engine = new TaskEngine(new InMemoryTaskStore());
+    const task = await engine.createTask("Reviewable task", "executor", "B5");
+    await engine.updateTaskState(task.id, TaskStatus.WORKING);
+    await engine.updateTaskState(task.id, TaskStatus.REVIEW);
+
+    await expect(engine.addReview(task.id, "executor", "APPROVED")).rejects.toThrow("executor");
+    await engine.addReview(task.id, "reviewer", "APPROVED", "Independent review");
+    expect(engine.getReviewMap().get(task.id)?.[0]?.reviewer).toBe("reviewer");
+  });
+
+  it("scenario 7: judge validates all ten acceptance criteria", async () => {
+    const judge = new JudgeEngine();
+    const context = {
+      taskId: "judge-task", executorId: "executor", branch: "feature/test", sha,
+      ciStatus: "passed" as const, testStatus: "passed" as const,
+      hasIndependentReview: true, approvals: ["human"], dependencies: [],
+      productionProof: { url: "https://example.com", timestamp: new Date(), verified: true },
+    };
+    const evidence = [{
+      id: "evidence-1", type: "test_result" as const, content: "tests passed",
+      source: "github-actions", timestamp: new Date(),
+    }];
+    const verdict = await judge.judge("judge-task", context, evidence, "judge", "feature/test", sha);
+
+    expect(verdict.status).toBe("PASS");
+    expect(verdict.canClose).toBe(true);
+    expect(Object.values(verdict.criteria)).toHaveLength(10);
+    expect(Object.values(verdict.criteria).every(Boolean)).toBe(true);
+  });
+
+  it("scenario 8: task engine enforces judge independence", async () => {
+    const engine = new TaskEngine(new InMemoryTaskStore());
+    const task = await engine.createTask("Judgeable task", "executor", "B5");
+
+    await expect(engine.addJudgment(task.id, "executor", "PASS", "self-judgment"))
+      .rejects.toThrow("executor");
+    await engine.addJudgment(task.id, "judge", "PASS", "Independent judgment");
+    expect(engine.getJudgmentMap().get(task.id)?.[0]?.judgeId).toBe("judge");
+  });
+
+  it("scenario 9: evidence validator removes secrets from evidence output", async () => {
+    const validator = new EvidenceValidator();
+    const raw = "CI passed; api_key=abcdefghijklmnopqrstuvwxyz123456";
+    const redacted = validator.redactSensitiveData(raw);
+    const validation = await validator.validate({
+      id: "evidence-2", type: "ci_log", content: raw, source: "github-actions", timestamp: new Date(),
+    });
+
+    expect(validation.valid).toBe(false);
+    expect(validation.secretsDetected.length).toBeGreaterThan(0);
+    expect(redacted).not.toContain("abcdefghijklmnopqrstuvwxyz123456");
+    expect(redacted).toContain("[REDACTED]");
+  });
+
+  it("scenario 10: critical operations remain blocked until human approval", () => {
+    const approvals = new HumanApprovalSystem();
+    const request = approvals.requestApproval(
+      OperationType.PRODUCTION_DEPLOY, "deployer", "deploy", "op-1", "release"
+    );
+
+    expect(() => approvals.enforceApproval(request.id)).toThrow("not approved");
+    approvals.approve(request.id, "human-reviewer", "approved for staging gate");
+    expect(() => approvals.enforceApproval(request.id)).not.toThrow();
+    expect(approvals.getApprovalRequest(request.id)?.status).toBe("APPROVED");
   });
 });

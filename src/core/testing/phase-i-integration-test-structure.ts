@@ -253,7 +253,7 @@ const IntegrationScenarios = [
 export const Phase_I_Test_Structure = {
   name: 'Integration Testing (38 Scenarios)',
   totalScenarios: 38,
-  implementedScenarios: [1, 2, 3, 4, 5],
+  implementedScenarios: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   scenarios: IntegrationScenarios,
 
   // Test stub (implement after phases A-H complete)
@@ -263,10 +263,10 @@ export const Phase_I_Test_Structure = {
     blockers: string[];
   }> {
     return {
-      passed: 5,
-      failed: 33,
+      passed: 10,
+      failed: 28,
       blockers: [
-        'BLOCKED: Scenarios 6-38 still require their runtime dependencies and acceptance evidence',
+        'BLOCKED: Scenarios 11-38 still require their runtime dependencies and acceptance evidence',
       ],
     };
   },
