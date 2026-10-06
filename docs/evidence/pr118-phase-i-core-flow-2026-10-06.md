@@ -51,7 +51,7 @@ Full local verification after this change:
 - `npm run verify`: PASS
 - ESLint: 0 errors; warnings are non-blocking existing/style warnings
 - TypeScript: PASS
-- Vitest: 44 files, 622 passed, 16 skipped (638 total)
+- Vitest: 45 files, 633 passed, 16 skipped (649 total)
 - Next production build: PASS
 
 The 38 scenarios now have local runtime-contract coverage. Live acceptance remains open for Supabase Auth/RLS, real provider credentials, pilot/KPI/finance, production deployment, independent review, and the 39 Phase J red-team scenarios. This document does not claim final acceptance is complete.
