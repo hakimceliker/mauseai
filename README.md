@@ -325,3 +325,5 @@ MIT
 # Project control
 
 Current status, ownership, acceptance vocabulary, and remaining production gates are maintained in [PROJECT_STATUS.md](PROJECT_STATUS.md). The repository/PR/CI/integration source-of-truth matrix is in [docs/repository-control-matrix.md](docs/repository-control-matrix.md).
+
+Senatech Ajan Merkezi çalışma standardı ve proje uyum manifesti: [senatech.project.yaml](senatech.project.yaml) ve [Senatech Ajan Merkezi Standardı v1.0](docs/governance/senatech-agent-center-standard-v1.0.md).

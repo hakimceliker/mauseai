@@ -1,0 +1,67 @@
+schema_version: "1.0"
+standard: "Senatech Ajan Merkezi Çalışma Modeli"
+project:
+  id: "mauseai"
+  name: "MauseAI"
+  source_of_truth: "github"
+  repository: "https://github.com/hakimceliker/mauseai"
+  status: "BLOCKED"
+  status_reason: "Kurumsal sahiplik, veri sınıfı ve risk sahibi insan tarafından doğrulanmadı."
+
+ownership:
+  project_owner: null
+  technical_owner: null
+  decision_owner: null
+  confirmation_required: true
+
+classification:
+  data_class: null
+  risk_level: null
+  allowed_values:
+    data_class: [public, internal, confidential, restricted]
+    risk_level: [low, medium, high, critical]
+
+control_plane:
+  required: true
+  identity: required
+  tenant: required
+  capability: required
+  model: required
+  validator: required
+  audit: required
+  provenance: required_when_knowledge_fabric_is_used
+
+runtime:
+  local_first: true
+  local_runtime: "Windows/Docker"
+  local_model: "Ollama/Qwen"
+  cloud_fallbacks: [NVIDIA_NIM, OpenAI, Claude, Cloudflare]
+  canonical_ci: "github_actions"
+  secondary_ci_and_backup: "gitlab"
+  disaster_recovery_mirror: "forgejo_read_only"
+
+required_controls:
+  health_endpoint: "/api/health"
+  readiness_endpoint: "/api/health/ready"
+  real_e2e_evidence: required
+  secrets_out_of_source_and_logs: required
+  human_approval_for:
+    - high_risk
+    - critical_risk
+    - financial_action
+    - deletion
+    - external_communication
+    - production_deployment
+    - dns_change
+    - permission_change
+
+acceptance:
+  validator: "independent_review_and_judge"
+  evidence_required: true
+  missing_information_decision: "BLOCKED"
+  production_ready: false
+
+governance:
+  policy_document: "docs/governance/senatech-agent-center-standard-v1.0.md"
+  readme_reference: true
+  last_review: "2026-10-06"
