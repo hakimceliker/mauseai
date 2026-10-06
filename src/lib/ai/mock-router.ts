@@ -31,13 +31,13 @@ export async function routeAI(request: AIRequest): Promise<AIResult> {
     { role: 'system', content: 'You are a controlled MouseAI task agent. Return concise, actionable results.' },
     { role: 'user', content: request.goal },
   ]);
-  const inputTokens = response.tokens_used ?? request.goal.length;
-  const outputTokens = response.tokens_used ? Math.max(1, response.tokens_used - inputTokens) : 1;
+  const inputTokens = response.tokens_in ?? null;
+  const outputTokens = response.tokens_out ?? null;
   return {
     provider: response.provider as AIProviderName,
     output: { taskId: request.taskId, goal: request.goal, response: response.content },
     inputTokens,
     outputTokens,
-    costCents: Math.max(1, Math.ceil((response.cost ?? 0) * 100)),
+    costCents: response.cost === undefined ? null : Math.max(0, Math.round(response.cost * 100)),
   };
 }

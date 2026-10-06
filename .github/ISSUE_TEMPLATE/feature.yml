@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a measurable user or operational outcome.
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include secrets or real customer data. A proposal is not an approved scope, budget, or gate decision."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and intended user outcome
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope and exclusions
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Measurable acceptance criteria
+      description: Include negative cases and evidence required.
+    validations:
+      required: true
+  - type: input
+    id: package-gate
+    attributes:
+      label: Related P-package, G-gate, or PLAN-ID
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks, dependencies, and external decisions

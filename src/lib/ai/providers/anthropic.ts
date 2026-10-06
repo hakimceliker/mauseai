@@ -33,14 +33,18 @@ export class AnthropicProvider implements AIProvider {
       content?: Array<{ type?: string; text?: string }>;
       usage?: { input_tokens?: number; output_tokens?: number };
     };
-    const inputTokens = payload.usage?.input_tokens ?? 0;
-    const outputTokens = payload.usage?.output_tokens ?? 0;
+    const inputTokens = payload.usage?.input_tokens;
+    const outputTokens = payload.usage?.output_tokens;
+    const usageAvailable = inputTokens !== undefined && outputTokens !== undefined;
     return {
       role: 'assistant',
       content: payload.content?.filter((item) => item.type === 'text').map((item) => item.text ?? '').join('') ?? '',
       provider: this.name,
-      tokens_used: inputTokens + outputTokens,
-      cost: (inputTokens * 0.000003) + (outputTokens * 0.000015),
+      tokens_used: usageAvailable ? inputTokens + outputTokens : undefined,
+      tokens_in: inputTokens,
+      tokens_out: outputTokens,
+      cost: usageAvailable ? (inputTokens * 0.000003) + (outputTokens * 0.000015) : undefined,
+      cost_basis: usageAvailable ? 'provider_rate_estimate' : 'unknown',
     };
   }
 }

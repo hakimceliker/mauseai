@@ -1,0 +1,46 @@
+name: Production incident
+description: Record a production incident using redacted operational facts.
+title: "[Incident] "
+body:
+  - type: markdown
+    attributes:
+      value: "Never include secrets, tokens, personal data, or customer payloads. Use timestamps in UTC and sanitized identifiers only."
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - SEV-1
+        - SEV-2
+        - SEV-3
+        - SEV-4
+        - Undetermined
+    validations:
+      required: true
+  - type: input
+    id: started
+    attributes:
+      label: Started at (UTC)
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Confirmed impact
+      description: Distinguish observed impact from suspected impact.
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Mitigation and rollback state
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence links
+      description: Include deployment/run identifiers, not payloads or credentials.
+  - type: textarea
+    id: followups
+    attributes:
+      label: Follow-up actions and owners
+      description: Leave owner unassigned when no authorized owner has accepted it.

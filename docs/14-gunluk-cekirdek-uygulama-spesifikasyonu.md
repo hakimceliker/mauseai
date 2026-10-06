@@ -1,5 +1,12 @@
 # MouseAI — 14 Günlük Çekirdek Uygulama Spesifikasyonu
 
+> **Plan statüsü:** Bu, eski bir teknik slice taslağıdır; günler göreli sıra
+> etiketidir, tarih/teslim taahhüdü veya üst kanun değildir. Yalnız P0/P1
+> kapsamında ve G0–G12 kanıt kapılarına bağlı uygulanabilir. Canlı Auth/RLS,
+> provider, pilot, verifier/recovery veya G10–G12 kabulü bu dokümandaki demo ile
+> verilmiş sayılmaz. Kanonik yol haritası:
+> [`mouseai-master-phase-plan-v1.0.md`](mouseai-master-phase-plan-v1.0.md).
+
 ## Hedef
 
 14 gün sonunda hedef alan, görev oluşturan, Inngest worker ile çalışan, checkpoint’ten devam eden, mock GPT/Claude yönlendiren, maliyet ve audit kaydı tutan, tenant izolasyonu uygulayan çalışan bir demo teslim edilir.
@@ -51,7 +58,8 @@
 - Production’da serbest masaüstü otomasyonu
 - Marketplace ve enterprise SSO
 
-Bu özellikler Faz 2 backlog’una alınır; MVP’nin tamamlanmasını beklemez.
+Bu özellikler ilgili P0–P9 paketlerinin ve G0–G12 kapılarının sırasına tabidir;
+bu eski demo taslağına göre otomatik olarak sonraki faz sayılmaz.
 
 ## Demo senaryosu
 

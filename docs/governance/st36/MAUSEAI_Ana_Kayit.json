@@ -6,6 +6,7 @@
   "project_code": "MOUSE",
   "law_alias": "MAU",
   "repo": "hakimceliker/mauseai",
+  "source_register": "SOURCE_REGISTER_AND_CHANGE_RECORD.md",
   "runtime_verified": false,
   "sources": [
     {
@@ -31,6 +32,36 @@
       "file": "01-MAUSEAI_Eksikler_ve_Kabul_Plani_v1.0.csv",
       "sha256": "6b906af6d6d747c8714c1ce38bc5d79cb3d59db4c648e3e92e7e6d4677fe495b",
       "bytes": 5580
+    },
+    {
+      "id": "SRC-05",
+      "file": "MAUSEAI_Master_Kanun_ve_Sartname_v1.0.pdf",
+      "sha256": "6672c3df336da68e15eff53b94a554a5004eb84d66672deb3a43619dbf16ba04",
+      "bytes": 3563460
+    },
+    {
+      "id": "SRC-06",
+      "file": "Senatech_Proje_Uretim_ve_Isletme_Kanunu_v3.0.pdf",
+      "sha256": "e4a31b22c8c67db7286d719b28361c607bebddff28183483f11a44c48eb121f0",
+      "bytes": 3742400
+    },
+    {
+      "id": "SRC-07",
+      "file": "Proje_Fikri_Arastirma_ve_Yatirim_Karar_Modeli.json",
+      "sha256": "a5fbc294e5ca46bcf5de2d88132d73a6b4d303d78fe9d5f286bfd7ba8720356a",
+      "bytes": 27299
+    },
+    {
+      "id": "SRC-08",
+      "file": "ST_Proje_Veri_Talep_Formu.xlsx",
+      "sha256": "7998eceb100904bf127e3a9dd59a04c18f236d33b0b00c39fbac95a97f592a37",
+      "bytes": 31252
+    },
+    {
+      "id": "SRC-09",
+      "file": "ST_Nihai_Projeksiyon_Kapanis_Raporu.pdf",
+      "sha256": "008473c4e6fc474b79d1d90ed22f6827e1bf4c393aa13fc72eedad75462c5c1a",
+      "bytes": 74462
     }
   ],
   "gates": [

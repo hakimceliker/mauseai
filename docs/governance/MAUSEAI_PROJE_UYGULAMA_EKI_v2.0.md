@@ -43,3 +43,9 @@ Yanlış repo, kanıtsız tamamlandı, kapsam artışı, bütçe/tarih sapması,
 Abonelik ve kullanım kotası hipotezidir. Runner, connector, model, depolama, destek ve başarısız denemeler görev maliyetine girer.
 ## Sıradaki gerçek teslim
 Auth/RLS → dayanıklı worker/checkpoint/audit → provider maliyeti → kontrollü runner/verifier → pilot fayda.
+
+## Merkezi kullanıcı daveti ve onay ayrımı
+
+Kullanıcı daveti normal operasyonu durduracak genel bir çift onay kapısına bağlanmaz. `owner` veya `admin` tarafından oluşturulan süreli `member` daveti, hedef kişinin kimlik/e-posta kabulünden sonra düşük ayrıcalıklı üyelik açar. İkinci onay yalnızca yüksek riskli rol veya erişimin etkinleştirilmesinde aranır: `admin`/`owner`, finans/ödeme, service-role/secret, production, tenantlar arası erişim, RLS/güvenlik ve geri döndürülemez işlemler.
+
+Davet oluşturma ve yetki yükseltme ayrı audit olaylarıdır. Davet eden kişi kendi yükseltme onayını veremez. Gerçek davet endpoint’i ve persistence modeli henüz teslim edilmediği için bu hüküm politika düzeyinde `implementation-pending` kabul edilir; uygulama kabul testleri `docs/central-invitation-and-approval-contract.md` içinde zorunlu tutulmuştur.

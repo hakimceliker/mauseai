@@ -1,0 +1,45 @@
+name: Pilot or KPI proposal
+description: Define a proposed pilot or metric without inventing user data or approval.
+title: "[Pilot/KPI] "
+body:
+  - type: markdown
+    attributes:
+      value: "A proposal is not an authorized pilot. Do not include personal or customer data. G0, legal/privacy, and security prerequisites must be approved before live data is used."
+  - type: dropdown
+    id: type
+    attributes:
+      label: Record type
+      options:
+        - Pilot A
+        - Pilot B
+        - KPI definition
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Process and measurable objective
+    validations:
+      required: true
+  - type: textarea
+    id: measure
+    attributes:
+      label: Definition, formula, denominator, exclusions, and source
+      description: Specify query/version and zero-denominator handling; use NOT PROVIDED for unknown data.
+    validations:
+      required: true
+  - type: input
+    id: baseline-target
+    attributes:
+      label: Baseline and target, or explicit pending status
+  - type: textarea
+    id: controls
+    attributes:
+      label: Security, privacy, legal, stop criteria, and rollback
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Required human decisions and evidence owner
+      description: Do not assign a person without their acceptance.

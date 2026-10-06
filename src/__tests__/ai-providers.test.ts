@@ -20,6 +20,7 @@ describe('AI Providers', () => {
       expect(response.content).toContain('Mock GPT Response');
       expect(response.tokens_used).toBeDefined();
       expect(response.cost).toBeGreaterThan(0);
+      expect(response.cost_basis).toBe('mock');
     });
 
     it('should have correct provider name', () => {
@@ -43,6 +44,7 @@ describe('AI Providers', () => {
       expect(response.content).toContain('Mock Claude Response');
       expect(response.tokens_used).toBeDefined();
       expect(response.cost).toBeGreaterThan(0);
+      expect(response.cost_basis).toBe('mock');
     });
 
     it('should have correct provider name', () => {
