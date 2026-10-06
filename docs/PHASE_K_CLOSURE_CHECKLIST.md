@@ -3,7 +3,12 @@
 **Purpose:** Validate all Phase K requirements before marking project as closed  
 **Owner:** Stechai  
 **Date Prepared:** 2026-10-04  
-**Status:** Ready for execution  
+**Status:** `PARTIAL / BLOCKED` — historical checklist; not a closure certificate
+
+> This file is a control checklist, not evidence that Phase K is closed. Earlier checkmarks and
+> summary text are historical planning content. Current authoritative evidence is in
+> `docs/evidence/` and the live GitHub PR/CI state. Do not use this file alone to claim production
+> readiness, completed red-team coverage, stakeholder sign-off, or final acceptance.
 
 ---
 
@@ -779,22 +784,13 @@ cat > /home/claude/mauseai/docs/PHASE_K_CLOSURE_DECLARATION.md << 'EOF'
 
 ## Summary
 
-All Phase K requirements have been met:
-- ✓ Phases A-B-C-E-F-G-H-I-J complete
-- ✓ CI/CD pipeline all green
-- ✓ 77 integration tests passing
-- ✓ 39 red-team scenarios passing
-- ✓ All 20 closure criteria verified
-- ✓ 5 stakeholder sign-offs collected
-- ✓ Evidence verified and sanitized
+## Current acceptance status
 
-## Phase K is CLOSED
-
-The MauseAI project has successfully completed Phase K closure validation.
-This represents the conclusion of the defined project phases and transition
-to ongoing operations.
-
-**Project Status:** CLOSED - Production Operations Active
+- Phase I: 38/38 local runtime-contract scenarios pass; live acceptance gates remain open.
+- Phase J: 19/39 scenario IDs have local executable coverage; 20 remain BLOCKED.
+- CI and build evidence is current on PR #118, but independent human review is still required.
+- Supabase Auth/RLS, real provider credentials, pilot/KPI/finance and production acceptance are not proven.
+- Therefore Phase K is **not closed** and project status is **PARTIAL / BLOCKED**.
 
 ---
 

@@ -12,14 +12,14 @@ import { describe, it, expect } from 'vitest';
  * CLOSURE CRITERIA (all must be CLOSED status):
  * 1. Phase A - Canonical Infrastructure (source mapping, registries) - CLOSED
  * 2. Phase B1-B11 - LETFON Core Runtime (contracts, orchestrator, planner, etc) - ALL CLOSED
- * 3. Phase C - Auth/Tenant/RLS Testing - CLOSED (with real credentials)
- * 4. Phase D - Inngest Production Testing - CLOSED
- * 5. Phase E - Provider Testing (all 4 providers) - CLOSED
- * 6. Phase F - Pilot Execution (2 cases + KPIs) - CLOSED with real results
- * 7. Phase G - Release Checklist - CLOSED (all items checked)
- * 8. Phase H - Operational Acceptance - CLOSED (SLA, drills, runbooks)
+ * 3. Phase C - Auth/Tenant/RLS Testing - BLOCKED until live evidence
+ * 4. Phase D - Inngest Production Testing - BLOCKED until live evidence
+ * 5. Phase E - Provider Testing - BLOCKED until real credentials
+ * 6. Phase F - Pilot Execution - BLOCKED until real pilot/KPI data
+ * 7. Phase G - Release Checklist - REVIEW / human acceptance required
+ * 8. Phase H - Operational Acceptance - REVIEW / operational evidence required
  * 9. Phase I - Integration Chain (38 scenarios) - ALL PASS
- * 10. Phase J - Red-Team Failure (39 scenarios) - ALL PASS, no critical vulns found
+ * 10. Phase J - Red-Team Failure (39 scenarios) - PARTIAL (19/39 locally covered)
  *
  * If ANY phase is BLOCKED, Phase K CANNOT close.
  * If ANY phase is FAILED, Phase K CANNOT close.
@@ -230,7 +230,7 @@ const AcceptanceRequirements: Phase_K_AcceptanceRequirement[] = [
     requiredStatus: 'ALL_PASS',
     evidence: {
       type: 'integration-test-results + ci-logs',
-      proofLocation: 'src/core/testing/phase-i-integration-test-structure.ts (all 38 scenarios PASS)',
+      proofLocation: 'docs/evidence/pr118-phase-i-core-flow-2026-10-06.md (38/38 local runtime-contract scenarios; live gates remain open)',
       hasNoSecrets: true,
     },
   },
@@ -240,7 +240,7 @@ const AcceptanceRequirements: Phase_K_AcceptanceRequirement[] = [
     requiredStatus: 'ALL_PASS',
     evidence: {
       type: 'red-team-results + security-audit',
-      proofLocation: 'src/core/testing/phase-j-redteam-test-structure.ts (all 39 scenarios PASS, no CRITICAL vulns)',
+      proofLocation: 'docs/evidence/pr118-phase-j-redteam-2026-10-06.md (19/39 local scenario IDs; 20 BLOCKED)',
       hasNoSecrets: true,
     },
   },
@@ -386,13 +386,11 @@ describe('Phase K - Final Acceptance', () => {
  * Phase K Summary:
  *
  * When ALL of the following are true:
- * ✅ Phases A-J all CLOSED with real evidence (no secrets)
- * ✅ Integration chain (38 scenarios) all PASS
- * ✅ Red-team (39 scenarios) all PASS, zero CRITICAL vulns
- * ✅ Pilot executed with real data (2+ cases, KPIs met, budget approved)
- * ✅ Release checklist complete (version, legal, security, ops readiness)
- * ✅ Operational acceptance (SLA, drills, runbooks, on-call ready)
- * ✅ Sign-offs from Architect, CTO, CEO, Legal, Ops
+ * ⛔ Phases A-J are not all CLOSED; live gates and human acceptance remain open
+ * ✅ Integration chain has 38/38 local runtime-contract scenarios
+ * ◐ Red-team has 19/39 local scenario IDs; 20 remain BLOCKED
+ * ⛔ Pilot, KPI, finance, production credentials, and operational acceptance are not proven here
+ * ⛔ Required independent review and stakeholder sign-offs are not present
  *
  * THEN:
  * Phase K CLOSES
