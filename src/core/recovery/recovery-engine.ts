@@ -333,7 +333,7 @@ export class RecoveryEngine {
     try {
       // Try primary action
       const primaryResult = await this.tryAction(plan.primaryAction, taskId, plan);
-      if (primaryResult) {
+      if (primaryResult?.success) {
         plan.status = 'completed';
         plan.completedAt = new Date();
         plan.result = primaryResult;
@@ -343,7 +343,7 @@ export class RecoveryEngine {
       // Try fallback actions
       for (const fallbackAction of plan.fallbackActions) {
         const fallbackResult = await this.tryAction(fallbackAction, taskId, plan);
-        if (fallbackResult) {
+        if (fallbackResult?.success) {
           plan.status = 'completed';
           plan.completedAt = new Date();
           plan.result = fallbackResult;

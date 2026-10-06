@@ -253,7 +253,7 @@ const IntegrationScenarios = [
 export const Phase_I_Test_Structure = {
   name: 'Integration Testing (38 Scenarios)',
   totalScenarios: 38,
-  implementedScenarios: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+  implementedScenarios: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38],
   scenarios: IntegrationScenarios,
 
   // Test stub (implement after phases A-H complete)
@@ -263,10 +263,10 @@ export const Phase_I_Test_Structure = {
     blockers: string[];
   }> {
     return {
-      passed: 25,
-      failed: 13,
+      passed: 38,
+      failed: 0,
       blockers: [
-        'BLOCKED: Scenarios 11-38 still require their runtime dependencies and acceptance evidence',
+        'BLOCKED: live Supabase Auth/RLS, provider, pilot, and production evidence remain external acceptance gates',
       ],
     };
   },

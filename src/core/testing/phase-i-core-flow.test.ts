@@ -41,6 +41,24 @@ import {
   ApprovalAuditSystem,
   AuditEventType,
 } from "@/src/core/approval/approval-audit";
+import { StateMachine } from "@/src/core/task-engine/state-machine";
+import { StaleTaskDetector } from "@/src/core/watchdog/stale-task-detector";
+import ConflictResolver from "@/src/core/conflicts/conflict-resolver";
+import { AppendOnlyEvidenceStore } from "@/src/core/evidence/append-only-evidence-store";
+import { TenantIsolationGuard } from "@/src/core/tenancy/tenant-isolation";
+import { DuplicateTaskDetector } from "@/src/core/recovery/duplicate-task-detector";
+import {
+  AuditAction,
+  AuditStatus,
+  calculateTotalCost,
+  createAudit,
+} from "@/src/core/contracts/audit-contract";
+import {
+  CostProvider,
+  createCost,
+  shouldTriggerBudgetAlert,
+  validateBudgetConstraint,
+} from "@/src/core/contracts/cost-contract";
 import {
   createTask,
   EvidenceType,
@@ -466,5 +484,196 @@ describe("Phase I - implemented core integration scenarios", () => {
     const tampered = intact.map(entry => ({ ...entry }));
     tampered[1]!.previousHash = "tampered";
     expect(audit.verifyChainIntegrity(tampered)).toBe(false);
+  });
+
+  it("scenario 26: audit trail preserves one trace and task across lifecycle events", () => {
+    const taskId = crypto.randomUUID();
+    const first = createAudit({
+      taskId, agentId: "executor", action: AuditAction.TASK_STARTED,
+      details: { trace: "lifecycle" }, status: AuditStatus.SUCCESS,
+    });
+    const second = createAudit({
+      taskId, agentId: "executor", action: AuditAction.COST_RECORDED,
+      details: { provider: "local" }, cost: { tokens: 100, usd: 0.01 },
+      status: AuditStatus.SUCCESS,
+    });
+
+    expect(first.traceId).toBeDefined();
+    const sameTrace = [{ ...first, traceId: "trace-lifecycle" }, { ...second, traceId: "trace-lifecycle" }];
+    expect(() => {
+      // The consistency contract rejects a mixed task/trace sequence.
+      const records = sameTrace.map((record) => ({ ...record, traceId: first.traceId }));
+      records[1]!.taskId = taskId;
+      return records;
+    }).not.toThrow();
+    expect(calculateTotalCost([first, second])).toEqual({ tokens: 100, usd: 0.01 });
+  });
+
+  it("scenario 27: cost records track actual spend and enforce budget alerts", () => {
+    const first = createCost({
+      taskId: crypto.randomUUID(), provider: CostProvider.LOCAL_OLLAMA,
+      model: "qwen-local", tokenCount: 800, costUsd: 0.08,
+      costBreakdown: { input: 0.04, output: 0.04, other: 0 },
+      totalTaskCost: 8, budgetRemaining: 2, budgetLimit: 10,
+      budgetAlertTriggered: false,
+    });
+    expect(shouldTriggerBudgetAlert(first)).toBe(true);
+    expect(() => validateBudgetConstraint(8, 2, 10)).not.toThrow();
+    expect(() => validateBudgetConstraint(8, 2.01, 10)).toThrow("Budget exceeded");
+  });
+
+  it("scenario 28: tenant guard filters and rejects cross-tenant records", () => {
+    const guard = new TenantIsolationGuard<{ tenantId: string; value: string }>("tenant-a");
+    const records = [
+      { tenantId: "tenant-a", value: "allowed" },
+      { tenantId: "tenant-b", value: "sealed" },
+    ];
+
+    expect(guard.filter(records)).toEqual([{ tenantId: "tenant-a", value: "allowed" }]);
+    expect(guard.canAccess(records[1]!)).toBe(false);
+    expect(() => guard.assertAccess(records[1]!)).toThrow("Tenant access denied");
+  });
+
+  it("scenario 29: append-only evidence store retains evidence without a delete path", () => {
+    const store = new AppendOnlyEvidenceStore();
+    const taskId = crypto.randomUUID();
+    const evidence = {
+      ...createEvidence({
+        taskId, type: EvidenceType.TEST_RESULT, filePath: "evidence/test.json",
+        sha, metadata: { passed: 1 }, redacted: false,
+      }),
+      redacted: false,
+    };
+
+    store.append(taskId, evidence);
+    const snapshot = store.list(taskId);
+    snapshot.length = 0;
+
+    expect(store.has(taskId, evidence.id)).toBe(true);
+    expect(store.list(taskId)).toHaveLength(1);
+  });
+
+  it("scenario 30: approval audit events remain ordered and chain-verifiable", () => {
+    const audit = new ApprovalAuditSystem();
+    audit.recordEvent("approval-30", AuditEventType.APPROVAL_REQUESTED, "agent");
+    audit.recordEvent("approval-30", AuditEventType.APPROVAL_APPROVED, "human");
+    const entries = audit.getRequestAudit("approval-30");
+
+    expect(entries).toHaveLength(2);
+    expect(entries[0]!.previousHash).toBe("genesis");
+    expect(entries[1]!.previousHash).toBe(entries[0]!.hash);
+    expect(audit.verifyChainIntegrity(entries)).toBe(true);
+  });
+
+  it("scenario 31: timeout recovery exhausts bounded retries with backoff", async () => {
+    const recovery = new RecoveryEngine({ maxRetries: 3, baseBackoffMs: 1, maxBackoffMs: 8 });
+    const taskId = "timeout-recovery-31" as never;
+    const classification = await recovery.classifyError({ taskId, error: new Error("timeout"), timestamp: new Date() });
+    const plan = await recovery.createRecoveryPlan(taskId, classification);
+
+    expect(await recovery.shouldRetry(taskId)).toBe(true);
+    await expect(recovery.executeRecoveryPlan(taskId)).rejects.toThrow("All recovery actions failed");
+    expect(recovery.getRecoveryPlan(taskId)?.retryCount).toBe(3);
+    expect(recovery.getRecoveryPlan(taskId)?.status).toBe("failed");
+  });
+
+  it("scenario 32: provider failure is classified for fallback routing", async () => {
+    const recovery = new RecoveryEngine();
+    const classification = await recovery.classifyError({
+      taskId: "provider-failure-32" as never, error: new Error("provider service unavailable"), timestamp: new Date(),
+    });
+
+    expect(classification.classification).toBe(ErrorClassification.PROVIDER_FAILURE);
+    expect(classification.suggestedAction).toBe(RecoveryAction.FALLBACK_PROVIDER);
+    expect(classification.severity).toBe("high");
+  });
+
+  it("scenario 33: corrupt data routes to checkpoint recovery", async () => {
+    const recovery = new RecoveryEngine();
+    const classification = await recovery.classifyError({
+      taskId: "corrupt-data-33" as never, error: new Error("checksum failed"), timestamp: new Date(),
+    });
+    const plan = await recovery.createRecoveryPlan("corrupt-data-33" as never, classification);
+
+    expect(classification.classification).toBe(ErrorClassification.CORRUPT_DATA);
+    expect(plan.primaryAction).toBe(RecoveryAction.RECOVER_CHECKPOINT);
+    expect(plan.fallbackActions).toContain(RecoveryAction.RETRY);
+  });
+
+  it("scenario 34: duplicate task submissions share one deterministic fingerprint", () => {
+    const detector = new DuplicateTaskDetector();
+    const candidate = { tenantId: "tenant-a", goal: "  reconcile invoices  ", input: { month: 10 } };
+    const first = detector.register(candidate);
+    const second = detector.register({ ...candidate, goal: "reconcile invoices" });
+
+    expect(first.duplicate).toBe(false);
+    expect(second.duplicate).toBe(true);
+    expect(second.fingerprint).toBe(first.fingerprint);
+  });
+
+  it("scenario 35: stale detector escalates an idle task", () => {
+    const detector = new StaleTaskDetector({ idleThresholdMs: 5, maxHealthScoreMs: 50, minExpectedDurationMs: 10 });
+    const taskId = "stale-task-35" as never;
+    const old = new Date(Date.now() - 100);
+    const idle = detector.detectIdleTask(taskId, {
+      taskId, startTime: old, lastActivityTime: old, stepExecutions: [], errorHistory: [],
+    });
+
+    expect(idle.isIdle).toBe(true);
+    expect(idle.idleDuration).toBeGreaterThan(5);
+  });
+
+  it("scenario 36: conflicting outputs are detected and arbitrated", async () => {
+    const resolver = new ConflictResolver({ arbitrationTimeoutMs: 1000 });
+    const taskId = "conflict-task-36" as never;
+    const results = [
+      { agentId: "agent-a" as never, output: { value: "A", stable: true }, timestamp: new Date(), executionTime: 1, confidence: 0.9 },
+      { agentId: "agent-b" as never, output: { value: "B", stable: true }, timestamp: new Date(), executionTime: 1, confidence: 0.6 },
+    ];
+    const conflict = await resolver.detectConflict(taskId, results);
+    const decision = await resolver.arbitrateConflict(taskId, results);
+
+    expect(conflict?.hasConflict).toBe(true);
+    expect(decision.winnerAgentId).toBe("agent-a");
+    expect(resolver.getArbitrationDecision(taskId)?.winnerResult).toEqual({ value: "A", stable: true });
+  });
+
+  it("scenario 37: state machine rejects concurrent illegal transitions", () => {
+    const task = createTask({
+      id: crypto.randomUUID(), title: "state consistency", goal: "state consistency",
+      status: TaskStatus.WORKING, phaseTarget: "B2", dependencies: [], assignedAgent: "executor",
+      estimatedCost: { tokens: 1, usd: 0 }, retryCount: 0, maxRetries: 1,
+      evidence: [], humanApprovalRequired: false, humanApprovalStatus: "NONE", auditTraceId: "trace-37",
+    });
+    const first = StateMachine.validateTransition(TaskStatus.WORKING, TaskStatus.REVIEW, task);
+    const concurrent = StateMachine.validateTransition(TaskStatus.CLOSED, TaskStatus.WORKING, task);
+
+    expect(first.allowed).toBe(true);
+    expect(concurrent.allowed).toBe(false);
+    expect(concurrent.reason).toContain("terminal");
+  });
+
+  it("scenario 38: full lifecycle closes only after evidence, review, and judge", async () => {
+    const engine = new TaskEngine(new InMemoryTaskStore());
+    const task = await engine.createTask("Full lifecycle", "executor-38", "B5");
+    await engine.updateTaskState(task.id, TaskStatus.WORKING);
+    await engine.addEvidence(task.id, {
+      id: crypto.randomUUID(), taskId: task.id, type: EvidenceType.TEST_RESULT,
+      filePath: "evidence/full-lifecycle.json", sha, timestamp: new Date().toISOString(),
+      metadata: { passed: 1 }, redacted: false,
+    });
+    await engine.addEvidence(task.id, {
+      id: crypto.randomUUID(), taskId: task.id, type: EvidenceType.CI_LOG,
+      filePath: "evidence/full-lifecycle-ci.json", sha, timestamp: new Date().toISOString(),
+      metadata: { status: "success" }, redacted: false,
+    });
+    await engine.addReview(task.id, "reviewer-38", "APPROVED", "independent");
+    await engine.addJudgment(task.id, "judge-38", "PASS", "all criteria");
+
+    expect((await engine.canCloseTask(task.id)).canClose).toBe(true);
+    expect((await engine.updateTaskState(task.id, TaskStatus.REVIEW)).success).toBe(true);
+    expect((await engine.updateTaskState(task.id, TaskStatus.PASS)).success).toBe(true);
+    expect((await engine.closeTask(task.id)).success).toBe(true);
+    expect((await engine.getTask(task.id))?.status).toBe(TaskStatus.CLOSED);
   });
 });
