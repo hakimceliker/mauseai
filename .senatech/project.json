@@ -1,0 +1,11 @@
+{
+  "project_id": "mouseai",
+  "display_name": "MOUSEAI",
+  "policy_id": "senatech-universal",
+  "policy_version": "1.0.0",
+  "control_plane_required": true,
+  "validator_required": true,
+  "audit_required": true,
+  "production_enabled": false,
+  "live_financial_orders_enabled": false
+}

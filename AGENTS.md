@@ -1,5 +1,14 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
+## Senatech Universal Policy Binding
+
+This repository is governed by `senatech-universal` policy version `1.0.0`
+with canonical project ID `mouseai`. Integrated work must use the Senatech
+Control Plane and preserve validator and audit evidence. Routine, reversible
+work may proceed without repeated confirmation; production, DNS, secrets,
+credentials, payments, deletion, live financial orders and external
+representation require explicit human approval.
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
