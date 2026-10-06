@@ -392,8 +392,8 @@ describe('Phase K - Final Acceptance', () => {
  * ⛔ Pilot, KPI, finance, production credentials, and operational acceptance are not proven here
  * ⛔ Required independent review and stakeholder sign-offs are not present
  *
- * THEN:
- * Phase K CLOSES
- * PROJECT ACCEPTANCE COMPLETE
- * READY FOR PRODUCTION
+ * Only after every listed prerequisite is independently verified may Phase K
+ * close. This source file does not provide those live proofs or human sign-offs.
+ * Until then the project remains PARTIAL / BLOCKED and must not be called
+ * production-ready.
  */

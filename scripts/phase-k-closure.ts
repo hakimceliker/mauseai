@@ -373,11 +373,18 @@ function validateCriteria(): ClosureCriterion[] {
 function generateReport(criteria: ClosureCriterion[]): ClosureReport {
   const passed = criteria.filter((c) => c.passed).length;
   const failed = criteria.filter((c) => !c.passed).length;
-  const closureReady = failed === 0;
+  // Filesystem checks alone cannot establish live acceptance. Keep the closure
+  // command fail-closed unless the human-controlled gates are explicitly
+  // supplied by the authorized acceptance environment.
+  const independentReview = process.env.MAUSEAI_PHASE_K_INDEPENDENT_REVIEW === 'true';
+  const liveGatesVerified = process.env.MAUSEAI_PHASE_K_LIVE_GATES_VERIFIED === 'true';
+  const stakeholderApproval = process.env.MAUSEAI_PHASE_K_STAKEHOLDER_APPROVAL === 'true';
+  const closureReady =
+    failed === 0 && independentReview && liveGatesVerified && stakeholderApproval;
 
   const summary = closureReady
     ? 'All closure criteria met. Project ready for sign-off.'
-    : `${failed} closure criteria not met. Review required before closure.`;
+    : `${failed} technical closure criteria and/or required live human gates are not met. Review required before closure.`;
 
   return {
     timestamp: new Date().toISOString(),

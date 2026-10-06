@@ -1,4 +1,6 @@
-# Vercel Deployment Checklist
+# Vercel Deployment Checklist (Historical / Not a Production Approval)
+
+> This checklist is a historical deployment guide. Current status is PARTIAL / NOT PRODUCTION-READY until live Auth/RLS, provider, pilot, rollback, independent review and human approval evidence are verified.
 
 ## Pre-Deployment Status
 
@@ -20,7 +22,7 @@
 - [x] Public GitHub repository: `hakimceliker/mauseai`
 - [x] Latest commit: `264831f - Fix: Update pre-commit hook to use direct eslint invocation`
 - [x] No uncommitted changes
-- [x] Ready for production deployment
+- [ ] Ready for production deployment — blocked pending current acceptance evidence
 
 ---
 
@@ -232,5 +234,5 @@ POST   /api/inngest               - Inngest webhooks
 
 ---
 
-**Status:** Ready for production deployment to Vercel
+**Status:** PARTIAL / NOT PRODUCTION-READY — production deployment requires current human-approved evidence
 **Last Updated:** 2026-09-26
