@@ -1,4 +1,4 @@
-import { TaskType } from "../contracts/index";
+import { TaskType } from "@/src/core/contracts/task-contract";
 
 /**
  * Represents a directed acyclic graph (DAG) of task dependencies

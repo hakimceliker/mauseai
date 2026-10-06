@@ -1,4 +1,4 @@
-import { TaskStatus, TaskType } from "@/src/core/contracts";
+import { TaskStatus, TaskType } from "@/src/core/contracts/task-contract";
 
 /**
  * State Machine - Validates legal task state transitions with strict guards

@@ -3,8 +3,16 @@
  * Implements local-first fallback: Ollama → Qwen → cloud providers
  */
 
-import { AgentCapability } from './capability-router';
 import { ProviderHealth, HealthStatus } from './provider-health';
+
+/**
+ * Agent capability specification
+ */
+export interface AgentCapability {
+  id: string;
+  name: string;
+  capabilities: string[];
+}
 
 /**
  * Model specification

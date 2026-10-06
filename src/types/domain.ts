@@ -11,6 +11,7 @@ export type WorkflowId = string & { readonly __brand: 'WorkflowId' };
 export type StepId = string & { readonly __brand: 'StepId' };
 export type CheckpointId = string & { readonly __brand: 'CheckpointId' };
 export type AuditEventId = string & { readonly __brand: 'AuditEventId' };
+export type AgentId = string & { readonly __brand: 'AgentId' };
 
 // Workflow entity
 export interface Workflow {

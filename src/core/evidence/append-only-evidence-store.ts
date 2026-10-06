@@ -1,4 +1,4 @@
-import type { Evidence } from "@/src/core/task-engine/task-engine";
+import type { EvidenceType_Type as Evidence } from "@/src/core/contracts/evidence-contract";
 
 /**
  * In-memory append-only evidence boundary used by the runtime and tests.
