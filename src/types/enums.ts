@@ -33,3 +33,27 @@ export enum ActorType {
   WORKER = "worker",
   POLICY = "policy",
 }
+
+export enum AgentType {
+  EXECUTOR = "executor",
+  JUDGE = "judge",
+  REVIEWER = "reviewer",
+  ORCHESTRATOR = "orchestrator",
+}
+
+export enum HandoffStatus {
+  PENDING = "pending",
+  INITIATED = "initiated",
+  VALIDATED = "validated",
+  EXECUTING = "executing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}
+
+export enum HandoffResult {
+  SUCCESS = "success",
+  FAILURE = "failure",
+  TIMEOUT = "timeout",
+  CANCELLED = "cancelled",
+}
