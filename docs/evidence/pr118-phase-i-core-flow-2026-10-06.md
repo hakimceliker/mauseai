@@ -1,6 +1,6 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `PENDING`
+- Verified code commit: `3b1c863`
 - Verification scope: Phase I scenarios 1–38
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
 - Result: **38/38 passed** in the local runtime-contract suite
