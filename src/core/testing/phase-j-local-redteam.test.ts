@@ -27,6 +27,7 @@ import { ProviderHealth, HealthStatus } from "@/src/core/routing/provider-health
 import { ModelProvider } from "@/src/core/routing/model-router";
 import { ErrorClassification, RecoveryAction, RecoveryEngine } from "@/src/core/recovery";
 import { redactTelemetry } from "@/src/lib/observability";
+import type { TaskId } from "@/src/types/domain";
 
 const task = (status: TaskStatus = TaskStatus.WORKING) => createTask({
   id: crypto.randomUUID(),
@@ -40,6 +41,8 @@ const task = (status: TaskStatus = TaskStatus.WORKING) => createTask({
   evidence: [],
   humanApprovalRequired: false,
   humanApprovalStatus: "NONE",
+  retryCount: 0,
+  maxRetries: 3,
   auditTraceId: "trace-red-team",
 });
 
@@ -57,17 +60,17 @@ describe("Phase J — executable local red-team contracts", () => {
 
   it("scenario 9: tenant isolation denies cross-tenant access", () => {
     const guard = new TenantIsolationGuard("tenant-a");
-    expect(guard.filter([{ tenantId: "tenant-a", id: 1 }, { tenantId: "tenant-b", id: 2 }])).toEqual([{ tenantId: "tenant-a", id: 1 }]);
+    expect(guard.filter([{ tenantId: "tenant-a" }, { tenantId: "tenant-b" }])).toEqual([{ tenantId: "tenant-a" }]);
     expect(() => guard.assertAccess({ tenantId: "tenant-b" })).toThrow(TenantAccessDeniedError);
   });
 
   it("scenario 11: evidence is append-only from the runtime boundary", () => {
     const store = new AppendOnlyEvidenceStore();
-    store.append("task", { id: "e1", type: "TEST_RESULT", content: "pass" });
+    store.append("task", { id: crypto.randomUUID(), taskId: crypto.randomUUID(), type: EvidenceType.TEST_RESULT, filePath: "test.log", sha: "a".repeat(40), timestamp: new Date().toISOString(), metadata: { result: "pass" }, redacted: false });
     const snapshot = store.list("task");
-    snapshot[0].content = "tampered";
-    expect(store.list("task")[0].content).toBe("pass");
-    expect(store.has("task", "e1")).toBe(true);
+    snapshot[0].filePath = "tampered";
+    expect(store.list("task")[0].filePath).toBe("test.log");
+    expect(store.has("task", snapshot[0].id)).toBe(true);
   });
 
   it("scenario 12: CLOSED is terminal and cannot be rolled back", () => {
@@ -118,7 +121,7 @@ describe("Phase J — executable local red-team contracts", () => {
 
   it("scenario 32/33: recovery classifies provider failures and conflicts remain explicit", async () => {
     const engine = new RecoveryEngine({ maxRetries: 0 });
-    const result = await engine.classifyError({ taskId: crypto.randomUUID(), error: new Error("provider service unavailable"), timestamp: new Date() });
+    const result = await engine.classifyError({ taskId: crypto.randomUUID() as TaskId, error: new Error("provider service unavailable"), timestamp: new Date() });
     expect(result.classification).toBe(ErrorClassification.PROVIDER_FAILURE);
     expect(result.suggestedAction).toBe(RecoveryAction.FALLBACK_PROVIDER);
   });

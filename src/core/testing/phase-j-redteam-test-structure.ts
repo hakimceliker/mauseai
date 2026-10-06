@@ -1,7 +1,7 @@
 // Phase J: Red-Team Failure Scenario Testing (39 scenarios)
 // Goal: Verify system resilience to adversarial and failure conditions
 
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 
 const RedTeamScenarios = [
   // Injection Attacks (1-5)
