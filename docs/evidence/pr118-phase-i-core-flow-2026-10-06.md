@@ -1,6 +1,6 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `PENDING` (this evidence is updated in the same change)
+- Verified code commit: `d54faf5` (`test: extend Phase I routing coverage through scenario fifteen`)
 - Verification scope: Phase I scenarios 1–15
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
 - Result: **15/15 passed**
