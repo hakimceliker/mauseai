@@ -28,6 +28,9 @@ import { ModelProvider } from "@/src/core/routing/model-router";
 import { ErrorClassification, RecoveryAction, RecoveryEngine } from "@/src/core/recovery";
 import { redactTelemetry } from "@/src/lib/observability";
 import type { TaskId } from "@/src/types/domain";
+import { StaleTaskDetector } from "@/src/core/watchdog/stale-task-detector";
+import { ConflictResolver } from "@/src/core/conflicts/conflict-resolver";
+import { CapabilityRegistry } from "@/src/core/agents/capability-definition";
 
 const task = (status: TaskStatus = TaskStatus.WORKING) => createTask({
   id: crypto.randomUUID(),
@@ -128,5 +131,40 @@ describe("Phase J — executable local red-team contracts", () => {
 
   it("scenario 34: telemetry redacts credential-shaped fields", () => {
     expect(redactTelemetry({ api_key: "secret-value", nested: { token: "abc" } })).toEqual({ api_key: "[REDACTED]", nested: { token: "[REDACTED]" } });
+  });
+
+  it("scenario 20: stale work is surfaced by the watchdog boundary", () => {
+    const detector = new StaleTaskDetector({ idleThresholdMs: 10 });
+    const old = new Date(Date.now() - 1000);
+    const result = detector.detectIdleTask("task-stale" as TaskId, { taskId: "task-stale" as TaskId, startTime: old, lastActivityTime: old, stepExecutions: [], errorHistory: [] });
+    expect(result.isIdle).toBe(true);
+  });
+
+  it("scenario 22/24: exhausted recovery fails instead of claiming completion", async () => {
+    const engine = new RecoveryEngine({ maxRetries: 0 });
+    const taskId = crypto.randomUUID() as TaskId;
+    const classification = await engine.classifyError({ taskId, error: new Error("timeout"), timestamp: new Date() });
+    await engine.createRecoveryPlan(taskId, classification);
+    await expect(engine.executeRecoveryPlan(taskId)).rejects.toThrow(/All recovery actions failed/);
+  });
+
+  it("scenario 28: capability definitions carry approval and review boundaries", () => {
+    const registry = new CapabilityRegistry();
+    const deploy = registry.getCapability("deploy");
+    expect(deploy).not.toBeNull();
+    expect(deploy?.requiresApproval).toBe(true);
+    expect(deploy?.requiresReview).toBe(true);
+  });
+
+  it("scenario 33: divergent concurrent results require explicit arbitration", async () => {
+    const resolver = new ConflictResolver();
+    const taskId = crypto.randomUUID() as TaskId;
+    const results = [
+      { agentId: "agent-a" as never, output: { a: 1, b: 2, c: 3 }, timestamp: new Date(), executionTime: 10, confidence: 0.8 },
+      { agentId: "agent-b" as never, output: { x: 1, y: 2, z: 3 }, timestamp: new Date(), executionTime: 10, confidence: 0.7 },
+    ];
+    const detected = await resolver.detectConflict(taskId, results);
+    expect(detected?.hasConflict).toBe(true);
+    await expect(resolver.arbitrateConflict(taskId, results)).rejects.toThrow("Human arbitration required");
   });
 });

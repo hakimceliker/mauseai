@@ -2,8 +2,8 @@
 
 - Branch: `pr/final-cleanup-and-signatures`
 - Scope: 39 defined red-team scenarios
-- Local executable coverage: **14/39 scenario IDs covered by 11 passing tests**
-- Remaining: **25/39 BLOCKED** pending live infrastructure, external providers, or human/pilot evidence
+- Local executable coverage: **19/39 scenario IDs covered by 15 passing tests**
+- Remaining: **20/39 BLOCKED** pending live infrastructure, external providers, or human/pilot evidence
 
 ## Local scenarios executed
 
@@ -21,7 +21,7 @@ The executable local suite is `src/core/testing/phase-j-local-redteam.test.ts` a
 - provider-failure classification;
 - telemetry credential redaction.
 
-Result: **11/11 tests passed**, covering 14 scenario IDs, in the local runtime-contract suite.
+Result: **15/15 tests passed**, covering 19 scenario IDs, in the local runtime-contract suite.
 
 ## Explicitly blocked scenarios
 

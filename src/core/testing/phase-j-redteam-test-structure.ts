@@ -303,7 +303,7 @@ export const Phase_J_Test_Structure = {
     blocked: number;
     vulnerabilities: string[];
   }> {
-    const locallyCovered = new Set([6, 9, 10, 11, 12, 13, 14, 17, 26, 30, 32, 34, 35, 36]);
+    const locallyCovered = new Set([6, 9, 10, 11, 12, 13, 14, 17, 20, 22, 24, 26, 28, 30, 32, 33, 34, 35, 36]);
     return {
       passed: locallyCovered.size,
       failed: 0,
