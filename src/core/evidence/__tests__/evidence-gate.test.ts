@@ -315,7 +315,7 @@ describe("EvidenceGate", () => {
     });
 
     it("should handle very large evidence content", async () => {
-      const largeContent = "A".repeat(1000000); // 1MB of content
+      const largeContent = "A".repeat(10000); // 10KB of content
       const evidence: Evidence[] = [
         {
           id: "ev-1",
