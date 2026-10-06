@@ -1,6 +1,6 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `3e3b495` (`test: implement first Phase I integration scenarios`)
+- Verified code commit: `0e49790` (`test: extend Phase I integration coverage through scenario ten`)
 - Verification scope: Phase I scenarios 1–10
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
 - Result: **10/10 passed**
