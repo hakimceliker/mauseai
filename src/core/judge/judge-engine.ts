@@ -63,14 +63,16 @@ export class JudgeEngine {
       failureReasons.push("Critical issue: Branch or SHA mismatch");
     }
 
-    // Check for auto-escalation criteria
-    const autoEscalateCriteria = policy.autoEscalate.filter(
-      (criterion) => !criteria[criterion]
-    );
+    // Check for auto-escalation criteria (but don't override hard failures)
+    if (status !== "FAIL") {
+      const autoEscalateCriteria = policy.autoEscalate.filter(
+        (criterion) => !criteria[criterion]
+      );
 
-    if (autoEscalateCriteria.length > 0) {
-      status = "ESCALATE";
-      escalationReason = `Auto-escalation triggered by: ${autoEscalateCriteria.join(", ")}`;
+      if (autoEscalateCriteria.length > 0) {
+        status = "ESCALATE";
+        escalationReason = `Auto-escalation triggered by: ${autoEscalateCriteria.join(", ")}`;
+      }
     }
 
     // Check if all required criteria from policy are met
@@ -173,10 +175,18 @@ export class JudgeEngine {
     context: TaskContext,
     expectedSha?: string
   ): Promise<boolean> {
-    if (!expectedSha) {
-      return !!context.sha && context.sha.length === 40; // Valid git SHA
+    // Always validate SHA format first
+    const isValidFormat = !!context.sha && context.sha.length === 40;
+    if (!isValidFormat) {
+      return false;
     }
-    return context.sha === expectedSha;
+
+    // If expectedSha provided, also check if it matches
+    if (expectedSha) {
+      return context.sha === expectedSha;
+    }
+
+    return true;
   }
 
   /**
