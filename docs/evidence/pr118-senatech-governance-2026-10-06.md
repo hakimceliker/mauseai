@@ -20,6 +20,7 @@
 - CodeQL Analyze başarılı.
 - Vercel Preview ve preview comments başarılı.
 - Yerel Phase I runtime-contract testi: 38/38 başarılı.
+- Senatech manifest doğrulama testi: 3/3 başarılı (`tests/unit/senatech-manifest.test.ts`).
 
 ## Kapanmayan kapılar
 
