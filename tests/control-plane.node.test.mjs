@@ -1,4 +1,4 @@
-import test, { afterEach } from 'node:test';
+import { test, afterEach } from 'vitest';
 import assert from 'node:assert/strict';
 import { callControlPlane } from '../src/lib/ai/providers/control-plane.ts';
 
