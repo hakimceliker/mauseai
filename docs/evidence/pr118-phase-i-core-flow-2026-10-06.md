@@ -1,9 +1,9 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `0e49790` (`test: extend Phase I integration coverage through scenario ten`)
-- Verification scope: Phase I scenarios 1–10
+- Verified code commit: `PENDING` (this evidence is updated in the same change)
+- Verification scope: Phase I scenarios 1–15
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
-- Result: **10/10 passed**
+- Result: **15/15 passed**
 
 Implemented runtime coverage:
 
@@ -17,6 +17,11 @@ Implemented runtime coverage:
 8. Judge independence: executor self-judgment is rejected.
 9. Evidence redaction: detected secret material is rejected and redacted output is safe.
 10. Human approval: critical operation enforcement fails closed until approval is granted.
+11. Capability routing: the compatible specialist wins while a general compatible alternative remains available.
+12. Capability routing fail-closed behavior: no compatible agent returns no selection and requires approval.
+13. Local-first model routing: the local provider is preferred when routing has no bound agent model.
+14. Model fallback constraints: fallback selection respects cost, latency, token, and zero-cost local execution constraints.
+15. Provider health gate: three consecutive failures transition a provider to DOWN and readiness zero.
 
 Full local verification after this change:
 
@@ -26,4 +31,4 @@ Full local verification after this change:
 - Vitest: 43 files, 591 passed, 16 skipped
 - Next production build: PASS
 
-Remaining acceptance scope is intentionally open: Phase I scenarios 11–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.
+Remaining acceptance scope is intentionally open: Phase I scenarios 16–38 and all 39 Phase J red-team scenarios still require implementation and evidence. This document does not claim Phase I, Phase J, or final acceptance is complete.

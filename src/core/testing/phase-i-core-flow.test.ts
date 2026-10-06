@@ -10,6 +10,19 @@ import { JudgeEngine } from "@/src/core/judge/judge-engine";
 import { EvidenceValidator } from "@/src/core/evidence/evidence-validator";
 import { HumanApprovalSystem, OperationType } from "@/src/core/approval/human-approval";
 import {
+  CapabilityRouter,
+  LatencyTier,
+  PrivacyLevel,
+  TaskType,
+} from "@/src/core/routing/capability-router";
+import {
+  ModelProvider,
+  ModelRouter,
+  type Model,
+} from "@/src/core/routing/model-router";
+import { HealthStatus, ProviderHealth } from "@/src/core/routing/provider-health";
+import { RiskLevel } from "@/src/types/enums";
+import {
   createTask,
   EvidenceType,
   TaskStatus,
@@ -187,5 +200,97 @@ describe("Phase I - implemented core integration scenarios", () => {
     approvals.approve(request.id, "human-reviewer", "approved for staging gate");
     expect(() => approvals.enforceApproval(request.id)).not.toThrow();
     expect(approvals.getApprovalRequest(request.id)?.status).toBe("APPROVED");
+  });
+
+  it("scenario 11: capability routing selects the best compatible specialist", () => {
+    const router = new CapabilityRouter([
+      {
+        id: "general-agent", name: "General", type: "language_model",
+        supportedTaskTypes: [TaskType.CODE_GENERATION], minPrivacyLevel: PrivacyLevel.PUBLIC,
+        supportedRiskLevels: [RiskLevel.L1], minLatency: LatencyTier.STANDARD,
+        maxCostPerCall: 100, provider: "openai", version: "1", tags: [],
+        requiresHumanApproval: false, enabled: true,
+      },
+      {
+        id: "specialist-agent", name: "Specialist", type: "language_model",
+        supportedTaskTypes: [TaskType.CODE_GENERATION], minPrivacyLevel: PrivacyLevel.PUBLIC,
+        supportedRiskLevels: [RiskLevel.L1], minLatency: LatencyTier.INTERACTIVE,
+        maxCostPerCall: 100, provider: "ollama", version: "1", tags: ["secure"],
+        specializations: [TaskType.CODE_GENERATION], requiresHumanApproval: false, enabled: true,
+      },
+    ]);
+
+    const result = router.routeByCapability({
+      id: "routing-task", type: TaskType.CODE_GENERATION,
+      privacyLevel: PrivacyLevel.PUBLIC, riskLevel: RiskLevel.L1,
+      latencyRequirement: LatencyTier.STANDARD, tenantId: "tenant", userId: "user",
+      metadata: { tags: ["secure"] },
+    });
+
+    expect(result.selectedAgents[0]?.id).toBe("specialist-agent");
+    expect(result.alternatives?.map(agent => agent.id)).toContain("general-agent");
+    expect(result.requiresApproval).toBe(false);
+  });
+
+  it("scenario 12: capability routing fails closed when no agent is compatible", () => {
+    const router = new CapabilityRouter([]);
+    const result = router.routeByCapability({
+      id: "unroutable-task", type: TaskType.REASONING,
+      privacyLevel: PrivacyLevel.CONFIDENTIAL, riskLevel: RiskLevel.L3,
+      latencyRequirement: LatencyTier.REALTIME, tenantId: "tenant", userId: "user",
+    });
+
+    expect(result.selectedAgents).toHaveLength(0);
+    expect(result.score).toBe(0);
+    expect(result.requiresApproval).toBe(true);
+  });
+
+  it("scenario 13: model routing prefers the local-first provider", async () => {
+    const local: Model = {
+      id: "ollama-qwen", name: "Ollama Qwen", provider: ModelProvider.OLLAMA_LOCAL,
+      version: "1", maxTokens: 4096, costPerInputToken: 0, costPerOutputToken: 0,
+      supportedLanguages: ["en"], capabilities: ["reasoning"], latencyMs: 400,
+      reliability: 0.95, enabled: true, isLocal: true, tags: ["local"],
+    };
+    const cloud: Model = {
+      id: "cloud-reasoner", name: "Cloud Reasoner", provider: ModelProvider.OPENAI,
+      version: "1", maxTokens: 8192, costPerInputToken: 0.03, costPerOutputToken: 0.06,
+      supportedLanguages: ["en"], capabilities: ["reasoning"], latencyMs: 250,
+      reliability: 0.99, enabled: true, isLocal: false, tags: ["cloud"],
+    };
+    const result = await new ModelRouter([cloud, local]).routeByModel([], { preferLocal: true });
+
+    expect(result.provider).toBe(ModelProvider.OLLAMA_LOCAL);
+    expect(result.selectedModel.id).toBe("ollama-qwen");
+    expect(result.reasoning).toContain("ollama_local");
+  });
+
+  it("scenario 14: model fallback honors cost and latency gates", async () => {
+    const local: Model = {
+      id: "local-fast", name: "Local Fast", provider: ModelProvider.OLLAMA_LOCAL,
+      version: "1", maxTokens: 4096, costPerInputToken: 0, costPerOutputToken: 0,
+      supportedLanguages: ["en"], capabilities: ["text_analysis"], latencyMs: 100,
+      reliability: 0.95, enabled: true, isLocal: true, tags: [],
+    };
+    const result = await new ModelRouter([local]).routeByModel([], {
+      preferLocal: true, maxCostCents: 1, maxLatencyMs: 200, maxTokens: 2048,
+      estimatedInputTokens: 100, estimatedOutputTokens: 100,
+    });
+
+    expect(result.selectedModel.id).toBe("local-fast");
+    expect(result.estimatedCostCents).toBe(0);
+    expect(result.estimatedLatencyMs).toBeLessThanOrEqual(200);
+  });
+
+  it("scenario 15: provider health transitions to DOWN and blocks readiness", () => {
+    const health = new ProviderHealth();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      health.recordFailure(ModelProvider.OPENAI, "timeout");
+    }
+
+    const metrics = health.getMetrics(ModelProvider.OPENAI);
+    expect(metrics?.status).toBe(HealthStatus.DOWN);
+    expect(health.getProviderReadiness(ModelProvider.OPENAI)).toBe(0);
+    expect(health.getHealthyProviders()).not.toContain(ModelProvider.OPENAI);
   });
 });
