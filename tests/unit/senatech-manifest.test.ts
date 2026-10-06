@@ -31,6 +31,31 @@ describe("Senatech project manifest", () => {
     }
   });
 
+  it("fails closed until control-plane and acceptance gates are satisfied", () => {
+    expect(manifest).toContain('status: "BLOCKED"');
+    expect(manifest).toContain("control_plane:");
+    expect(manifest).toContain("identity: required");
+    expect(manifest).toContain("tenant: required");
+    expect(manifest).toContain("capability: required");
+    expect(manifest).toContain("validator: required");
+    expect(manifest).toContain("audit: required");
+    expect(manifest).toContain('validator: "independent_review_and_judge"');
+    expect(manifest).toContain("evidence_required: true");
+    expect(manifest).toContain("production_ready: false");
+    for (const approval of [
+      "high_risk",
+      "critical_risk",
+      "financial_action",
+      "deletion",
+      "external_communication",
+      "production_deployment",
+      "dns_change",
+      "permission_change",
+    ]) {
+      expect(manifest).toContain(`    - ${approval}`);
+    }
+  });
+
   it("does not contain credential-shaped values", () => {
     expect(manifest).not.toMatch(/(?:sk_live|sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|service_role)/);
   });
