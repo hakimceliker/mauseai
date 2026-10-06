@@ -3,7 +3,9 @@
 /**
  * Phase K Validator - Final Acceptance Framework
  * Validates that all Phase B modules are properly consolidated into main
- * and reports closure-ready status
+ * and reports closure-ready status. Local checks are necessary but are not
+ * sufficient: live gates, independent review and stakeholder approval must be
+ * explicitly supplied by the authorized acceptance environment.
  */
 
 import { execSync } from 'child_process';
@@ -266,7 +268,14 @@ function main() {
   console.log(`Validation Results: ${passedChecks}/${totalChecks} checks passed`);
   console.log('='.repeat(60));
 
-  const closureReady = passedChecks === totalChecks;
+  const independentReview = process.env.MAUSEAI_PHASE_K_INDEPENDENT_REVIEW === 'true';
+  const liveGatesVerified = process.env.MAUSEAI_PHASE_K_LIVE_GATES_VERIFIED === 'true';
+  const stakeholderApproval = process.env.MAUSEAI_PHASE_K_STAKEHOLDER_APPROVAL === 'true';
+  const closureReady =
+    passedChecks === totalChecks &&
+    independentReview &&
+    liveGatesVerified &&
+    stakeholderApproval;
 
   if (closureReady) {
     console.log(
@@ -280,7 +289,7 @@ function main() {
     console.log('  3. 5 stakeholder sign-offs for Phase K closure\n');
     process.exit(0);
   } else {
-    console.log(`\n✗ ${totalChecks - passedChecks} validation checks failed`);
+    console.log(`\n✗ ${totalChecks - passedChecks} local validation checks failed or required live/human gates are missing`);
     console.log('  Phase K closure-ready status: NO\n');
     process.exit(1);
   }
