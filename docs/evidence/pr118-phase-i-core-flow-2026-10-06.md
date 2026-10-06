@@ -1,6 +1,6 @@
 # PR #118 — Phase I core integration evidence
 
-- Verified code commit: `PENDING` (this evidence is updated in the same change)
+- Verified code commit: `49c6813` (`test: extend Phase I handoff coverage through scenario twenty`)
 - Verification scope: Phase I scenarios 1–20
 - Test file: `src/core/testing/phase-i-core-flow.test.ts`
 - Result: **20/20 passed**
