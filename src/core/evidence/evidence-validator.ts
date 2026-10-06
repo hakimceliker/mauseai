@@ -106,7 +106,27 @@ export class EvidenceValidator {
     const detected: string[] = [];
     const seen = new Set<string>();
 
-    for (const [patternName, pattern] of Object.entries(SECRET_PATTERNS)) {
+    // Process patterns in order of specificity (most specific first)
+    // This ensures that specific patterns like jwtToken, githubToken, etc.
+    // are checked before generic patterns like "token"
+    const orderedPatternEntries: Array<[string, RegExp]> = [
+      ['jwtToken', SECRET_PATTERNS.jwtToken],
+      ['githubToken', SECRET_PATTERNS.githubToken],
+      ['slackToken', SECRET_PATTERNS.slackToken],
+      ['mongoUri', SECRET_PATTERNS.mongoUri],
+      ['databaseUrl', SECRET_PATTERNS.databaseUrl],
+      ['awsKey', SECRET_PATTERNS.awsKey],
+      ['privateKey', SECRET_PATTERNS.privateKey],
+      ['bearer', SECRET_PATTERNS.bearer],
+      ['apiKey', SECRET_PATTERNS.apiKey],
+      ['secret', SECRET_PATTERNS.secret],
+      ['credential', SECRET_PATTERNS.credential],
+      ['auth', SECRET_PATTERNS.auth],
+      ['password', SECRET_PATTERNS.password],
+      ['token', SECRET_PATTERNS.token],
+    ];
+
+    for (const [patternName, pattern] of orderedPatternEntries) {
       const matches = text.match(pattern);
       if (matches) {
         matches.forEach((match) => {
