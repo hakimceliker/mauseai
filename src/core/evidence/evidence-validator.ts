@@ -9,14 +9,14 @@ import { Evidence, EvidenceValidationResult } from "../judge/types";
  * Patterns to detect sensitive information
  */
 const SECRET_PATTERNS = {
-  apiKey: /api[_-]?key["\s:=]*([a-zA-Z0-9_-]{20,})/gi,
-  secret: /secret["\s:=]*([a-zA-Z0-9_-]{20,})/gi,
+  apiKey: /api[_-]?key["\s:=]*([a-zA-Z0-9_-]{14,})/gi,
+  secret: /secret["\s:=]*([a-zA-Z0-9_-]{14,})/gi,
   password: /password["\s:=]*([^"\s\n]{8,})/gi,
-  token: /token["\s:=]*([a-zA-Z0-9_.-]{20,})/gi,
+  token: /token["\s:=]*([a-zA-Z0-9_.-]{14,})/gi,
   bearer: /bearer\s+([a-zA-Z0-9_.-]+)/gi,
   auth: /authorization["\s:=]*([^"\s\n]+)/gi,
   privateKey: /private[_-]?key["\s:=]*([a-zA-Z0-9+/=\n]{50,})/gi,
-  credential: /credential[s]?["\s:=]*([a-zA-Z0-9_:-]{20,})/gi,
+  credential: /credential[s]?["\s:=]*([a-zA-Z0-9_:-]{14,})/gi,
   awsKey: /AKIA[0-9A-Z]{16}/g,
   jwtToken: /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g,
   githubToken: /ghp_[a-zA-Z0-9_]{36,}/g,

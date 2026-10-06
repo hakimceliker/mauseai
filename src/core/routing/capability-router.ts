@@ -401,7 +401,7 @@ export class CapabilityRouter {
   getAgentsByCost(maxCostCents: number, estimatedTokens?: number): AgentCapability[] {
     return this.getAgents().filter(a => {
       if (estimatedTokens && a.costPerToken) {
-        return estimatedTokens * a.costPerToken <= maxCostCents;
+        return estimatedTokens * a.costPerToken <= maxCostCents && a.maxCostPerCall <= maxCostCents;
       }
       return (a.maxCostPerCall || 0) <= maxCostCents;
     });
