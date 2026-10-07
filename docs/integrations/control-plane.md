@@ -1,0 +1,25 @@
+# Control Plane integration — Infra24
+
+Status: CODE PREPARED / LIVE ACCEPTANCE BLOCKED. Default local-first/cloud-fallback behavior remains when SENATECH_CONTROL_PLANE_ENABLED is not true.
+
+## Explicit service binding
+
+Server-only settings: SENATECH_CONTROL_PLANE_ENABLED, SENATECH_CONTROL_PLANE_URL (HTTPS origin only), SENATECH_CONTROL_PLANE_TENANT_ID, SENATECH_CONTROL_PLANE_TOKEN. Values are not provisioned by this PR. One worker deployment is bound to exactly one tenant; this is not a shared credential implementation for arbitrary tenants.
+
+The Inngest task path verifies the persisted task's tenant and workflow before calling the router. The tenant must match server configuration. It sends stable mouseai:task:step request IDs, client/project mouseai and text capability. Missing context or another tenant is rejected before network access. Other router callers that do not provide verified context fail closed in central mode.
+
+The central server must authenticate x-control-token against the same tenant/project, support text capability, and return matching request_id, decision.status=selected, decision.approval_required=false, result.validated=true and nonempty result.output. Missing/incompatible contracts are rejected. Redirects are rejected. No provider fallback or retry follows an ambiguous request failure; Inngest receives NonRetriableError for central execution failures.
+
+Unknown token/cost usage stays unknown. Central-mode task results mark metering_status=unknown, omit estimated step cost and avoid committing guessed task cost. Commercial billing remains BLOCKED until central metering is integrated; this is not billable readiness.
+
+## Verification
+
+Initial isolated execution with Node 24.19.0: 13 adapter assertions PASS. The suite now uses the repository Vitest runner: npm test -- --run tests/control-plane.node.test.mjs. This prevents Vitest from treating node:test registration as an empty suite. Tests cover authenticated payload, tenant mismatch, missing context, request ID validation, unsafe URLs, approval/validation/request ID/output rejection, and no retry/redacted ambiguity. Local tests used exactly the committed provider source with a relative test import adjustment. node --check passed for changed router and workflow modules.
+
+GitHub CI at ef808b7: lint and typecheck PASS; Docker and CodeQL PASS; 276 existing Vitest tests PASS, 16 existing skips; the newly introduced suite runner mismatch failed quality and was corrected. The rerun must verify the current head. Audit independently fails on source-map-js 1.2.1 (GHSA-68fv-2mgg-jv7q); package-lock blob 57d7fef55a4b4959171b833600513a141593d8f5 is identical to base. No audit gate was bypassed. Signed Inngest execution, tenant A/B database checks and live Control Plane have NOT been executed. No Next route/UI/API behavior is modified; these are provider and task worker modules. Repository Next.js instruction was inspected; installed Next guides are unavailable in this isolated source workspace, so no Next API changes were attempted.
+
+Before activation: review and merge required server contract PRs, provision approved server-only binding, run full CI and real signed task E2E, verify durable duplicate suppression upstream, then separately approve production configuration. No production activation, secret changes, payment, DNS or live orders occurred.
+
+## CI recovery evidence
+
+At 160b06e, GitHub quality job 112224086763 PASS (including Vitest and build); Docker 112224086601 PASS. The original audit blocker was independently reproduced from the unchanged base lock. A scoped npm-generated source-map-js update to 1.2.2 now changes only that package entry (version, resolved URL, integrity), preserving unrelated optional-package metadata. Exact scoped lock: npm audit --audit-level=high --json returned zero vulnerabilities, exit 0. Final-head GitHub CI remains required; earlier audit failures are retained in history rather than bypassed.

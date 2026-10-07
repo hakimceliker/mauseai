@@ -1,3 +1,5 @@
+import { NonRetriableError } from 'inngest';
+import { ControlPlaneError } from '@/src/lib/ai/providers/control-plane';
 import { inngest } from '../client';
 import { TaskRepository } from '@/src/lib/db/task-repository';
 import { CheckpointRepository } from '@/src/lib/db/checkpoint-repository';
@@ -24,6 +26,14 @@ export const executeTask = inngest.createFunction(
   { event: 'task.execute' },
   async ({ event, step }) => {
     const { taskId, tenantId, workflowId } = event.data;
+    const controlPlaneEnabled = process.env.SENATECH_CONTROL_PLANE_ENABLED === 'true';
+    if (controlPlaneEnabled) {
+      const task = await TaskRepository.getTask(taskId as Domain.TaskId, tenantId as Domain.TenantId);
+      if (!task || task.workflow_id !== workflowId || task.tenant_id !== tenantId ||
+          tenantId !== process.env.SENATECH_CONTROL_PLANE_TENANT_ID) {
+        throw new NonRetriableError('control_plane_task_binding_rejected');
+      }
+    }
 
     try {
       // Update task status to running
@@ -48,6 +58,7 @@ export const executeTask = inngest.createFunction(
       const results: Record<string, unknown> = {};
 
       let totalCost = 0;
+      let unknownCost = false;
 
       for (const workflowStep of workflowSteps) {
         // Check cost limit before executing
@@ -96,9 +107,12 @@ export const executeTask = inngest.createFunction(
                   role: 'user',
                   content: `Execute ${workflowStep.name}`,
                 },
-              ]);
+              ], controlPlaneEnabled ? { tenantId: String(tenantId), requestId: `mouseai:${taskId}:${workflowStep.id}` } : undefined).catch(error => {
+                if (error instanceof ControlPlaneError) throw new NonRetriableError(error.message);
+                throw error;
+              });
 
-              stepCost = aiResponse.cost || 0.0001;
+              stepCost = aiResponse.cost ?? (controlPlaneEnabled ? 0 : 0.0001);
 
               return {
                 step_id: workflowStep.id,
@@ -106,13 +120,15 @@ export const executeTask = inngest.createFunction(
                 result: aiResponse.content,
                 provider: aiResponse.provider,
                 tokens_used: aiResponse.tokens_used,
-                cost: stepCost,
+                cost: controlPlaneEnabled ? aiResponse.cost : stepCost,
+                metering_status: controlPlaneEnabled && aiResponse.cost === undefined ? 'unknown' : 'known',
                 executed_at: new Date().toISOString(),
               };
             }
           )) as Record<string, unknown>;
 
-          totalCost += stepCost;
+          if (stepResult?.metering_status === 'unknown') unknownCost = true;
+          else totalCost += stepCost;
 
           // Record execution for idempotency
           await step.run(
@@ -130,6 +146,7 @@ export const executeTask = inngest.createFunction(
           await step.run(
             `log-cost-step-${workflowStep.order}`,
             async () => {
+              if (stepResult?.metering_status === 'unknown') return;
               const aiProvider = (stepResult as Record<string, unknown>)?.provider || 'unknown';
               await AuditService.logCostIncurred(
                 tenantId as Domain.TenantId,
@@ -140,6 +157,8 @@ export const executeTask = inngest.createFunction(
             }
           );
         }
+
+        if (stepResult?.metering_status === 'unknown') unknownCost = true;
 
         // Save checkpoint after step execution (cached or fresh)
         await step.run(`checkpoint-step-${workflowStep.order}`, async () => {
@@ -165,12 +184,12 @@ export const executeTask = inngest.createFunction(
           Domain.TaskStatus.COMPLETED,
           results
         );
-        await CostTracker.recordTaskCost(
+        if (!unknownCost) await CostTracker.recordTaskCost(
           taskId as Domain.TaskId,
           tenantId as Domain.TenantId,
           totalCost
         );
-        await AuditService.logTaskCompleted(
+        if (!unknownCost) await AuditService.logTaskCompleted(
           tenantId as Domain.TenantId,
           taskId as Domain.TaskId,
           totalCost
@@ -181,7 +200,8 @@ export const executeTask = inngest.createFunction(
         success: true,
         taskId,
         results,
-        totalCost,
+        totalCost: unknownCost ? null : totalCost,
+        metering_status: unknownCost ? 'unknown' : 'known',
       };
     } catch (error) {
       // Update task to failed and log error

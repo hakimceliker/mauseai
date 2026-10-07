@@ -1,3 +1,4 @@
+import { callControlPlane, type ControlPlaneContext } from './providers/control-plane';
 import { AIProvider, AIMessage, AIResponse, CredentialNotConfiguredError } from './providers/base-provider';
 import { MockGPTProvider } from './providers/mock-gpt';
 import { OpenAIProvider } from './providers/openai';
@@ -57,7 +58,10 @@ export class AIRouter {
   /**
    * Call the AI provider
    */
-  async call(messages: AIMessage[]): Promise<AIResponse> {
+  async call(messages: AIMessage[], context?: ControlPlaneContext): Promise<AIResponse> {
+    if (process.env.SENATECH_CONTROL_PLANE_ENABLED === 'true') {
+      return callControlPlane(messages, context);
+    }
     const startedAt = new Date().toISOString();
     const startedAtMs = Date.now();
     try {
@@ -117,8 +121,8 @@ export class AIRouter {
   /**
    * Static method for easy access
    */
-  static async execute(messages: AIMessage[]): Promise<AIResponse> {
+  static async execute(messages: AIMessage[], context?: ControlPlaneContext): Promise<AIResponse> {
     const router = new AIRouter();
-    return router.call(messages);
+    return router.call(messages, context);
   }
 }
