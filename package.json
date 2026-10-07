@@ -21,6 +21,9 @@
     "smoke:production": "node scripts/production-smoke.mjs",
     "acceptance:production": "node scripts/production-acceptance.mjs"
   },
+  "overrides": {
+    "source-map-js": "^1.2.2"
+  },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.38.0",
