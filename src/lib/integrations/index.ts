@@ -29,3 +29,17 @@ export { createNotificationAdapter, getNotificationAdapter } from './notificatio
 // Analytics
 export type { IAnalyticsProvider, UserProperties, EventData, PageData } from './analytics-provider';
 export { createAnalyticsAdapter, getAnalyticsAdapter } from './analytics-provider';
+
+// Optional Senatech Control Plane shadow boundary
+export {
+  MOUSEAI_PROJECT_ID,
+  MOUSEAI_CONTROL_PLANE_TASKS,
+  SenatechControlPlaneAdapter,
+} from './senatech-control-plane-adapter';
+export type {
+  MouseAiControlPlaneTask,
+  MouseAiControlPlaneRequest,
+  MouseAiControlPlaneEnvelope,
+  MouseAiControlPlaneResponse,
+  MouseAiControlPlaneTransport,
+} from './senatech-control-plane-adapter';
