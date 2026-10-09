@@ -189,10 +189,11 @@ export const executeTask = inngest.createFunction(
           tenantId as Domain.TenantId,
           totalCost
         );
-        if (!unknownCost) await AuditService.logTaskCompleted(
+        // Completion is an audit fact even when provider metering is unavailable.
+        await AuditService.logTaskCompleted(
           tenantId as Domain.TenantId,
           taskId as Domain.TaskId,
-          totalCost
+          unknownCost ? null : totalCost
         );
       });
 

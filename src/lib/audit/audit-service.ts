@@ -68,10 +68,11 @@ export class AuditService {
   static async logTaskCompleted(
     tenantId: Domain.TenantId,
     taskId: Domain.TaskId,
-    cost: number
+    cost: number | null
   ): Promise<void> {
     await this.log(tenantId, Domain.AuditAction.TASK_COMPLETED, 'task', taskId, 'system', {
       cost,
+      metering_status: cost === null ? 'unknown' : 'known',
     });
   }
 
